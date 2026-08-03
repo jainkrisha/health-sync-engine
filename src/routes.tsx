@@ -3,14 +3,10 @@ import { useAuth } from './context/AuthContext';
 import { Layout } from './layout/Layout';
 import { Login } from './pages/Login/Login';
 
-export function Dashboard() {
-  return <div><h2>Dashboard</h2><p>Overview content goes here.</p></div>;
-}
+import Dashboard from './pages/Dashboard/Dashboard';
+import PatientList from './pages/PatientList/PatientList';
 
-export function PatientList() {
-  return <div><h2>Patient List</h2><p>List of patients goes here.</p></div>;
-}
-
+// PatientForm — stub kept until Person C builds the real implementation
 export function PatientForm({ mode }: { mode: 'add' | 'edit' }) {
   return <div><h2>{mode === 'add' ? 'Add' : 'Edit'} Patient</h2><p>Form goes here.</p></div>;
 }

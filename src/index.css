@@ -57,7 +57,7 @@
   /* Danger button */
   .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-lg bg-status-danger px-4 py-2 text-sm font-medium text-white
-      hover:brightness-90 active:brightness-80 transition-all duration-150
+      hover:brightness-90 active:brightness-75 transition-all duration-150
       focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none
       disabled:opacity-50 disabled:pointer-events-none;
   }
