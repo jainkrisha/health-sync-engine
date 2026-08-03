@@ -1,0 +1,118 @@
+/* Google Fonts — Inter (must precede @tailwind directives for PostCSS) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface text-slate-800 min-h-screen;
+    margin: 0;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus ring — accessible but styled */
+  :focus-visible {
+    @apply outline-none ring-2 ring-medical-500 ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Card container */
+  .card {
+    @apply rounded-card bg-white shadow-card border border-slate-100 p-6;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-medical-600 px-4 py-2 text-sm font-medium text-white
+      hover:bg-medical-700 active:bg-medical-800 transition-colors duration-150
+      focus-visible:ring-2 focus-visible:ring-medical-500 focus-visible:ring-offset-2 focus-visible:outline-none
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Secondary / ghost button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700
+      hover:bg-slate-50 active:bg-slate-100 transition-colors duration-150
+      focus-visible:ring-2 focus-visible:ring-medical-500 focus-visible:ring-offset-2 focus-visible:outline-none
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-status-danger px-4 py-2 text-sm font-medium text-white
+      hover:brightness-90 active:brightness-80 transition-all duration-150
+      focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Form label */
+  .form-label {
+    @apply block text-sm font-medium text-slate-700 mb-1;
+  }
+
+  /* Form input */
+  .form-input {
+    @apply block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900
+      placeholder:text-slate-400 shadow-sm
+      focus:border-medical-500 focus:outline-none focus:ring-1 focus:ring-medical-500
+      disabled:bg-slate-50 disabled:text-slate-400;
+  }
+
+  /* Inline field validation error */
+  .form-error {
+    @apply mt-1 text-xs text-status-danger;
+  }
+
+  /* Status badge */
+  .badge {
+    @apply inline-flex items-center rounded-badge px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-teal {
+    @apply badge bg-teal-100 text-teal-700;
+  }
+
+  .badge-blue {
+    @apply badge bg-medical-100 text-medical-700;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-100 text-amber-700;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 text-red-700;
+  }
+
+  /* Offline indicator */
+  .offline-badge {
+    @apply badge bg-slate-200 text-slate-600;
+  }
+
+  /* Page heading */
+  .page-title {
+    @apply text-2xl font-semibold text-slate-900 tracking-tight;
+  }
+
+  /* Section heading */
+  .section-title {
+    @apply text-base font-semibold text-slate-700 uppercase tracking-widest;
+  }
+}
