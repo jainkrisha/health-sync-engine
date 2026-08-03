@@ -10,11 +10,7 @@ export function Layout() {
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col shadow-xl z-10">
         <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="bg-teal-600 text-white p-2 rounded-lg">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
+          <img src="/favicon.svg" alt="HealthSync Logo" className="w-8 h-8" />
           <span className="font-bold text-white text-lg tracking-wide">HealthSync</span>
         </div>
 

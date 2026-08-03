@@ -28,10 +28,8 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 border-t-4 border-teal-600">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-100 text-teal-600 mb-4">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/favicon.svg" alt="HealthSync Logo" className="w-16 h-16" />
           </div>
           <h1 className="text-2xl font-bold text-slate-800">HealthSync System</h1>
           <p className="text-slate-500 mt-2">Secure access for clinical staff</p>
