@@ -1,59 +1,44 @@
-/**
- * AuthContext — local stub auth for Phase A.
- *
- * OWNERSHIP: Person A.
- *
- * No network calls, no real credentials. Stores the current "user" in
- * React state only. Phase B will swap this context out with a real auth
- * solution — no other files should call backend auth APIs directly.
- */
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface StubUser {
-  id: string
-  name: string
-  role: 'field_worker'
+interface AuthContextType {
+  isAuthenticated: boolean;
+  login: (u: string, p: string) => void;
+  logout: () => void;
 }
 
-interface AuthContextValue {
-  user: StubUser | null
-  login: (name: string) => void
-  logout: () => void
-  isAuthenticated: boolean
-}
+const AuthContext = createContext<AuthContextType | null>(null);
 
-// ── Context ───────────────────────────────────────────────────────────────────
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const stored = localStorage.getItem('health_sync_auth');
+    return stored === 'true';
+  });
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+  useEffect(() => {
+    localStorage.setItem('health_sync_auth', String(isAuthenticated));
+  }, [isAuthenticated]);
 
-// ── Provider ──────────────────────────────────────────────────────────────────
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<StubUser | null>(null)
-
-  const login = (name: string) => {
-    // Stub: accept any non-empty name, assign a fixed device-local id
-    setUser({ id: 'local-worker-001', name, role: 'field_worker' })
-  }
+  const login = (u: string, p: string) => {
+    if (u && p) {
+      setIsAuthenticated(true);
+    }
+  };
 
   const logout = () => {
-    setUser(null)
-  }
+    setIsAuthenticated(false);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: user !== null }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>')
-  return ctx
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
