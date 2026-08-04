@@ -6,10 +6,8 @@ import { Login } from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import PatientList from './pages/PatientList/PatientList';
 
-// PatientForm — stub kept until Person C builds the real implementation
-export function PatientForm({ mode }: { mode: 'add' | 'edit' }) {
-  return <div><h2>{mode === 'add' ? 'Add' : 'Edit'} Patient</h2><p>Form goes here.</p></div>;
-}
+import PatientForm from './pages/PatientForm/PatientForm';
+
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();

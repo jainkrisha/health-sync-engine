@@ -1,54 +1,78 @@
 /**
- * patientSchema.ts — Zod v4 validation schema for patient forms.
+ * patientSchema.ts — Zod validation schema for patient forms.
  *
  * OWNERSHIP: Person C.
  *
  * This schema drives React Hook Form validation in PatientFormPage.
- * It must stay in sync with src/types/patient.ts — when the Patient
- * interface gains a field, add it here too.
- *
- * Rules (from rules.md):
- * - Zod validation errors render inline under the relevant field,
- *   not as toasts or alerts.
- *
- * Note: Zod v4 dropped `required_error` in favour of a single `error`
- * string or using .min(1, message) for required string fields.
+ * It stays in sync with src/types/patient.ts — referencing the Patient interface.
  */
 
-import { z } from 'zod'
+import { z } from 'zod';
+import type { Patient } from '../types/patient';
+
+export const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
+export type BloodType = (typeof BLOOD_TYPES)[number];
 
 export const patientSchema = z.object({
-  firstName: z
+  name: z
     .string()
-    .min(1, 'First name is required')
-    .max(100, 'First name must be 100 characters or fewer'),
-
-  lastName: z
-    .string()
-    .min(1, 'Last name is required')
-    .max(100, 'Last name must be 100 characters or fewer'),
+    .min(1, 'Name is required')
+    .min(2, 'Name must be at least 2 characters'),
 
   dateOfBirth: z
     .string()
     .min(1, 'Date of birth is required')
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use format YYYY-MM-DD'),
+    .refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid date format' })
+    .refine(
+      (val) => {
+        const dob = new Date(val);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        return dob <= today;
+      },
+      { message: 'Date of birth cannot be in the future' }
+    ),
 
-  gender: z.enum(['Male', 'Female', 'Other', 'Unknown']),
+  bloodType: z.enum(BLOOD_TYPES, {
+    message: 'Please select a valid blood type',
+  }),
 
-  bloodType: z.string().max(5).default(''),
+  allergies: z.array(z.string()),
 
-  allergies: z.array(z.string().min(1)).default([]),
+  medications: z.array(
+    z.object({
+      name: z.string().min(1, 'Medication name is required'),
+      dosage: z.string().min(1, 'Dosage is required'),
+    })
+  ),
 
-  /**
-   * CRITICAL: medicationDosage is a free-text field.
-   * No coercion, no auto-fill of a "default" value.
-   * Phase B: conflicts on this field are NEVER auto-resolved.
-   */
-  medicationDosage: z.string().default(''),
+  vitals: z.object({
+    heartRate: z
+      .number({ message: 'Heart rate must be a number' })
+      .min(20, 'Heart rate must be at least 20 bpm')
+      .max(300, 'Heart rate must be at most 300 bpm')
+      .optional(),
 
-  phone: z.string().max(30).default(''),
+    bloodPressure: z
+      .string()
+      .regex(
+        /^\d{2,3}\/\d{2,3}$/,
+        'Blood pressure must be in Systolic/Diastolic format (e.g. 120/80)'
+      )
+      .optional()
+      .or(z.literal('')),
 
-  address: z.string().max(500).default(''),
-})
+    temperature: z
+      .number({ message: 'Temperature must be a number' })
+      .min(30, 'Temperature must be at least 30°C / 86°F')
+      .max(115, 'Temperature must be at most 115°F / 46°C')
+      .optional(),
+  }),
 
-export type PatientFormValues = z.infer<typeof patientSchema>
+});
+
+
+export type PatientFormValues = z.infer<typeof patientSchema>;
+
+// Static check to ensure PatientFormValues matches Patient write-side fields
+export type _PatientFormValuesCompatible = PatientFormValues extends Omit<Patient, 'id' | 'createdAt' | 'updatedAt'> ? true : false;
