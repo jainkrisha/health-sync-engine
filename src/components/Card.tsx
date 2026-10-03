@@ -94,10 +94,10 @@ export function StatCard({
 
       {/* Text — aria-hidden because the container label covers it */}
       <div className="min-w-0" aria-hidden="true">
-        <p className="text-2xl font-bold text-slate-900 leading-none tabular-nums">
+        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 leading-none tabular-nums">
           {value}
         </p>
-        <p className="text-sm font-medium text-slate-600 mt-1">{label}</p>
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">{label}</p>
         {subLabel && (
           <p className="text-xs text-slate-400 mt-0.5">{subLabel}</p>
         )}

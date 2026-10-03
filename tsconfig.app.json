@@ -20,7 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "strict": true,
+
+    /* Shared client/server code */
+    "paths": { "@shared/*": ["./shared/*"] }
   },
-  "include": ["src"]
+  "include": ["src", "shared"]
 }

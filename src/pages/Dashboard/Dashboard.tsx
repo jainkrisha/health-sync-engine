@@ -1,264 +1,236 @@
 /**
- * Dashboard.tsx — Dashboard overview page.
- * OWNERSHIP: Person B.
- *
- * All data sourced from IndexedDB via usePatients(). No network calls.
- * Counts are derived in-component from the patient array — no extra DB queries.
+ * Dashboard — what is on this device, what still needs to sync, and how
+ * conflicts are being resolved across the whole system.
  */
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import type { StatsResponse } from '@shared/types';
+import { usePatients } from '../../hooks/usePatients';
+import { useSyncEngine } from '../../hooks/useSync';
+import { useApi } from '../../hooks/useApi';
+import { usePermissions } from '../../context/RBAC';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
+import { getOutboxSince, type OutboxSummary } from '../../db/mutationLog';
+import { onDataChanged } from '../../lib/events';
+import { StatCard } from '../../components/Card';
+import { Icon } from '../../components/Icon';
+import { EmptyState, PageHeader, initials, relativeTime } from '../../components/ui';
 
-import { useMemo, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { usePatients } from '../../hooks/usePatients'
-import { StatCard, Card } from '../../components/Card'
-import { useToast } from '../../components/Toast'
-import type { Patient } from '../../types/patient'
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Returns a human-readable relative time string ("just now", "3h ago", "4 days ago"). */
-function relativeTime(iso: string): string {
-  if (!iso) return '—'
-  const diffMs  = Date.now() - new Date(iso).getTime()
-  const mins    = Math.floor(diffMs / 60_000)
-  if (mins < 1)  return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7)  return `${days} day${days === 1 ? '' : 's'} ago`
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+function last7Days(): string[] {
+  const days: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
 }
 
-/** Returns true when updatedAt is within the last 7 days. */
-function updatedWithin7Days(iso: string): boolean {
-  if (!iso) return false
-  return Date.now() - new Date(iso).getTime() < 7 * 24 * 60 * 60 * 1000
+function localDay(iso: string): string {
+  const d = new Date(iso);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().slice(0, 10);
 }
 
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
+function useOutboxWeek() {
+  const [rows, setRows] = useState<OutboxSummary[]>([]);
+  useEffect(() => {
+    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const load = () => void getOutboxSince(since).then(setRows).catch(() => undefined);
+    load();
+    return onDataChanged(load);
+  }, []);
+  return rows;
+}
 
 function DashboardSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
-      {/* Stat cards skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="card flex items-start gap-4">
-            <div className="h-11 w-11 rounded-full bg-slate-200 flex-shrink-0" />
-            <div className="space-y-2 flex-1">
-              <div className="h-6 bg-slate-200 rounded w-12" />
-              <div className="h-3 bg-slate-100 rounded w-28" />
-            </div>
+    <div className="space-y-6" aria-busy="true">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="card flex gap-4">
+            <div className="skeleton h-11 w-11 rounded-full" />
+            <div className="flex-1 space-y-2"><div className="skeleton h-6 w-12" /><div className="skeleton h-3 w-24" /></div>
           </div>
         ))}
       </div>
-      {/* Recent activity skeleton */}
-      <div className="card space-y-3">
-        <div className="h-4 bg-slate-200 rounded w-32 mb-4" />
-        {[1, 2, 3].map(i => (
-          <div key={i} className="flex items-center gap-3 py-2">
-            <div className="h-8 w-8 rounded-full bg-slate-200 flex-shrink-0" />
-            <div className="flex-1 space-y-1.5">
-              <div className="h-3 bg-slate-200 rounded w-40" />
-              <div className="h-2.5 bg-slate-100 rounded w-20" />
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="card"><div className="skeleton h-64 w-full" /></div>
     </div>
-  )
+  );
 }
-
-// ─── Recent activity row ──────────────────────────────────────────────────────
-
-function ActivityRow({ patient }: { patient: Patient }) {
-  /** Derive initials for the avatar */
-  const initials = patient.name
-    .split(' ')
-    .slice(0, 2)
-    .map(w => w[0]?.toUpperCase() ?? '')
-    .join('')
-
-  return (
-    <li className="flex items-center gap-3 py-2.5 border-b border-slate-100 last:border-0">
-      {/* Avatar */}
-      <div
-        aria-hidden="true"
-        className="flex-shrink-0 h-8 w-8 rounded-full bg-medical-100 text-medical-700
-                   flex items-center justify-center text-xs font-semibold select-none"
-      >
-        {initials}
-      </div>
-
-      {/* Name + time */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-800 truncate">{patient.name}</p>
-        <p className="text-xs text-slate-400">Updated {relativeTime(patient.updatedAt)}</p>
-      </div>
-
-      {/* Quick edit link */}
-      <Link
-        to={`/patients/${patient.id}/edit`}
-        className="text-xs text-medical-600 hover:text-medical-800 font-medium
-                   transition-colors flex-shrink-0"
-        id={`dashboard-edit-${patient.id}`}
-      >
-        View →
-      </Link>
-    </li>
-  )
-}
-
-// ─── Empty dashboard (no patients at all) ─────────────────────────────────────
-
-function EmptyDashboard() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div
-        className="w-16 h-16 rounded-full bg-medical-50 flex items-center justify-center
-                   text-3xl mb-4 select-none"
-      >
-        🏥
-      </div>
-      <h2 className="text-base font-semibold text-slate-700">Welcome to HealthSync</h2>
-      <p className="text-sm text-slate-400 mt-1 mb-6 max-w-xs">
-        No patient records yet. Add your first patient to start tracking health data offline.
-      </p>
-      <Link to="/patients/new" className="btn-primary" id="dashboard-empty-add-patient">
-        Add your first patient
-      </Link>
-    </div>
-  )
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-  const { patients, loading, error } = usePatients()
-  const { toast } = useToast()
+  const { patients, loading } = usePatients();
+  const sync = useSyncEngine();
+  const outbox = useOutboxWeek();
+  const { user } = useAuth();
+  const perms = usePermissions();
+  const { theme } = useTheme();
+  const stats = useApi<StatsResponse>(sync.connected ? '/stats' : null, sync.lastSyncedAt);
 
-  // Surface any IndexedDB load failure via toast — rules.md §5
-  useEffect(() => {
-    if (error) toast({ message: `Could not load records: ${error}`, type: 'error' })
-  }, [error, toast])
+  const chartData = useMemo(() => {
+    const days = last7Days();
+    const map = new Map(days.map((d) => [d, { day: d, synced: 0, pending: 0, conflicts: 0 }]));
+    for (const r of outbox) {
+      if (r.status === 'pending') {
+        const e = map.get(localDay(r.createdAt));
+        if (e) e.pending++;
+      } else if (r.syncedAt) {
+        const e = map.get(localDay(r.syncedAt));
+        if (!e) continue;
+        if (r.status === 'conflict') e.conflicts++;
+        else if (r.status === 'synced' || r.status === 'resolved') e.synced++;
+      }
+    }
+    return [...map.values()].map((d) => ({
+      ...d,
+      label: new Date(`${d.day}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short' }),
+    }));
+  }, [outbox]);
 
-  // Derive stats — no extra DB calls, purely from the in-memory patients array
-  const stats = useMemo(() => {
-    const total        = patients.length
-    const withAllergy  = patients.filter(p => p.allergies.length > 0).length
-    const recentUpdate = patients.filter(p => updatedWithin7Days(p.updatedAt)).length
+  const openConflicts = patients.filter((p) => p.hasOpenConflicts).length;
+  const rate = stats.data
+    ? (() => {
+        const { automatic, manual } = stats.data.resolutions;
+        const total = automatic + manual + stats.data.conflicts.pending;
+        return total === 0 ? null : Math.round((automatic / total) * 100);
+      })()
+    : null;
 
-    // Last 5 sorted by updatedAt descending
-    const recent = [...patients]
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 5)
-
-    return { total, withAllergy, recentUpdate, recent }
-  }, [patients])
+  const axisColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0';
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
+      <PageHeader
+        title={`Hello, ${user?.name.split(' ')[0] ?? 'there'}`}
+        subtitle="Records on this device, sync activity and conflict resolution at a glance."
+        actions={
+          perms.canEditPatients && (
+            <Link to="/patients/new" className="btn-primary">
+              <Icon name="plus" className="h-4 w-4" /> Add patient
+            </Link>
+          )
+        }
+      />
 
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Dashboard</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            All data stored on this device — works fully offline
-          </p>
-        </div>
-
-        <Link
-          to="/patients/new"
-          className="btn-primary self-start sm:self-auto flex-shrink-0"
-          id="dashboard-add-patient"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0
-                 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Add New Patient
-        </Link>
-      </div>
-
-      {/* Content — skeleton while loading */}
       {loading ? (
         <DashboardSkeleton />
-      ) : patients.length === 0 ? (
-        <EmptyDashboard />
       ) : (
         <>
-          {/* ── Summary stat cards ───────────────────────────────────── */}
-          <section aria-label="Summary statistics">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard
-                icon="👤"
-                value={stats.total}
-                label="Total Patients"
-                subLabel={`on this device`}
-                accent="medical"
-              />
-              <StatCard
-                icon="⚠️"
-                value={stats.withAllergy}
-                label="Patients with Allergies"
-                subLabel={
-                  stats.total > 0
-                    ? `${Math.round((stats.withAllergy / stats.total) * 100)}% of records`
-                    : undefined
-                }
-                accent={stats.withAllergy > 0 ? 'warning' : 'teal'}
-              />
-              <StatCard
-                icon="🕐"
-                value={stats.recentUpdate}
-                label="Updated in Last 7 Days"
-                subLabel="records modified recently"
-                accent="teal"
-              />
-            </div>
-          </section>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard value={patients.length} label="Patients on this device" icon="🩺" accent="medical" />
+            <StatCard value={sync.pendingCount} label="Changes waiting to sync" subLabel={`Last sync ${relativeTime(sync.lastSyncedAt)}`} icon="⏳" accent={sync.pendingCount ? 'warning' : 'teal'} />
+            <StatCard value={openConflicts} label="Patients with a dose under review" icon="⚠" accent={openConflicts ? 'danger' : 'teal'} />
+            <StatCard
+              value={rate === null ? '—' : `${rate}%`}
+              label="Concurrent edits auto-resolved"
+              subLabel={stats.data ? `${stats.data.resolutions.automatic} automatic · ${stats.data.resolutions.manual} by reviewers` : 'Connect to load system stats'}
+              icon="🔀"
+              accent="teal"
+            />
+          </div>
 
-          {/* ── Recent activity ──────────────────────────────────────── */}
-          <section aria-label="Recent patient activity">
-            <Card>
-              <div className="flex items-center justify-between mb-1">
-                <h2 className="section-title">Recent Activity</h2>
-                <Link
-                  to="/patients"
-                  className="text-xs text-medical-600 hover:text-medical-800
-                             font-medium transition-colors"
-                  id="dashboard-view-all-patients"
-                >
-                  View all →
-                </Link>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <section className="card lg:col-span-2" aria-labelledby="chart-h">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 id="chart-h" className="section-title">This device, last 7 days</h2>
+                <span className="text-xs text-slate-400">changes by day</span>
               </div>
+              <div className="h-64" role="img" aria-label={`Bar chart of changes synced and pending over the last 7 days. ${chartData.map((d) => `${d.label}: ${d.synced} synced, ${d.pending} pending, ${d.conflicts} sent to review`).join('; ')}`}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <CartesianGrid stroke={gridColor} vertical={false} />
+                    <XAxis dataKey="label" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis allowDecimals={false} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: theme === 'dark' ? '#0f172a' : '#fff', border: `1px solid ${gridColor}`, borderRadius: 8, fontSize: 12 }}
+                      cursor={{ fill: theme === 'dark' ? '#1e293b' : '#f1f5f9' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="synced" name="Synced" stackId="a" fill="#0d9488" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="conflicts" name="Sent to review" stackId="a" fill="#f97316" />
+                    <Bar dataKey="pending" name="Pending" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
 
-              {stats.recent.length === 0 ? (
-                <p className="text-sm text-slate-400 py-4 text-center">
-                  No recent activity
-                </p>
+            <section className="card" aria-labelledby="system-h">
+              <h2 id="system-h" className="section-title mb-4">System</h2>
+              {stats.data ? (
+                <dl className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-slate-600 dark:text-slate-300">Patients on server</dt>
+                    <dd className="text-lg font-bold text-slate-900 dark:text-white">{stats.data.patients}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-slate-600 dark:text-slate-300">Conflicts awaiting review</dt>
+                    <dd className="text-lg font-bold text-orange-600 dark:text-orange-400">{stats.data.conflicts.pending}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-slate-600 dark:text-slate-300">Conflicts resolved</dt>
+                    <dd className="text-lg font-bold text-slate-900 dark:text-white">{stats.data.conflicts.resolved}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-sm text-slate-600 dark:text-slate-300">Registered devices</dt>
+                    <dd className="text-lg font-bold text-slate-900 dark:text-white">{stats.data.devices}</dd>
+                  </div>
+                  {rate !== null && (
+                    <div>
+                      <div className="mb-1 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span>Auto-resolved</span><span>Manual / pending</span>
+                      </div>
+                      <div className="flex h-2.5 overflow-hidden rounded-full bg-orange-200 dark:bg-orange-900/50" role="img" aria-label={`${rate}% of concurrent edits resolved automatically`}>
+                        <div className="bg-teal-600" style={{ width: `${rate}%` }} />
+                      </div>
+                    </div>
+                  )}
+                  {perms.canReviewConflicts && stats.data.conflicts.pending > 0 && (
+                    <Link to="/conflicts" className="btn-primary w-full">Review conflicts</Link>
+                  )}
+                </dl>
               ) : (
-                <ul role="list" className="mt-3">
-                  {stats.recent.map(p => (
-                    <ActivityRow key={p.id} patient={p} />
-                  ))}
-                </ul>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{sync.connected ? 'Loading…' : 'Offline. System-wide stats appear when the server is reachable.'}</p>
               )}
-            </Card>
+            </section>
+          </div>
+
+          <section className="card" aria-labelledby="recent-h">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 id="recent-h" className="section-title">Recently updated</h2>
+              <Link to="/patients" className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300">All patients</Link>
+            </div>
+            {patients.length === 0 ? (
+              <EmptyState
+                icon="patients"
+                title="No patients yet"
+                message="Add a patient, or sync to download records from the server."
+                action={perms.canEditPatients && <Link to="/patients/new" className="btn-primary">Add your first patient</Link>}
+              />
+            ) : (
+              <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                {patients.slice(0, 6).map((p) => (
+                  <li key={p.id}>
+                    <Link to={`/patients/${p.id}`} className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-medical-100 text-xs font-semibold text-medical-700 dark:bg-medical-900/50 dark:text-medical-300">{initials(p.name)}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-slate-800 dark:text-slate-100">{p.name}</span>
+                        <span className="block text-xs text-slate-400">Updated {relativeTime(p.updatedAt)}</span>
+                      </span>
+                      {p.hasOpenConflicts && <span className="badge-conflict">Review</span>}
+                      <Icon name="chevronRight" className="h-4 w-4 text-slate-400" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         </>
       )}
     </div>
-  )
+  );
 }

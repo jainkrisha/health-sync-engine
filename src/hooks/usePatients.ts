@@ -1,62 +1,67 @@
 /**
- * usePatients.ts — hook for fetching + mutating the patient list.
- * OWNERSHIP: Person B.
- *
- * Reads all patients from IndexedDB via Dexie (getAllPatients).
- * Manual refetch pattern: call refetch() after any write to re-sync the list.
- * No network calls — fully offline, pure IndexedDB reads via db.ts helpers.
- *
- * Error handling: any Dexie/IndexedDB failure on load or delete is caught here
- * and exposed via the `error` field so the page can surface it via toast.
- * Per rules.md §5 — no silent swallowing.
+ * usePatients.ts — patient records from the device's encrypted local store.
+ * Re-reads automatically when local data changes (local edits or sync).
  */
+import { useEffect, useState } from 'react';
+import type { Patient, PatientDoc } from '@shared/types';
+import { getAllPatients, getPatientDoc } from '../db/patientRepo';
+import { onDataChanged } from '../lib/events';
+import { materialize } from '@shared/materialize';
 
-import { useState, useEffect, useCallback } from 'react'
-import type { Patient } from '../types/patient'
-import { getAllPatients, deletePatient } from '../db/db'
+export function usePatients() {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-interface UsePatientsResult {
-  patients: Patient[]
-  loading: boolean
-  /** Non-null when the last IndexedDB operation failed. Page must surface this via toast. */
-  error: string | null
-  refetch: () => Promise<void>
-  removePatient: (id: string) => Promise<void>
+  useEffect(() => {
+    let active = true;
+    const load = () =>
+      getAllPatients()
+        .then((list) => {
+          if (!active) return;
+          setPatients(list);
+          setError(null);
+        })
+        .catch((err: unknown) => active && setError(err instanceof Error ? err.message : 'Failed to load patient records'))
+        .finally(() => active && setLoading(false));
+    void load();
+    const off = onDataChanged(() => void load());
+    return () => {
+      active = false;
+      off();
+    };
+  }, []);
+
+  return { patients, loading, error };
 }
 
-export function usePatients(): UsePatientsResult {
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [loading, setLoading]   = useState<boolean>(true)
-  const [error, setError]       = useState<string | null>(null)
+export function usePatient(id: string | undefined) {
+  const [state, setState] = useState<{ id: string | undefined; doc: PatientDoc | null; error: string | null }>({
+    id: undefined,
+    doc: null,
+    error: null,
+  });
 
-  const refetch = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await getAllPatients()
-      setPatients(data)
-    } catch (err) {
-      // Surface Dexie/IndexedDB errors to the page — rules.md §5.
-      const message = err instanceof Error ? err.message : 'Failed to load patient records'
-      setError(message)
-    } finally {
-      // Always clear loading — spinner must not spin forever.
-      setLoading(false)
-    }
-  }, [])
-
-  // Load on mount — error is caught inside refetch and stored in `error` state.
   useEffect(() => {
-    void refetch()
-  }, [refetch])
+    if (!id) return;
+    let active = true;
+    const load = () =>
+      getPatientDoc(id)
+        .then((doc) => active && setState({ id, doc, error: null }))
+        .catch((err: unknown) => active && setState({ id, doc: null, error: err instanceof Error ? err.message : 'Failed to load patient' }));
+    void load();
+    const off = onDataChanged(() => void load());
+    return () => {
+      active = false;
+      off();
+    };
+  }, [id]);
 
-  const removePatient = useCallback(
-    async (id: string) => {
-      await deletePatient(id)
-      await refetch()
-    },
-    [refetch],
-  )
-
-  return { patients, loading, error, refetch, removePatient }
+  const doc = state.id === id ? state.doc : null;
+  return {
+    doc,
+    patient: doc ? materialize(doc) : null,
+    loading: Boolean(id) && state.id !== id,
+    error: state.error,
+  };
 }

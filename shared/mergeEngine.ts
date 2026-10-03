@@ -461,6 +461,8 @@ export function applyMutation(
   ctx: ApplyContext,
 ): ApplyResult {
   const doc = current ? cloneDoc(current) : emptyDoc(m.entityId, m.timestamp, m.userId);
+  // The edit was made without seeing every change already on the record.
+  const recordConcurrent = current ? compare(m.vectorClock, current.clock) === 'concurrent' : false;
   const decisions: MergeDecision[] = [];
   const conflicts: ConflictDraft[] = [];
 
@@ -538,6 +540,7 @@ export function applyMutation(
 
   doc.clock = merge(doc.clock, m.vectorClock);
   if (m.timestamp > doc.updatedAt) doc.updatedAt = m.timestamp;
+  if (recordConcurrent) for (const d of decisions) d.concurrent = true;
   return { doc, decisions, conflicts };
 }
 
