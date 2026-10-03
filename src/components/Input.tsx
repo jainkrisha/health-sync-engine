@@ -29,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
         {label && (
-          <label htmlFor={inputId} className="text-sm font-semibold text-slate-700 flex items-center gap-1">
+          <label htmlFor={inputId} className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
             {label}
             {required && <span className="text-rose-500 font-bold">*</span>}
           </label>
@@ -49,8 +49,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               ${icon ? 'pl-10' : ''}
               ${
                 error
-                  ? 'border-rose-400 bg-rose-50/30 text-slate-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
-                  : 'border-slate-300 bg-white text-slate-900 hover:border-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20'
+                  ? 'border-rose-400 bg-rose-50/30 text-slate-900 dark:text-slate-100 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
+                  : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:border-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20'
               }
               ${className}
             `}

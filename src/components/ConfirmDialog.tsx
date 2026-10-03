@@ -36,18 +36,18 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
     >
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
+      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden transform transition-all">
         <div className="p-6">
-          <h3 id="confirm-dialog-title" className="text-lg font-bold text-slate-900 mb-2">
+          <h3 id="confirm-dialog-title" className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
             {title}
           </h3>
-          <p className="text-sm text-slate-600">{message}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{message}</p>
         </div>
-        <div className="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
+        <div className="bg-slate-50 dark:bg-slate-800/60 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200/80 rounded-lg transition-colors border border-slate-300"
+            className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-300 dark:border-slate-700"
           >
             {cancelText}
           </button>

@@ -245,3 +245,40 @@ describe('merge engine: manual resolution, delete and local mode', () => {
     expect(JSON.stringify(doc)).toBe(snapshot);
   });
 });
+
+describe('form rebase (three-way merge in the editor)', () => {
+  it('keeps remote changes to fields the user did not touch', async () => {
+    const { rebaseInput, inputFromDoc, buildUpdateMutations } = await import('../diff');
+    const server = new FakeServer();
+    const doc = seed(server);
+    const snapshot = inputFromDoc(doc);
+    // Another device renames the patient and adds an allergy while the form is open
+    server.push(edit(doc, { name: 'Asha R. Patil', allergies: [...baseInput.allergies, { allergen: 'Latex', severity: 'mild', reaction: '' }] }, 'dev-b', '2026-10-01T12:00:00.000Z'));
+    const latest = server.doc!;
+    // The user only changed the contact number and removed Penicillin
+    const edited = { ...snapshot, contactNumber: '9000000000', allergies: [] };
+    const input = rebaseInput(snapshot, edited, inputFromDoc(latest));
+    const muts = buildUpdateMutations(latest, input, ctxFor('dev-a', '2026-10-01T12:10:00.000Z'));
+    expect(muts.map((m) => m.field)).toEqual(['contactNumber', 'allergies']);
+    server.push(muts);
+    const view = server.view();
+    expect(view.name).toBe('Asha R. Patil');
+    expect(view.contactNumber).toBe('9000000000');
+    expect(view.allergies.map((a) => a.allergen)).toEqual(['Latex']);
+  });
+});
+
+describe('concurrency flag for the audit trail', () => {
+  it('marks every decision from an edit made without seeing the latest record', () => {
+    const server = new FakeServer();
+    const doc = seed(server);
+    server.push(edit(doc, { name: 'A' }, 'dev-a', '2026-10-01T12:00:00.000Z'));
+    server.decisions.length = 0;
+    server.push(edit(doc, { allergies: [...baseInput.allergies, { allergen: 'Latex', severity: 'mild', reaction: '' }] }, 'dev-b', '2026-10-01T12:00:00.000Z'));
+    expect(server.decisions).toHaveLength(1);
+    expect(server.decisions[0]).toMatchObject({ concurrent: true, outcome: 'applied' });
+    server.decisions.length = 0;
+    server.push(edit(server.doc!, { contactNumber: '1234567' }, 'dev-b', '2026-10-01T12:10:00.000Z'));
+    expect(server.decisions[0].concurrent).toBe(false);
+  });
+});

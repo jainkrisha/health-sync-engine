@@ -1,180 +1,89 @@
-import { Controller, useFieldArray } from 'react-hook-form';
-import { BLOOD_TYPES } from '../../schemas/patientSchema';
+import { useFieldArray } from 'react-hook-form';
+import { ALLERGY_SEVERITIES, BLOOD_TYPES, GENDERS } from '../../schemas/patientSchema';
 import { usePatientForm } from '../../hooks/usePatientForm';
 import { Input } from '../../components/Input';
 import { Select } from '../../components/Select';
-import { TagInput } from '../../components/TagInput';
 import { Card } from '../../components/Card';
+import { Icon } from '../../components/Icon';
+import { PageHeader, Spinner } from '../../components/ui';
+import { normaliseKey } from '@shared/mergeEngine';
 
 export interface PatientFormProps {
   mode?: 'add' | 'edit';
 }
 
-export function PatientForm({ mode }: PatientFormProps) {
-  const {
-    form: {
-      register,
-      control,
-      formState: { errors },
-    },
-    isLoading,
-    isSubmitting,
-    isEditMode,
-    onSubmit,
-    handleCancel,
-  } = usePatientForm({ mode });
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  const { fields, append, remove } = useFieldArray({
+export function PatientForm({ mode }: PatientFormProps) {
+  const { form, patient, isLoading, isSubmitting, isEditMode, onSubmit, handleCancel } = usePatientForm({ mode });
+  const {
+    register,
     control,
-    name: 'medications',
-  });
+    watch,
+    formState: { errors },
+  } = form;
+
+  const allergies = useFieldArray({ control, name: 'allergies' });
+  const medications = useFieldArray({ control, name: 'medications' });
+  const watchedMeds = watch('medications');
+
+  const conflictedMeds = new Set(
+    (patient?.medications ?? []).filter((m) => m.openConflictIds.length > 0).map((m) => normaliseKey(m.name)),
+  );
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <div className="w-10 h-10 border-4 border-teal-600/30 border-t-teal-600 rounded-full animate-spin" />
-        <p className="text-sm font-medium text-slate-500">Loading patient record...</p>
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 text-slate-500">
+        <Spinner className="h-8 w-8 text-teal-600" />
+        <p className="text-sm font-medium">Loading patient record…</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {isEditMode ? 'Edit Patient Record' : 'Add New Patient'}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {isEditMode
-              ? 'Update medical history, vitals, and personal details.'
-              : 'Enter patient information to save to the local health record database.'}
-          </p>
-        </div>
-      </div>
+    <div className="pb-12">
+      <PageHeader
+        title={isEditMode ? `Edit ${patient?.name ?? 'patient'}` : 'Add new patient'}
+        subtitle={
+          isEditMode
+            ? 'Only the fields you change are synced, so edits made on other devices are kept.'
+            : 'Saved on this device first (encrypted). It syncs to the server when a connection is available.'
+        }
+      />
 
       <form onSubmit={onSubmit} className="space-y-6" noValidate>
-        {/* Section 1: Basic Information */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">
-            Basic Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="md:col-span-1">
-              <Input
-                label="Full Name"
-                placeholder="e.g. Jane Doe"
-                required
-                error={errors.name?.message}
-                {...register('name')}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <Input
-                label="Date of Birth"
-                type="date"
-                required
-                error={errors.dateOfBirth?.message}
-                {...register('dateOfBirth')}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <Select
-                label="Blood Type"
-                required
-                options={BLOOD_TYPES}
-                placeholder="Select blood type"
-                error={errors.bloodType?.message}
-                {...register('bloodType')}
-              />
-            </div>
+          <h2 className="section-title mb-4">Basic information</h2>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <Input label="Full name" required placeholder="e.g. Asha Patil" error={errors.name?.message} containerClassName="md:col-span-2" {...register('name')} />
+            <Input label="Date of birth" required type="date" max={new Date().toISOString().slice(0, 10)} error={errors.dateOfBirth?.message} {...register('dateOfBirth')} />
+            <Select label="Gender" options={GENDERS.map((g) => ({ value: g, label: cap(g) }))} placeholder="" error={errors.gender?.message} {...register('gender')} />
+            <Select label="Blood type" options={BLOOD_TYPES} placeholder="" error={errors.bloodType?.message} {...register('bloodType')} />
+            <Input label="Contact number" type="tel" placeholder="e.g. 98200 12345" error={errors.contactNumber?.message} {...register('contactNumber')} />
           </div>
         </Card>
 
-        {/* Section 2: Allergies */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">
-            Allergies
-          </h2>
-          <Controller
-            control={control}
-            name="allergies"
-            render={({ field }) => (
-              <TagInput
-                label="Known Allergies"
-                placeholder="Type allergy (e.g. Penicillin, Peanuts) and press Enter"
-                value={field.value || []}
-                onChange={field.onChange}
-                error={errors.allergies?.message}
-                helperText="Press Enter or click Add after typing each allergy."
-              />
-            )}
-          />
-        </Card>
-
-        {/* Section 3: Medications */}
-        <Card>
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-            <h2 className="text-lg font-bold text-slate-800">Medications</h2>
-            <button
-              type="button"
-              onClick={() => append({ name: '', dosage: '' })}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Add Medication
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="section-title">Allergies</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Allergies added on any device are always kept when records merge.</p>
+            </div>
+            <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={() => allergies.append({ allergen: '', severity: 'unknown', reaction: '' })}>
+              <Icon name="plus" className="h-3.5 w-3.5" /> Add allergy
             </button>
           </div>
-
-          {fields.length === 0 ? (
-            <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-              <p className="text-xs text-slate-500">No medications currently listed.</p>
-              <button
-                type="button"
-                onClick={() => append({ name: '', dosage: '' })}
-                className="mt-2 text-xs font-semibold text-teal-600 hover:text-teal-700 hover:underline"
-              >
-                + Click to add first medication
-              </button>
-            </div>
+          {allergies.fields.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">No known allergies</p>
           ) : (
-            <div className="space-y-4">
-              {fields.map((fieldItem, index) => (
-                <div
-                  key={fieldItem.id}
-                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 transition-all"
-                >
-                  <div className="flex-1 w-full">
-                    <Input
-                      placeholder="Medication Name (e.g. Amoxicillin)"
-                      error={errors.medications?.[index]?.name?.message}
-                      {...register(`medications.${index}.name`)}
-                    />
-                  </div>
-                  <div className="flex-1 w-full">
-                    <Input
-                      placeholder="Dosage (e.g. 500mg twice daily)"
-                      error={errors.medications?.[index]?.dosage?.message}
-                      {...register(`medications.${index}.dosage`)}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors self-end sm:self-center"
-                    aria-label={`Remove medication ${index + 1}`}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
+            <div className="space-y-3">
+              {allergies.fields.map((field, index) => (
+                <div key={field.id} className="grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-800/40 md:grid-cols-[1.4fr_1fr_1.6fr_auto] md:items-start">
+                  <Input label="Allergen" required placeholder="e.g. Penicillin" error={errors.allergies?.[index]?.allergen?.message} id={`allergies-${index}-allergen`} {...register(`allergies.${index}.allergen`)} />
+                  <Select label="Severity" options={ALLERGY_SEVERITIES.map((s) => ({ value: s, label: cap(s) }))} placeholder="" id={`allergies-${index}-severity`} {...register(`allergies.${index}.severity`)} />
+                  <Input label="Reaction" placeholder="e.g. Rash, swelling" error={errors.allergies?.[index]?.reaction?.message} id={`allergies-${index}-reaction`} {...register(`allergies.${index}.reaction`)} />
+                  <button type="button" onClick={() => allergies.remove(index)} className="btn-ghost mt-6 self-start text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40" aria-label={`Remove allergy ${index + 1}`}>
+                    <Icon name="trash" className="h-4 w-4" />
                   </button>
                 </div>
               ))}
@@ -182,66 +91,65 @@ export function PatientForm({ mode }: PatientFormProps) {
           )}
         </Card>
 
-        {/* Section 4: Vitals */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">
-            Vitals (Optional)
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <Input
-                label="Heart Rate (bpm)"
-                type="number"
-                placeholder="e.g. 72"
-                error={errors.vitals?.heartRate?.message}
-                {...register('vitals.heartRate', { valueAsNumber: true })}
-              />
+              <h2 className="section-title">Medications</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">If two devices change a dose at the same time, a clinical reviewer decides.</p>
             </div>
-            <div>
-              <Input
-                label="Blood Pressure"
-                placeholder="e.g. 120/80"
-                error={errors.vitals?.bloodPressure?.message}
-                {...register('vitals.bloodPressure')}
-              />
+            <button type="button" className="btn-secondary px-3 py-1.5 text-xs" onClick={() => medications.append({ name: '', dosage: '', frequency: '', startDate: '', endDate: '' })}>
+              <Icon name="plus" className="h-3.5 w-3.5" /> Add medication
+            </button>
+          </div>
+          {medications.fields.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">No current medications</p>
+          ) : (
+            <div className="space-y-3">
+              {medications.fields.map((field, index) => {
+                const inConflict = conflictedMeds.has(normaliseKey(watchedMeds?.[index]?.name ?? ''));
+                return (
+                  <div key={field.id} className={`rounded-lg border p-3 ${inConflict ? 'border-orange-300 bg-orange-50/60 dark:border-orange-900 dark:bg-orange-950/20' : 'border-slate-200 bg-slate-50/60 dark:border-slate-700 dark:bg-slate-800/40'}`}>
+                    {inConflict && (
+                      <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-orange-800 dark:text-orange-300">
+                        <Icon name="alert" className="h-3.5 w-3.5" /> This dose is waiting for clinical review. A change here is checked against it too.
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-[1.4fr_1fr_1fr_auto] md:items-start">
+                      <Input label="Medication" required placeholder="e.g. Metformin" error={errors.medications?.[index]?.name?.message} id={`medications-${index}-name`} {...register(`medications.${index}.name`)} />
+                      <Input label="Dosage" required placeholder="e.g. 500 mg" error={errors.medications?.[index]?.dosage?.message} id={`medications-${index}-dosage`} {...register(`medications.${index}.dosage`)} />
+                      <Input label="Frequency" placeholder="e.g. Twice daily" error={errors.medications?.[index]?.frequency?.message} id={`medications-${index}-frequency`} {...register(`medications.${index}.frequency`)} />
+                      <button type="button" onClick={() => medications.remove(index)} className="btn-ghost mt-6 self-start text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40" aria-label={`Stop medication ${index + 1}`} title="Stop / remove medication">
+                        <Icon name="trash" className="h-4 w-4" />
+                      </button>
+                      <Input label="Start date" type="date" id={`medications-${index}-startDate`} {...register(`medications.${index}.startDate`)} />
+                      <Input label="End date" type="date" error={errors.medications?.[index]?.endDate?.message} id={`medications-${index}-endDate`} {...register(`medications.${index}.endDate`)} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <Input
-                label="Temperature (°C / °F)"
-                type="number"
-                step="0.1"
-                placeholder="e.g. 36.6"
-                error={errors.vitals?.temperature?.message}
-                {...register('vitals.temperature', { valueAsNumber: true })}
-              />
+          )}
+        </Card>
 
-            </div>
+        <Card>
+          <h2 className="section-title">{isEditMode ? 'Record new vitals' : 'Vitals'}</h2>
+          <p className="mb-4 mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Each reading is added to the history with the time and who took it. Leave blank if not measured.
+          </p>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+            <Input label="Heart rate (bpm)" inputMode="numeric" placeholder="72" error={errors.newVitals?.heartRate?.message} {...register('newVitals.heartRate')} />
+            <Input label="Blood pressure" placeholder="120/80" error={errors.newVitals?.bloodPressure?.message} {...register('newVitals.bloodPressure')} />
+            <Input label="Temp (°C)" inputMode="decimal" placeholder="36.8" error={errors.newVitals?.temperature?.message} {...register('newVitals.temperature')} />
+            <Input label="Resp. rate" inputMode="numeric" placeholder="16" error={errors.newVitals?.respiratoryRate?.message} {...register('newVitals.respiratoryRate')} />
+            <Input label="SpO₂ (%)" inputMode="numeric" placeholder="98" error={errors.newVitals?.oxygenSaturation?.message} {...register('newVitals.oxygenSaturation')} />
           </div>
         </Card>
 
-        {/* Form Action Bar */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition-colors shadow-xs"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 active:bg-teal-800 disabled:opacity-50 transition-all shadow-md flex items-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <span>Save Patient</span>
-            )}
+        <div className="sticky bottom-0 -mx-4 flex justify-end gap-3 border-t border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 sm:mx-0 sm:rounded-lg">
+          <button type="button" onClick={handleCancel} className="btn-secondary" disabled={isSubmitting}>Cancel</button>
+          <button type="submit" className="btn-primary" disabled={isSubmitting}>
+            {isSubmitting && <Spinner />}
+            {isEditMode ? 'Save changes' : 'Save patient'}
           </button>
         </div>
       </form>

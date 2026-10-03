@@ -75,14 +75,14 @@ function cleanVitals(v: VitalsInput): VitalsInput {
 
 class MutationBuilder {
   private clock: VectorClock;
+  private readonly entityId: string;
+  private readonly ctx: MutationContext;
   readonly mutations: Mutation[] = [];
 
-  constructor(
-    private readonly entityId: string,
-    startClock: VectorClock,
-    private readonly ctx: MutationContext,
-  ) {
+  constructor(entityId: string, startClock: VectorClock, ctx: MutationContext) {
+    this.entityId = entityId;
     this.clock = startClock;
+    this.ctx = ctx;
   }
 
   add(operation: MutationOperation, field: MutationField | undefined, payload: Mutation['payload']): void {
@@ -226,4 +226,59 @@ export function buildDeleteMutation(doc: PatientDoc, ctx: MutationContext): Muta
   const builder = new MutationBuilder(doc.id, doc.clock, ctx);
   builder.add('delete', undefined, {});
   return builder.mutations[0];
+}
+
+/** The editable form values for a document, as currently stored. */
+export function inputFromDoc(doc: PatientDoc): PatientInput {
+  const p = materialize(doc);
+  return {
+    name: p.name,
+    dateOfBirth: p.dateOfBirth,
+    gender: p.gender,
+    bloodType: p.bloodType,
+    contactNumber: p.contactNumber,
+    allergies: p.allergies.map((a) => ({ ...a })),
+    medications: p.medications.map(({ openConflictIds: _ignored, ...m }) => ({ ...m })),
+    newVitals: null,
+  };
+}
+
+function listChanges<T>(before: T[], after: T[], keyOf: (t: T) => string) {
+  const prev = new Map(before.map((t) => [keyOf(t), t]));
+  const next = new Map(after.map((t) => [keyOf(t), t]));
+  const upserts: T[] = [];
+  const removed: string[] = [];
+  for (const [k, v] of next) if (!prev.has(k) || JSON.stringify(prev.get(k)) !== JSON.stringify(v)) upserts.push(v);
+  for (const k of prev.keys()) if (!next.has(k)) removed.push(k);
+  return { upserts, removed };
+}
+
+/**
+ * Three-way merge for a form: apply only what the user changed (edited vs the
+ * snapshot the form was opened with) on top of the latest stored values. Edits
+ * that arrived from other devices while the form was open are kept, not reverted.
+ */
+export function rebaseInput(snapshot: PatientInput, edited: PatientInput, current: PatientInput): PatientInput {
+  const result: PatientInput = { ...current, newVitals: edited.newVitals ?? null };
+  for (const field of SCALAR_FIELDS) {
+    if (String(edited[field]).trim() !== String(snapshot[field]).trim()) {
+      (result as unknown as Record<string, unknown>)[field] = edited[field];
+    }
+  }
+
+  const aKey = (a: Allergy) => normaliseKey(a.allergen);
+  const allergyChanges = listChanges(dedupeAllergies(snapshot.allergies), dedupeAllergies(edited.allergies), aKey);
+  const allergies = new Map(current.allergies.map((a) => [aKey(a), a]));
+  for (const k of allergyChanges.removed) allergies.delete(k);
+  for (const a of allergyChanges.upserts) allergies.set(aKey(a), a);
+  result.allergies = [...allergies.values()];
+
+  const mKey = (m: MedicationInput) => normaliseKey(m.name);
+  const medChanges = listChanges(dedupeMedications(snapshot.medications), dedupeMedications(edited.medications), mKey);
+  const meds = new Map(current.medications.map((m) => [mKey(m), m]));
+  for (const k of medChanges.removed) meds.delete(k);
+  for (const m of medChanges.upserts) meds.set(mKey(m), m);
+  result.medications = [...meds.values()];
+
+  return result;
 }
