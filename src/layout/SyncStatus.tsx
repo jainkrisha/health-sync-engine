@@ -64,6 +64,7 @@ export function SyncStatus() {
           <input
             type="checkbox"
             className="peer sr-only"
+            aria-label="Simulate offline"
             checked={sync.simulatedOffline}
             onChange={(e) => sync.setSimulatedOffline(e.target.checked)}
           />
