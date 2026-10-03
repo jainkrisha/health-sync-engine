@@ -1,6 +1,6 @@
 import { Schema, model, type InferSchemaType } from 'mongoose';
 import { randomUUID } from 'node:crypto';
-import { ROLES, type PublicUser, type Role } from '@shared/types';
+import { DISTRICT_FACILITY, ROLES, portalForRole, type PublicUser, type Role } from '@shared/types';
 
 const userSchema = new Schema(
   {
@@ -9,6 +9,7 @@ const userSchema = new Schema(
     name: { type: String, required: true, trim: true },
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ROLES, required: true },
+    facility: { type: String, default: '', trim: true },
   },
   { timestamps: true, versionKey: false },
 );
@@ -16,12 +17,21 @@ const userSchema = new Schema(
 export type UserRecord = InferSchemaType<typeof userSchema> & { _id: string };
 export const User = model('User', userSchema);
 
-export function toPublicUser(u: { _id: string; username: string; name: string; role: string; createdAt?: Date }): PublicUser {
+export function toPublicUser(u: {
+  _id: string;
+  username: string;
+  name: string;
+  role: string;
+  facility?: string | null;
+  createdAt?: Date;
+}): PublicUser {
+  const role = u.role as Role;
   return {
     id: u._id,
     username: u.username,
     name: u.name,
-    role: u.role as Role,
+    role,
+    facility: u.facility || (portalForRole(role) === 'district' ? DISTRICT_FACILITY : 'Unassigned PHC'),
     createdAt: (u.createdAt ?? new Date()).toISOString(),
   };
 }

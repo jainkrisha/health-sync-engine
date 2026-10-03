@@ -74,6 +74,32 @@ describe('auth and roles', () => {
     expect((await request(server.app).post('/api/auth/register').send({ username: 'reviewer', password: 'password123', role: 'admin' })).status).toBe(409);
   });
 
+  it('opens an account only in its own portal (PHC or district admin)', async () => {
+    const login = (username: string, portal: string) =>
+      request(server.app).post('/api/auth/login').send({ username, password: 'password123', portal });
+    const wrong = await login('reviewer', 'phc');
+    expect(wrong.status).toBe(403);
+    expect(wrong.body.error).toMatch(/Admin \(District Hospital\)/);
+    expect((await login('reviewer', 'district')).status).toBe(200);
+
+    const phc = await request(server.app)
+      .post('/api/auth/register')
+      .send({ username: 'phcdoc', name: 'Dr. Local', password: 'password123', role: 'health_worker', portal: 'phc', facility: 'PHC Wagholi' });
+    expect(phc.status).toBe(201);
+    expect(phc.body.user.facility).toBe('PHC Wagholi');
+    expect((await login('phcdoc', 'district')).status).toBe(403);
+    expect((await login('phcdoc', 'phc')).status).toBe(200);
+
+    const noPhcName = await request(server.app)
+      .post('/api/auth/register')
+      .send({ username: 'phcdoc2', password: 'password123', role: 'health_worker', portal: 'phc' });
+    expect(noPhcName.status).toBe(400);
+    const badRole = await request(server.app)
+      .post('/api/auth/register')
+      .send({ username: 'phcadmin', password: 'password123', role: 'admin', portal: 'phc', facility: 'PHC X' });
+    expect(badRole.status).toBe(400);
+  });
+
   it('requires a token for patient routes', async () => {
     expect((await request(server.app).get('/api/patients')).status).toBe(401);
     expect((await request(server.app).get('/api/patients').set('Authorization', 'Bearer junk')).status).toBe(401);

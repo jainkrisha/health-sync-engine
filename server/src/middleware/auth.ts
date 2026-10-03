@@ -8,6 +8,7 @@ export interface AuthUser {
   username: string;
   name: string;
   role: Role;
+  facility?: string;
 }
 
 declare module 'express-serve-static-core' {
@@ -23,7 +24,7 @@ export function signToken(user: AuthUser): string {
 export function verifyToken(token: string): AuthUser {
   const decoded = jwt.verify(token, config.jwtSecret) as jwt.JwtPayload;
   if (!decoded.userId || !ROLES.includes(decoded.role)) throw new Error('Malformed token');
-  return { userId: decoded.userId, username: decoded.username, name: decoded.name, role: decoded.role };
+  return { userId: decoded.userId, username: decoded.username, name: decoded.name, role: decoded.role, facility: decoded.facility };
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {

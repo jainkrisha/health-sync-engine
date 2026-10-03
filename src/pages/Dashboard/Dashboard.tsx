@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { StatsResponse } from '@shared/types';
+import { portalForRole, type StatsResponse } from '@shared/types';
 import { usePatients } from '../../hooks/usePatients';
 import { useSyncEngine } from '../../hooks/useSync';
 import { useApi } from '../../hooks/useApi';
@@ -107,7 +107,11 @@ export default function Dashboard() {
     <div className="space-y-6">
       <PageHeader
         title={`Hello, ${user?.name.split(' ')[0] ?? 'there'}`}
-        subtitle="Records on this device, sync activity and conflict resolution at a glance."
+        subtitle={
+          user && portalForRole(user.role) === 'district'
+            ? `${user.facility}: every PHC's records, sync activity and conflict resolution at a glance.`
+            : `${user?.facility ?? 'PHC'}: records on this device, sync activity and conflict resolution at a glance.`
+        }
         actions={
           perms.canEditPatients && (
             <Link to="/patients/new" className="btn-primary">

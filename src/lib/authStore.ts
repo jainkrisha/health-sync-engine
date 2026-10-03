@@ -3,7 +3,7 @@
  * Kept outside React so the API client and the sync engine can read the token.
  */
 import { profileKey } from './deviceProfile';
-import type { PublicUser } from '@shared/types';
+import { DISTRICT_FACILITY, portalForRole, type PublicUser } from '@shared/types';
 
 export interface Session {
   token: string;
@@ -34,6 +34,10 @@ function load(): Session | null {
     if (!raw) return null;
     const session = JSON.parse(raw) as Session;
     if (!session.token || !session.user || isExpired(session.token)) return null;
+    // Sessions saved before facilities existed: fill in a sensible label.
+    if (!session.user.facility) {
+      session.user.facility = portalForRole(session.user.role) === 'district' ? DISTRICT_FACILITY : 'PHC';
+    }
     return session;
   } catch {
     return null;

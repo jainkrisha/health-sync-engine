@@ -102,10 +102,12 @@ Server flow per mutation: validate with zod → reject if the role cannot write 
 ## 6. Security
 
 - **Auth**: bcrypt password hashes, JWT (`userId, username, name, role`), required on every REST route and on the Socket.io handshake. The server overrides `userId`/`clientId` in pushed mutations with the authenticated identity.
+- **Portals**: the sign-in screen offers **PHC** (Primary Health Centre, the local doctor; offline-first) and **Admin** (the central system at the district hospital). `PORTAL_ROLES` in `shared/types.ts` maps PHC to `health_worker` and Admin to `admin`, `clinical_reviewer` and `auditor`. `/api/auth/login` takes the chosen `portal` and returns 403 if the account belongs to the other one. Every user has a `facility` (their PHC name, or "District Hospital"), carried in the JWT and recorded on each device that syncs, so the Admin page shows which PHC each tablet belongs to.
 - **RBAC** (server enforced, UI hides what you cannot use):
 
 | | health_worker | clinical_reviewer | admin | auditor |
 |---|---|---|---|---|
+| Portal | PHC | Admin | Admin | Admin |
 | Read patients | ✓ | ✓ | ✓ | ✓ |
 | Create/edit/archive patients | ✓ | ✓ | ✓ | |
 | Conflict review | | ✓ | ✓ | |

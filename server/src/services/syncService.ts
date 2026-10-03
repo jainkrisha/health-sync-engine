@@ -115,6 +115,7 @@ async function touchDevice(opts: PushOptions): Promise<void> {
       $set: {
         userId: opts.user.userId,
         username: opts.user.username,
+        ...(opts.user.facility ? { facility: opts.user.facility } : {}),
         lastSyncAt: new Date().toISOString(),
         ...(opts.deviceName ? { deviceName: opts.deviceName } : {}),
       },

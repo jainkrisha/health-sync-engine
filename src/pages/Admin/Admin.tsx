@@ -49,11 +49,12 @@ export default function Admin() {
           <p className="form-error">{users.error}</p>
         ) : (
           <div className="card overflow-x-auto p-0">
-            <table className="w-full min-w-[560px]">
+            <table className="w-full min-w-[640px]">
               <thead className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                 <tr>
                   <th className="table-head">Name</th>
                   <th className="table-head">Username</th>
+                  <th className="table-head">Facility</th>
                   <th className="table-head">Role</th>
                   <th className="table-head">Change role</th>
                 </tr>
@@ -63,6 +64,7 @@ export default function Admin() {
                   <tr key={u.id}>
                     <td className="table-cell font-medium">{u.name}{u.id === me?.id && <span className="ml-2 text-xs text-slate-400">(you)</span>}</td>
                     <td className="table-cell font-mono text-xs">{u.username}</td>
+                    <td className="table-cell">{u.facility}</td>
                     <td className="table-cell"><RoleBadge role={u.role} /></td>
                     <td className="table-cell">
                       <label className="sr-only" htmlFor={`role-${u.id}`}>Role for {u.name}</label>
@@ -92,10 +94,11 @@ export default function Admin() {
           <p className="form-error">{devices.error}</p>
         ) : (
           <div className="card overflow-x-auto p-0">
-            <table className="w-full min-w-[560px]">
+            <table className="w-full min-w-[640px]">
               <thead className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                 <tr>
                   <th className="table-head">Device</th>
+                  <th className="table-head">PHC</th>
                   <th className="table-head">Client id</th>
                   <th className="table-head">Last user</th>
                   <th className="table-head">Last sync</th>
@@ -106,6 +109,7 @@ export default function Admin() {
                 {devices.data?.devices.map((d) => (
                   <tr key={d.clientId}>
                     <td className="table-cell font-medium">{d.deviceName}</td>
+                    <td className="table-cell">{d.facility || '—'}</td>
                     <td className="table-cell font-mono text-xs" title={d.clientId}>{shortId(d.clientId)}</td>
                     <td className="table-cell">{d.username}</td>
                     <td className="table-cell">{relativeTime(d.lastSyncAt)}</td>
