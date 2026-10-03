@@ -24,7 +24,7 @@
     "strict": true,
 
     /* Shared client/server code */
-    "paths": { "@shared/*": ["./shared/*"] }
+    "paths": { "@shared/*": ["../shared/*"], "vitest": ["./node_modules/vitest"] }
   },
-  "include": ["src", "shared"]
+  "include": ["src", "../shared"]
 }

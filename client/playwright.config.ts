@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * End-to-end tests run against a running stack:
  *   docker compose up --build        (http://localhost:8080)
- * or the dev servers (server: npm run dev in /server, client: npm run dev) at http://localhost:5173.
+ * or the dev servers (server: npm run dev in server/, client: npm run dev in client/) at http://localhost:5173.
  */
 export default defineConfig({
   testDir: './e2e',

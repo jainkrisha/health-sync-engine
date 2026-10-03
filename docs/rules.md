@@ -8,7 +8,7 @@ Read PRD.md and Architecture.md before generating any code. This file constrains
 
 ## 2. Shared contracts
 - `shared/types.ts` is the contract between client and server (Patient, PatientDoc, Mutation, Conflict, AuditEntry, socket events). Change it deliberately and update both sides.
-- Patient writes on the device go through `commitLocalEdit()` in `src/db/patientRepo.ts`, never directly to Dexie, so they are encrypted, merged and queued for sync.
+- Patient writes on the device go through `commitLocalEdit()` in `client/src/db/patientRepo.ts`, never directly to Dexie, so they are encrypted, merged and queued for sync.
 
 ## 3. Non-negotiable product rules (do not optimize these away)
 - Never write logic that deletes an allergy as a side effect of anything other than an explicit user action tombstoning it.
@@ -28,7 +28,7 @@ Read PRD.md and Architecture.md before generating any code. This file constrains
 - Zod validation errors render inline under the relevant field, not as a toast or alert.
 
 ## 6. What the AI should always do
-- Re-read `shared/types.ts` and `src/db/patientRepo.ts` before writing any code that touches patient data — do not assume field names from memory.
+- Re-read `shared/types.ts` and `client/src/db/patientRepo.ts` before writing any code that touches patient data — do not assume field names from memory.
 - Keep placeholder pages as simple exported functions so teammates can extend them without touching shared files.
 - When a prompt is ambiguous about which phase it belongs to, ask before building — do not guess and build the more advanced version "to save time."
 

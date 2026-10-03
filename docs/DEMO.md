@@ -1,6 +1,6 @@
 # Demo script (two devices, one laptop)
 
-Setup: stack running (`docker compose up` or the dev servers) and seeded (`npm run server:seed`).
+Setup: stack running (`docker compose up` or the dev servers) and seeded (`docker compose exec server node dist/seed.js`, or `npm run seed` in `server/`).
 
 The sign-in screen asks **PHC** (local doctor, works offline) or **Admin** (central system at the district hospital). Health workers use PHC; admin, reviewer and auditor use Admin. Picking the wrong one shows which portal the account belongs to.
 
@@ -21,4 +21,4 @@ The sign-in screen asks **PHC** (local doctor, works offline) or **Admin** (cent
 9. Optional: in DevTools > Application > IndexedDB > HealthSync > patients, show that records are encrypted blobs, not readable JSON.
 10. Optional: turn the real network off (DevTools > Network > Offline) on the production build, reload the page, and keep working.
 
-The same flow runs automatically in `e2e/two-devices.spec.ts`.
+The same flow runs automatically in `client/e2e/two-devices.spec.ts`.

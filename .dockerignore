@@ -5,3 +5,5 @@ test-results
 playwright-report
 server/.env
 .env
+venv
+docs
