@@ -249,6 +249,8 @@ export interface MergeDecision {
   outcome: MergeOutcome;
   report: string;
   finalValue: unknown;
+  /** True when the incoming write was concurrent with the stored one (a real merge). */
+  concurrent: boolean;
 }
 
 export interface ConflictDraft {
@@ -298,6 +300,7 @@ export interface AuditEntry {
   resolutionType: ResolutionType;
   report: string;
   finalValue: unknown;
+  concurrent: boolean;
   clientId: string | null;
   userId: string | null;
   resolvedBy: string | null;
