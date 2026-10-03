@@ -56,12 +56,14 @@ Open http://localhost:8080.
 Needs Node 22+ and a MongoDB on `localhost:27017` (or set `MONGO_URI`).
 
 ```bash
-npm install                    # client + shared
-npm --prefix server install    # server
-cp server/.env.example server/.env
+cd server
+npm install
+cp .env.example .env
+npm run seed                   # demo users and patients (once)
+npm run dev                    # API + sync on http://localhost:4000
 
-npm run server:seed            # demo users and patients (once)
-npm run server:dev             # API + sync on http://localhost:4000
+cd ../client                   # in a second terminal
+npm install
 npm run dev                    # PWA on http://localhost:5173 (proxies /api and /socket.io)
 ```
 
@@ -87,7 +89,8 @@ Demo logins after seeding (password `password123`):
 ## Tests
 
 ```bash
-npm test                 # merge engine and vector clock unit tests
+cd client
+npm test                 # merge engine and vector clock unit tests (shared/)
 npm run test:server      # API, RBAC, sync, conflicts, Socket.io (uses MONGO_URI_TEST or an in-memory MongoDB)
 npm run test:e2e         # Playwright, against a running stack (E2E_BASE_URL, default http://localhost:5173)
 ```
@@ -101,21 +104,22 @@ See [docs/DEMO.md](docs/DEMO.md) for the two-device walkthrough used in the pres
 ## Project structure
 
 ```
-shared/            types, vector clocks, CRDT merge engine, form diff (client + server)
-server/            Express + Socket.io + Mongoose
-  src/models/      User, Patient, MutationLog, Conflict, AuditEntry, Device, Counter
-  src/routes/      auth, patients, sync, conflicts, audit-log, users, devices, stats
-  src/services/    syncService (merge authority), conflictService, auditService
-  src/socket.ts    real-time sync transport
-src/               React PWA
-  crypto/          AES-GCM encryption and device key
-  db/              Dexie schema, encrypted patient repository, mutation outbox
-  sync/            syncEngine (Socket.io client, push/pull, reconnect)
-  context/         Auth (JWT), RBAC guards, theme
-  pages/           Login, Dashboard, PatientList, PatientForm, PatientDetail,
-                   ConflictDashboard, AuditTrail, Admin
-e2e/               Playwright end-to-end tests
-docs/              PRD, Architecture, Demo script
+client/              React PWA (Vite), its Dockerfile and nginx config
+  src/crypto/        AES-GCM encryption and device key
+  src/db/            Dexie schema, encrypted patient repository, mutation outbox
+  src/sync/          syncEngine (Socket.io client, push/pull, reconnect)
+  src/context/       Auth (JWT), RBAC guards, theme
+  src/pages/         Login, Dashboard, PatientList, PatientForm, PatientDetail,
+                     ConflictDashboard, AuditTrail, Admin
+  e2e/               Playwright end-to-end tests
+server/              Express + Socket.io + Mongoose, and its Dockerfile
+  src/models/        User, Patient, MutationLog, Conflict, AuditEntry, Device, Counter
+  src/routes/        auth, patients, sync, conflicts, audit-log, users, devices, stats
+  src/services/      syncService (merge authority), conflictService, auditService
+  src/socket.ts      real-time sync transport
+shared/              types, vector clocks, CRDT merge engine, form diff (client + server)
+docs/                PRD, Architecture, Demo script, project memory and AI rules
+docker-compose.yml   mongo + server + client
 ```
 
 See [docs/Architecture.md](docs/Architecture.md) for how sync and merging work.

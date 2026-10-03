@@ -55,7 +55,7 @@ _(record each decision once made, with a one-line reason — e.g. "2026-08-02: L
 - 2026-10-03: **Allergies can be removed** by explicit user action (OR-Set tombstones of observed tags); a concurrent add or update on another device always wins.
 - 2026-10-03: **Medications are reviewed per medication**, and only when two devices change the same medication's dose/frequency/active state concurrently with different values. New medications and date-only edits never need review.
 - 2026-10-03: Patient model **expanded** toward the UML: gender, contact number, allergy severity/reaction, medication frequency/start/end, vitals history (with respiratory rate and SpO2).
-- 2026-10-03: Client stays at the repo root; backend in `/server`; shared code in `/shared`.
+- 2026-10-03: Repo split into `client/` (React PWA), `server/` (backend), `shared/` (merge engine + types) and `docs/`, so the root only holds docker-compose.yml and the README. (Earlier the client sat at the repo root.)
 - 2026-10-03: MongoDB via Mongoose for the backend (overrides the earlier "no ORM" line in rules.md).
 - 2026-08-02: Phase B backend language locked to **Node.js**. Reason: keeps the whole stack in TypeScript, and Zod schemas/types from Phase A can be shared with the backend instead of ported to a second language.
 - 2026-08-02: Phase B local storage stays on **IndexedDB/Dexie** (no move to SQLite). Reason: PRD's Phase A non-goals rule out a native app — PWA only — and SQLite would require a native/Capacitor shell for filesystem access, which contradicts that. Staying on Dexie also preserves the Phase A `db.ts` investment instead of rewriting it for Phase B.

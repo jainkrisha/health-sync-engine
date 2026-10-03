@@ -13,7 +13,7 @@
     "noUnusedParameters": true,
     "verbatimModuleSyntax": true,
     "baseUrl": ".",
-    "paths": { "@shared/*": ["../shared/*"] }
+    "paths": { "@shared/*": ["../shared/*"], "vitest": ["./node_modules/vitest"] }
   },
   "include": ["src", "__tests__", "../shared"]
 }
