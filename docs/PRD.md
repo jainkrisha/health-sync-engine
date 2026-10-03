@@ -20,14 +20,14 @@ Two devices edit the same patient record while both are offline. When they recon
 
 ## 4. Scope by Phase
 
-### Phase A — Local-first CRUD shell (current phase, "Week 1")
+### Phase A — Local-first CRUD shell ("Week 1", complete)
 - Installable PWA, works fully offline (no network calls for app shell or data)
 - Local browser storage (IndexedDB via Dexie.js) as the on-device store
 - Full CRUD on patient records: add, view, list, search, edit, delete
 - Dummy/stub auth (no real backend auth yet)
 - No sync, no multi-device merge, no vector clocks yet — this phase proves the offline CRUD experience only
 
-### Phase B — Sync & Conflict Resolution (later phase, not yet started)
+### Phase B — Sync & Conflict Resolution (implemented, see Final_Project_Task_Split and docs/Architecture.md)
 - Vector clock stamping on every field-level write
 - Field-level CRDT resolution:
   - LWW-Register for simple fields (name, blood type, DOB)
@@ -35,10 +35,13 @@ Two devices edit the same patient record while both are offline. When they recon
   - Critical-field flag (medication dosage and similar) — never auto-resolved, always routed to human review
 - Backend sync service: accepts deltas from devices, runs the merge engine against canonical state, returns accepted / conflict-flagged / server-has-newer
 - Append-only audit trail (`change_log`) recording every merge decision
-- Minimal dashboard surfacing flagged conflicts for human review
+- Conflict Review dashboard surfacing flagged conflicts for human review
+- Real authentication (JWT) with roles: health_worker, clinical_reviewer, admin, auditor
+- Client-side AES-256-GCM encryption of data at rest
+- Expanded record: gender, contact number, allergy severity/reaction, medication frequency and dates, vitals history
+- Docker Compose deployment (MongoDB + server + client)
 
 ### Explicit non-goals (do not build unless this document is updated)
-- Real authentication / user management beyond a stub
 - Multi-tenant or multi-clinic support
 - Any field auto-resolution for medication dosage or other flagged critical fields
 - A native mobile app (PWA only)

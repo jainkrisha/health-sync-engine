@@ -37,7 +37,7 @@ function ValuePanel({
   tone: 'a' | 'b';
 }) {
   return (
-    <div className={`rounded-lg border p-4 ${tone === 'a' ? 'border-medical-200 bg-medical-50/50 dark:border-medical-900 dark:bg-medical-950/20' : 'border-violet-200 bg-violet-50/50 dark:border-violet-900 dark:bg-violet-950/20'}`}>
+    <div className={`rounded-lg border p-4 ${tone === 'a' ? 'border-sky-200 bg-sky-50/60 dark:border-sky-900 dark:bg-sky-950/30' : 'border-violet-200 bg-violet-50/50 dark:border-violet-900 dark:bg-violet-950/20'}`}>
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{title}</p>
       <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{describe(value)}</p>
       <dl className="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">

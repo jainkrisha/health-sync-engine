@@ -7,7 +7,7 @@ Update this file at the end of every work session, before switching tools or cha
 ---
 
 ## Current Phase
-Phase A — local-first CRUD shell (scaffolding complete; page implementations not yet started)
+Full build complete on branch `feature/full-build` (2026-10-03): server, sync, CRDT merge, conflict review, RBAC, encryption, audit trail, Docker. See README.md and docs/Architecture.md.
 
 ## Completed
 
@@ -43,8 +43,20 @@ _(none — `routes.tsx` and `App.tsx` wiring done 2026-08-03 at user request; `T
 ## Open Decisions
 _(none currently open)_
 
+## Full build (2026-10-03)
+- `shared/`: vector clocks, merge engine (LWW / OR-Set allergies / critical medications / G-Set vitals), materialize, form diff + three-way rebase. 28 unit tests.
+- `server/`: Express 5 + Socket.io + Mongoose. Server is the merge authority (syncService). 15 API tests.
+- Client: encrypted Dexie store (`patients {base, local}`, `outbox`), syncEngine (socket push/pull, reconnect), JWT auth, RBAC, pages for patients, patient detail, conflict review, audit trail, admin, dashboard chart, dark mode. `?device=B` gives a second simulated device.
+- e2e: `e2e/two-devices.spec.ts` (concurrent offline edits → merge + review) and `e2e/offline.spec.ts` (real offline on the production build).
+
 ## Decisions Log
 _(record each decision once made, with a one-line reason — e.g. "2026-08-02: Locked Phase A stack to React+Vite+TS+Dexie per Week 1 Task Split doc.")_
+- 2026-10-03: **Conflicts are merged on the server** (server-side merge engine), not only on the client as the task split suggested. Reason: matches the SRS/presentation architecture and gives one canonical record; the same engine runs on devices for optimistic local edits.
+- 2026-10-03: **Allergies can be removed** by explicit user action (OR-Set tombstones of observed tags); a concurrent add or update on another device always wins.
+- 2026-10-03: **Medications are reviewed per medication**, and only when two devices change the same medication's dose/frequency/active state concurrently with different values. New medications and date-only edits never need review.
+- 2026-10-03: Patient model **expanded** toward the UML: gender, contact number, allergy severity/reaction, medication frequency/start/end, vitals history (with respiratory rate and SpO2).
+- 2026-10-03: Client stays at the repo root; backend in `/server`; shared code in `/shared`.
+- 2026-10-03: MongoDB via Mongoose for the backend (overrides the earlier "no ORM" line in rules.md).
 - 2026-08-02: Phase B backend language locked to **Node.js**. Reason: keeps the whole stack in TypeScript, and Zod schemas/types from Phase A can be shared with the backend instead of ported to a second language.
 - 2026-08-02: Phase B local storage stays on **IndexedDB/Dexie** (no move to SQLite). Reason: PRD's Phase A non-goals rule out a native app — PWA only — and SQLite would require a native/Capacitor shell for filesystem access, which contradicts that. Staying on Dexie also preserves the Phase A `db.ts` investment instead of rewriting it for Phase B.
 - 2026-08-03: Confirmed Phase A tech stack locked — React 18 + Vite + TypeScript + TailwindCSS v3 + React Router v6 + Dexie.js + React Hook Form + Zod + vite-plugin-pwa. No additional state management libraries permitted (no Redux, Zustand, Jotai). No UI component libraries beyond Tailwind (no MUI, Chakra, Ant Design).
@@ -54,6 +66,10 @@ _(record each decision once made, with a one-line reason — e.g. "2026-08-02: L
 - 2026-08-03: **Diagnosis — pages appeared unchanged in browser.** Root cause was NOT missing file writes — `PatientList.tsx` (506 lines) and `Dashboard.tsx` (258 lines) both exist on disk with full content and are untracked (`git status` confirmed). Root cause: `routes.tsx` defines its own inline `PatientList` and `Dashboard` stub components and never imports from the page files Person B created. Files on disk are correct; wiring is Person A's action item. Lesson: always verify `git status` and `routes.tsx` import graph before assuming a file write failed.
 - 2026-08-03: **Final compliance check (pre-PR) —** 8/8 checks passed after fixes. One real rules.md §5 violation found and fixed: `void refetch()` on mount in `usePatients.ts` was silently swallowing `getAllPatients()` failures. Fixed by adding a real `catch` block that sets `error` state; both `Dashboard.tsx` and `PatientList.tsx` now surface it via `useToast()`. One minor type fix: `JSX.IntrinsicElements` in `Card.tsx` replaced with `ElementType` from react (explicit import, no global namespace reliance). All other checks clean: zero network calls, zero Phase B code, zero banned libraries, zero allergy/dosage mutation logic, zero invented Patient fields, zero console.logs, zero `any` types. Branch is ready for PR into main.
 
-## Next Steps
+## Next Steps (as of 2026-10-03)
+- Review and merge `feature/full-build` into main; run `docker compose up --build` on a team machine (Docker was not available in the build environment).
+- Rehearse docs/DEMO.md.
+
+## Older next steps (Phase A, done)
 - **Person B:** `git add` + `git commit` all untracked/modified files, then `git push origin main` (or open PR from main if working directly on it). Files to stage: `src/components/`, `src/pages/Dashboard/Dashboard.tsx`, `src/pages/PatientList/PatientList.tsx`, `src/hooks/usePatients.ts`, `memory.md`, `src/index.css`, `src/routes.tsx`, `src/App.tsx`.
 - **Person C:** implement `PatientFormPage.tsx` (add/edit form using React Hook Form + Zod schema). Can use `useToast()` from `src/components/Toast.tsx` directly. Apply ConfirmDialog focus-trap pattern from PatientList if any modals are needed.
