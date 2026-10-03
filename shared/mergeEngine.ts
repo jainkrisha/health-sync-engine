@@ -131,6 +131,7 @@ type LwwResult<T> = {
   register: LWWRegister<T>;
   outcome: 'applied' | 'kept_existing' | 'duplicate';
   reason: string;
+  concurrent: boolean;
 };
 
 /**
@@ -141,7 +142,7 @@ type LwwResult<T> = {
 export function applyLww<T>(current: LWWRegister<T>, write: RegisterWrite<T>): LwwResult<T> {
   const order = compare(write.clock, current.clock);
   if (order === 'after') {
-    return { register: { ...write }, outcome: 'applied', reason: 'newer write' };
+    return { register: { ...write }, outcome: 'applied', reason: 'newer write', concurrent: false };
   }
   if (order === 'equal' || order === 'before') {
     const duplicate = order === 'equal' && sameValue(write.value, current.value);
@@ -149,6 +150,7 @@ export function applyLww<T>(current: LWWRegister<T>, write: RegisterWrite<T>): L
       register: current,
       outcome: duplicate ? 'duplicate' : 'kept_existing',
       reason: duplicate ? 'already applied' : 'older write, the stored value is newer',
+      concurrent: false,
     };
   }
   // concurrent
@@ -158,6 +160,7 @@ export function applyLww<T>(current: LWWRegister<T>, write: RegisterWrite<T>): L
       register: { ...current, clock: merged },
       outcome: 'kept_existing',
       reason: 'concurrent write with the same value',
+      concurrent: true,
     };
   }
   const incomingWins =
@@ -168,12 +171,14 @@ export function applyLww<T>(current: LWWRegister<T>, write: RegisterWrite<T>): L
       register: { ...write, clock: merged },
       outcome: 'applied',
       reason: 'concurrent edit, kept the incoming value (newer timestamp)',
+      concurrent: true,
     };
   }
   return {
     register: { ...current, clock: merged },
     outcome: 'kept_existing',
     reason: 'concurrent edit, kept the stored value (newer timestamp)',
+      concurrent: true,
   };
 }
 
@@ -204,6 +209,7 @@ function applyScalar<F extends ScalarField>(
         ? `${label}: resolved via Last-Write-Wins, set to ${kept} (${result.reason}).`
         : `${label}: resolved via Last-Write-Wins, kept ${kept} (${result.reason}).`,
     finalValue: result.register.value,
+    concurrent: result.concurrent,
   };
 }
 
@@ -240,6 +246,7 @@ function applyAllergy(doc: PatientDoc, payload: AllergyPayload, m: Mutation): Me
       outcome: !wasPresent ? 'applied' : details.outcome === 'applied' ? 'applied' : 'merged',
       report,
       finalValue: element.details.value,
+      concurrent: details.concurrent,
     };
   }
 
@@ -252,6 +259,7 @@ function applyAllergy(doc: PatientDoc, payload: AllergyPayload, m: Mutation): Me
       outcome: 'kept_existing',
       report: `Allergies: remove of "${payload.allergen}" ignored, it was never recorded here.`,
       finalValue: null,
+      concurrent: false,
     };
   }
   const observed = payload.observedTags.filter((t) => existing.addTags.includes(t));
@@ -265,6 +273,7 @@ function applyAllergy(doc: PatientDoc, payload: AllergyPayload, m: Mutation): Me
       outcome: 'merged',
       report: `Allergies: remove of "${name}" did not apply because another device added or updated it concurrently (add-wins, never-lose rule).`,
       finalValue: existing.details.value,
+      concurrent: true,
     };
   }
   return {
@@ -274,6 +283,7 @@ function applyAllergy(doc: PatientDoc, payload: AllergyPayload, m: Mutation): Me
     outcome: 'applied',
     report: `Allergies: "${name}" removed by explicit user action.`,
     finalValue: null,
+    concurrent: false,
   };
 }
 
@@ -315,6 +325,7 @@ function applyMedication(
       outcome: result.outcome,
       report: `Medications: "${element.name}" schedule dates resolved via Last-Write-Wins (${result.reason}).`,
       finalValue: element.details.value,
+      concurrent: result.concurrent,
     };
   }
 
@@ -342,6 +353,7 @@ function applyMedication(
       outcome: 'applied',
       report: `Medications: "${element.name}" ${action} (sequential edit, no conflict).`,
       finalValue: incoming,
+      concurrent: false,
     };
   }
 
@@ -353,6 +365,7 @@ function applyMedication(
       outcome: order === 'equal' && sameValue(incoming, current.value) ? 'duplicate' : 'kept_existing',
       report: `Medications: "${element.name}" incoming change was older than the stored value, kept ${describe(current.value)}.`,
       finalValue: current.value,
+      concurrent: false,
     };
   }
 
@@ -366,6 +379,7 @@ function applyMedication(
       outcome: 'merged',
       report: `Medications: "${element.name}" concurrent edits agree on ${describe(incoming)}, no review needed.`,
       finalValue: current.value,
+      concurrent: true,
     };
   }
 
@@ -379,6 +393,7 @@ function applyMedication(
       outcome: 'applied',
       report: `Medications: "${element.name}" changed locally, awaiting server check.`,
       finalValue: incoming,
+      concurrent: true,
     };
   }
 
@@ -407,6 +422,7 @@ function applyMedication(
     outcome: 'conflict',
     report: `Medications: "${element.name}" conflict detected (${describe(current.value)} vs ${describe(incoming)}), awaiting manual review.`,
     finalValue: current.value,
+    concurrent: true,
   };
 }
 
@@ -420,6 +436,7 @@ function applyVital(doc: PatientDoc, payload: VitalsPayload): MergeDecision {
       outcome: 'duplicate',
       report: 'Vitals: reading already recorded.',
       finalValue: reading,
+      concurrent: false,
     };
   }
   doc.vitals[reading.id] = { ...reading };
@@ -430,6 +447,7 @@ function applyVital(doc: PatientDoc, payload: VitalsPayload): MergeDecision {
     outcome: 'merged',
     report: `Vitals: new reading from ${reading.recordedAt.slice(0, 16).replace('T', ' ')} added to history (readings are never overwritten).`,
     finalValue: reading,
+    concurrent: false,
   };
 }
 
@@ -485,6 +503,7 @@ export function applyMutation(
         ? `Patient record "${p.name}" already existed, creation merged field by field.`
         : `Patient record "${p.name}" created with ${p.allergies.length} allergies, ${p.medications.length} medications and ${p.vitals.length} vital readings.`,
       finalValue: { name: p.name },
+      concurrent: false,
     });
   } else if (m.operation === 'delete') {
     const result = applyLww(doc.deleted, writeFrom(m, true));
@@ -498,6 +517,7 @@ export function applyMutation(
           ? 'Patient record archived (soft delete, history is kept).'
           : `Patient delete not applied (${result.reason}).`,
       finalValue: doc.deleted.value,
+      concurrent: result.concurrent,
     });
   } else {
     const field = m.field;
@@ -561,6 +581,7 @@ export function resolveMedicationConflict(
       outcome: 'resolved',
       report: `Medications: "${element.name}" conflict resolved by a reviewer, ${describe(previous)} -> ${describe(element.critical.value)}.`,
       finalValue: element.critical.value,
+      concurrent: false,
     },
   };
 }
