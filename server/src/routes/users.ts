@@ -34,6 +34,7 @@ devicesRouter.get('/', async (_req, res) => {
       deviceName: d.deviceName,
       userId: d.userId,
       username: d.username,
+      facility: d.facility ?? '',
       lastSyncAt: d.lastSyncAt,
       online: online.has(d._id),
     })),

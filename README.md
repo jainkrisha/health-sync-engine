@@ -21,6 +21,7 @@ Every decision (automatic or manual) is written to an append-only audit trail.
 - **Vector clocks** on every field to tell genuine conflicts from stale writes.
 - **Conflict Review dashboard** for clinical reviewers: both values side by side with device and clock, keep A, keep B, or enter a corrected dose.
 - **Audit Trail**: filter by patient, date range, automatic vs manual; read-only.
+- **Two sign-in portals**: **PHC** for the local doctor at a Primary Health Centre (full offline support, data syncs when the network returns) and **Admin** for the central system at the district hospital (every PHC's records, conflict review, audit trail, users and devices). An account only opens in its own portal.
 - **JWT auth with 4 roles** (health worker, clinical reviewer, admin, auditor) enforced on the server and in the UI.
 - **Admin page**: change user roles, see registered devices and who is online.
 - **Dashboard**: synced vs pending chart, auto-resolution rate, system stats.
@@ -64,7 +65,13 @@ npm run server:dev             # API + sync on http://localhost:4000
 npm run dev                    # PWA on http://localhost:5173 (proxies /api and /socket.io)
 ```
 
-Demo logins after seeding (password `password123`): `admin`, `worker1`, `worker2`, `reviewer`, `auditor`. The seed includes one pending medication conflict on Asha Patil.
+Demo logins after seeding (password `password123`):
+
+| Portal | Accounts |
+|---|---|
+| PHC | `worker1` (PHC Wagholi), `worker2` (PHC Lonikand) |
+| Admin (District Hospital) | `admin`, `reviewer`, `auditor` |
+ The seed includes one pending medication conflict on Asha Patil.
 
 ### Environment variables (server)
 

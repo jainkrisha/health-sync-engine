@@ -6,7 +6,7 @@
 import { expect, test } from '@playwright/test';
 
 const run = Date.now().toString(36);
-const user = { username: `e2e_off_${run}`, name: 'Offline Worker', role: 'health_worker', password: 'password123' };
+const user = { username: `e2e_off_${run}`, name: 'Offline Worker', role: 'health_worker', portal: 'phc', facility: 'PHC Offline Test', password: 'password123' };
 
 test('records can be created and read with no network, then sync', async ({ browser, request }) => {
   expect((await request.post('/api/auth/register', { data: user })).status()).toBe(201);
@@ -22,8 +22,9 @@ test('records can be created and read with no network, then sync', async ({ brow
 
   await page.getByLabel('Username').fill(user.username);
   await page.getByLabel('Password').fill(user.password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'Synced' })).toBeVisible();
+  await page.getByRole('radio', { name: /^PHC/ }).check({ force: true });
+  await page.getByRole('button', { name: 'Sign in to PHC' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
 
   await context.setOffline(true);
   await page.reload();

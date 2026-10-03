@@ -15,22 +15,25 @@ const users = {
 };
 const patientName = `E2E Patient ${run}`;
 
-async function device(browser: Browser, user: { username: string }): Promise<Page> {
+async function device(browser: Browser, user: { username: string; role: string }): Promise<Page> {
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('/');
+  // Health workers sign in at their PHC; everyone else uses the district hospital's central system.
+  const portal = user.role === 'health_worker' ? /^PHC/ : /^Admin/;
+  await page.getByRole('radio', { name: portal }).check({ force: true });
   await page.getByLabel('Username').fill(user.username);
   await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('button', { name: user.role === 'health_worker' ? 'Sign in to PHC' : 'Sign in to district system' }).click();
   await expect(page).toHaveURL(/dashboard/);
-  await expect(page.getByRole('status').filter({ hasText: 'Synced' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
   return page;
 }
 
 async function setOffline(page: Page, offline: boolean) {
   const toggle = page.getByLabel('Simulate offline');
   if ((await toggle.isChecked()) !== offline) await toggle.click({ force: true });
-  await expect(page.getByRole('status').filter({ hasText: offline ? 'Offline' : 'Synced' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: offline ? 'Offline' : 'Synced' }).first()).toBeVisible();
 }
 
 async function openPatient(page: Page) {

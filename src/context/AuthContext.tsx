@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { api } from '../api/client';
 import { getSession, onSessionChange, setSession, type Session } from '../lib/authStore';
-import type { PublicUser, Role } from '@shared/types';
+import type { Portal, PublicUser, Role } from '@shared/types';
 
 interface AuthResponse {
   token: string;
@@ -14,6 +14,9 @@ export interface RegisterInput {
   name: string;
   password: string;
   role: Role;
+  portal: Portal;
+  /** PHC name; the server fills in the district hospital for district accounts. */
+  facility?: string;
 }
 
 interface AuthContextType {
@@ -21,7 +24,7 @@ interface AuthContextType {
   role: Role | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, portal?: Portal) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
 }
@@ -33,8 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => onSessionChange(setState), []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const res = await api<AuthResponse>('/auth/login', { method: 'POST', body: { username, password } });
+  const login = useCallback(async (username: string, password: string, portal?: Portal) => {
+    const res = await api<AuthResponse>('/auth/login', { method: 'POST', body: { username, password, portal } });
     setSession({ token: res.token, user: res.user });
   }, []);
 

@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import { buildCreateMutation, buildUpdateMutations, type MutationContext, type PatientInput } from '@shared/diff';
 import { materialize } from '@shared/materialize';
-import type { PatientDoc, Role } from '@shared/types';
+import { DISTRICT_FACILITY, type PatientDoc, type Role } from '@shared/types';
 import { connectDb, disconnectDb } from './db';
 import { config } from './config';
 import { User } from './models/User';
@@ -21,12 +21,12 @@ import type { AuthUser } from './middleware/auth';
 
 const DEMO_PASSWORD = 'password123';
 
-const demoUsers: { username: string; name: string; role: Role }[] = [
-  { username: 'admin', name: 'Admin User', role: 'admin' },
-  { username: 'worker1', name: 'Priya (Field Worker)', role: 'health_worker' },
-  { username: 'worker2', name: 'Rahul (Field Worker)', role: 'health_worker' },
-  { username: 'reviewer', name: 'Dr. Mehta (Reviewer)', role: 'clinical_reviewer' },
-  { username: 'auditor', name: 'Audit Officer', role: 'auditor' },
+const demoUsers: { username: string; name: string; role: Role; facility: string }[] = [
+  { username: 'admin', name: 'Admin User', role: 'admin', facility: DISTRICT_FACILITY },
+  { username: 'worker1', name: 'Dr. Priya (PHC Wagholi)', role: 'health_worker', facility: 'PHC Wagholi' },
+  { username: 'worker2', name: 'Dr. Rahul (PHC Lonikand)', role: 'health_worker', facility: 'PHC Lonikand' },
+  { username: 'reviewer', name: 'Dr. Mehta (Reviewer)', role: 'clinical_reviewer', facility: DISTRICT_FACILITY },
+  { username: 'auditor', name: 'Audit Officer', role: 'auditor', facility: DISTRICT_FACILITY },
 ];
 
 const patients: PatientInput[] = [
@@ -115,7 +115,7 @@ async function main() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
   for (const u of demoUsers) {
     const doc = await User.create({ ...u, passwordHash });
-    created[u.username] = { userId: doc._id, username: u.username, name: u.name, role: u.role };
+    created[u.username] = { userId: doc._id, username: u.username, name: u.name, role: u.role, facility: u.facility };
   }
 
   const worker1 = created.worker1;
@@ -130,7 +130,7 @@ async function main() {
     await processMutations([buildCreateMutation(id, p, ctx(deviceA, worker1, 600 - i * 10))], {
       user: worker1,
       clientId: deviceA,
-      deviceName: 'Clinic tablet A',
+      deviceName: 'PHC Wagholi tablet',
     });
   }
 
@@ -156,8 +156,8 @@ async function main() {
     },
     ctx(deviceB, worker2, 90),
   );
-  await processMutations(fromA, { user: worker1, clientId: deviceA, deviceName: 'Clinic tablet A' });
-  await processMutations(fromB, { user: worker2, clientId: deviceB, deviceName: 'Field phone B' });
+  await processMutations(fromA, { user: worker1, clientId: deviceA, deviceName: 'PHC Wagholi tablet' });
+  await processMutations(fromB, { user: worker2, clientId: deviceB, deviceName: 'PHC Lonikand tablet' });
 
   console.log(`Seeded ${demoUsers.length} users and ${patients.length} patients (1 pending medication conflict).`);
   console.log(`Demo logins (password "${DEMO_PASSWORD}"): ${demoUsers.map((u) => `${u.username} [${u.role}]`).join(', ')}`);

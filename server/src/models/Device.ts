@@ -6,6 +6,7 @@ const deviceSchema = new Schema(
     deviceName: { type: String, default: 'Unknown device' },
     userId: { type: String, required: true },
     username: { type: String, required: true },
+    facility: { type: String, default: '' },
     lastSyncAt: { type: String, required: true },
   },
   { versionKey: false },

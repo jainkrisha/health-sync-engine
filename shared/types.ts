@@ -29,11 +29,43 @@ export const WRITE_ROLES: Role[] = ['health_worker', 'clinical_reviewer', 'admin
 export const REVIEW_ROLES: Role[] = ['clinical_reviewer', 'admin'];
 export const AUDIT_ROLES: Role[] = ['auditor', 'admin'];
 
+// ---------------------------------------------------------------------------
+// Portals: where a user signs in from
+// ---------------------------------------------------------------------------
+
+/**
+ * phc:      a Primary Health Centre. The local doctor or health worker records
+ *           patients on a device that keeps working with no network.
+ * district: the central system at the district hospital. Administrators (and the
+ *           reviewers and auditors who work there) see every PHC's data, resolve
+ *           conflicts and read the audit trail.
+ */
+export const PORTALS = ['phc', 'district'] as const;
+export type Portal = (typeof PORTALS)[number];
+
+export const PORTAL_LABELS: Record<Portal, string> = {
+  phc: 'PHC',
+  district: 'Admin (District Hospital)',
+};
+
+export const PORTAL_ROLES: Record<Portal, Role[]> = {
+  phc: ['health_worker'],
+  district: ['admin', 'clinical_reviewer', 'auditor'],
+};
+
+export const DISTRICT_FACILITY = 'District Hospital';
+
+export function portalForRole(role: Role): Portal {
+  return PORTAL_ROLES.phc.includes(role) ? 'phc' : 'district';
+}
+
 export interface PublicUser {
   id: string;
   username: string;
   name: string;
   role: Role;
+  /** The PHC (or the district hospital) this account belongs to. */
+  facility: string;
   createdAt: string;
 }
 
@@ -355,6 +387,7 @@ export interface DeviceInfo {
   deviceName: string;
   userId: string;
   username: string;
+  facility: string;
   lastSyncAt: string;
   online: boolean;
 }

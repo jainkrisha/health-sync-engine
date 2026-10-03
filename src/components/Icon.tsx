@@ -28,6 +28,8 @@ const paths = {
   lock: 'M19 11H5a2 2 0 00-2 2v7a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2zM7 11V7a5 5 0 0110 0v4',
   git: 'M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9',
   activity: 'M22 12h-4l-3 9L9 3l-3 9H2',
+  clinic: 'M3 10l9-7 9 7v11H3V10zM12 11v6M9 14h6',
+  hospital: 'M3 21h18M5 21V7l7-4 7 4v14M12 7v4M10 9h4M9 21v-5h6v5',
 } as const;
 
 export type IconName = keyof typeof paths;

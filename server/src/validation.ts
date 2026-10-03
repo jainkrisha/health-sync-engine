@@ -4,7 +4,7 @@
  * payload is rejected before it reaches the merge engine.
  */
 import { z } from 'zod';
-import { ALLERGY_SEVERITIES, BLOOD_TYPES, GENDERS, ROLES } from '@shared/types';
+import { ALLERGY_SEVERITIES, BLOOD_TYPES, GENDERS, PORTALS, ROLES } from '@shared/types';
 
 const id = z.string().min(1).max(100);
 const shortText = z.string().max(200);
@@ -109,11 +109,15 @@ export const registerSchema = z.object({
   name: z.string().trim().min(1).max(80).optional(),
   password: z.string().min(6).max(200),
   role: z.enum(ROLES),
+  portal: z.enum(PORTALS).optional(),
+  facility: z.string().trim().max(80).optional(),
 });
 
 export const loginSchema = z.object({
   username: z.string().trim().min(1).max(40),
   password: z.string().min(1).max(200),
+  /** The portal picked on the sign-in screen. Optional so API clients and tests can omit it. */
+  portal: z.enum(PORTALS).optional(),
 });
 
 const criticalValue = z.object({ dosage: shortText, frequency: shortText, active: z.boolean() });

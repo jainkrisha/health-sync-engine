@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { portalForRole } from '@shared/types';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/RBAC';
 import { useTheme } from '../context/ThemeContext';
@@ -66,7 +67,9 @@ export function Layout() {
           <img src="/favicon.svg" alt="" className="h-8 w-8" />
           <div>
             <span className="block text-lg font-bold tracking-wide text-white">HealthSync</span>
-            <span className="block text-[11px] text-slate-400">{deviceLabel}</span>
+            <span className="block text-[11px] text-slate-400">
+              {user && portalForRole(user.role) === 'district' ? 'District central system' : 'PHC'} · {deviceLabel}
+            </span>
           </div>
           <button className="ml-auto rounded p-1 hover:bg-slate-800 lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Close menu">
             <Icon name="x" />
@@ -100,6 +103,7 @@ export function Layout() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+                <p className="truncate text-xs text-slate-400">{user.facility}</p>
                 <RoleBadge role={user.role} />
               </div>
             </div>
