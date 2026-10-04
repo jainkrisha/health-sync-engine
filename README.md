@@ -1,5 +1,23 @@
 # HealthSync Engine
 
+## Quick start
+
+Needs [Docker Desktop](https://www.docker.com/products/docker-desktop/) running.
+
+```bash
+docker compose up --build -d                     # start MongoDB, server, app
+docker compose exec server node dist/seed.js     # demo data (once)
+```
+
+Open **http://localhost:8080**. Password for every demo account: `password123`.
+
+| Pass | IDs |
+|---|---|
+| PHC | `worker1` … `worker5` |
+| Admin | `admin`, `reviewer`, `auditor` |
+
+Stop: `docker compose down` · Reset demo data: `docker compose exec server node dist/seed.js --reset`
+
 An offline-first, conflict-resolving health record system for field health workers (rural clinics, home visits, mobile health camps, disaster response). Group 17 mini project.
 
 Every device is a full Progressive Web App that keeps patient records encrypted on the device and works with no network. When devices reconnect, their edits sync through a Node.js server that merges them **field by field** using vector clocks and CRDT rules:
@@ -71,7 +89,7 @@ Demo logins after seeding (password `password123`):
 
 | Portal | Accounts |
 |---|---|
-| PHC | `worker1` (PHC Wagholi), `worker2` (PHC Lonikand) |
+| PHC | `worker1` (PHC Wagholi), `worker2` (PHC Lonikand), `worker3`–`worker5` (Hadapsar, Uruli Kanchan, Khed) |
 | Admin (District Hospital) | `admin`, `reviewer`, `auditor` |
  The seed includes one pending medication conflict on Asha Patil.
 
