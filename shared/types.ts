@@ -358,6 +358,14 @@ export interface HistoryCommit {
   decisions: AuditEntry[];
 }
 
+export interface HistoryPatient {
+  id: string;
+  name: string;
+  commits: number;
+  devices: number;
+  openConflicts: number;
+}
+
 export interface PatientHistory {
   patientName: string;
   commits: HistoryCommit[];
@@ -383,6 +391,8 @@ export interface PushResponse {
 export interface PullResponse {
   patients: PatientDoc[];
   serverSeq: number;
+  /** Changes when the server's database is reset. */
+  epoch?: number;
 }
 
 export const SOCKET_EVENTS = {

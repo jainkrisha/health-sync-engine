@@ -24,8 +24,13 @@ import { API_BASE } from '../api/client';
 import { getSession, onSessionChange } from '../lib/authStore';
 import { deviceLabel, getClientId, profileKey } from '../lib/deviceProfile';
 import { getMeta, setMeta } from '../db/db';
-import { countPending, getPendingMutations, markMutationResults, pruneOutbox } from '../db/mutationLog';
-import { applyServerDocs } from '../db/patientRepo';
+import {
+  countPending,
+  getPendingMutations,
+  markMutationResults,
+  pruneOutbox,
+} from '../db/mutationLog';
+import { applyServerDocs, dropSyncedPatients } from '../db/patientRepo';
 import { onDataChanged } from '../lib/events';
 
 export type SyncStatus = 'offline' | 'connecting' | 'syncing' | 'idle' | 'error' | 'signed_out';
@@ -198,7 +203,11 @@ class SyncEngine {
       this.set({ connected: false, status: navigator.onLine ? 'connecting' : 'offline' });
     });
     socket.on('connect_error', (err: Error) => {
-      this.set({ connected: false, status: 'error', lastError: err.message || 'Cannot reach the sync server' });
+      this.set({
+        connected: false,
+        status: 'error',
+        lastError: err.message || 'Cannot reach the sync server',
+      });
     });
     socket.on(SOCKET_EVENTS.patientChanged, (data: { patient: PatientDoc }) => {
       void applyServerDocs([data.patient]);
@@ -221,7 +230,10 @@ class SyncEngine {
       for (;;) {
         const pending = (await getPendingMutations()).slice(0, BATCH_SIZE);
         if (pending.length === 0) break;
-        const response = await this.emitWithAck<PushResponse & { error?: string }>(SOCKET_EVENTS.push, { mutations: pending });
+        const response = await this.emitWithAck<PushResponse & { error?: string }>(
+          SOCKET_EVENTS.push,
+          { mutations: pending },
+        );
         if (response.error) throw new Error(response.error);
         await markMutationResults(response.results);
         await applyServerDocs(response.patients);
@@ -233,11 +245,25 @@ class SyncEngine {
       }
 
       // 2. Pull whatever else changed since our last pull.
-      const since = await getMeta<number>('lastServerSeq', 0);
-      const pulled = await this.emitWithAck<PullResponse & { error?: string }>(SOCKET_EVENTS.pull, { since });
+      let since = await getMeta<number>('lastServerSeq', 0);
+      let pulled = await this.emitWithAck<PullResponse & { error?: string }>(SOCKET_EVENTS.pull, {
+        since,
+      });
       if (pulled.error) throw new Error(pulled.error);
+      const knownEpoch = await getMeta<number | null>('serverEpoch', null);
+      // (A device that has never seen an epoch does one full refresh too.)
+      if (pulled.epoch !== undefined && pulled.epoch !== knownEpoch && since > 0) {
+        // The server's data was reset; our copies point at records that no longer exist.
+        await dropSyncedPatients();
+        since = 0;
+        pulled = await this.emitWithAck<PullResponse & { error?: string }>(SOCKET_EVENTS.pull, {
+          since,
+        });
+        if (pulled.error) throw new Error(pulled.error);
+      }
       await applyServerDocs(pulled.patients);
       await setMeta('lastServerSeq', pulled.serverSeq);
+      if (pulled.epoch !== undefined) await setMeta('serverEpoch', pulled.epoch);
 
       const now = new Date().toISOString();
       await setMeta('lastSyncedAt', now);
@@ -247,7 +273,8 @@ class SyncEngine {
         status: 'idle',
         lastSyncedAt: now,
         lastError: null,
-        lastPush: synced + conflicts + rejected > 0 ? { synced, conflicts, rejected } : this.state.lastPush,
+        lastPush:
+          synced + conflicts + rejected > 0 ? { synced, conflicts, rejected } : this.state.lastPush,
       });
     } catch (err) {
       this.set({ status: 'error', lastError: err instanceof Error ? err.message : 'Sync failed' });

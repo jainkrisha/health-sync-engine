@@ -11,7 +11,7 @@ import type { Mutation, Patient, PatientDoc } from '@shared/types';
 import { db } from './db';
 import { getDeviceKey } from '../crypto/deviceKey';
 import { decryptJson, encryptJson } from '../crypto/encryption';
-import { getPendingMutations, queueMutations } from './mutationLog';
+import { getPendingEntityIds, getPendingMutations, queueMutations } from './mutationLog';
 import { notifyDataChanged } from '../lib/events';
 import { Mutex } from '../lib/mutex';
 
@@ -91,6 +91,20 @@ export async function applyServerDocs(docs: PatientDoc[]): Promise<void> {
       for (const m of pending) local = applyMutation(local, m, localCtx).doc;
       await writeStored({ base: doc, local });
     }
+  });
+  notifyDataChanged();
+}
+
+/**
+ * The server's database was reset (its sequence went backwards): forget every
+ * synced copy, so the next full pull replaces them. Records with edits still
+ * waiting to sync are kept and will be pushed again.
+ */
+export async function dropSyncedPatients(): Promise<void> {
+  await writeLock.run(async () => {
+    const keep = await getPendingEntityIds();
+    const ids = (await db.patients.toCollection().primaryKeys()) as string[];
+    await db.patients.bulkDelete(ids.filter((id) => !keep.has(id)));
   });
   notifyDataChanged();
 }

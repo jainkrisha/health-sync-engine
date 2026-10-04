@@ -3,7 +3,7 @@
  * the server exposes no route to edit or delete entries and blocks it at the model.
  */
 import { useMemo, useState } from 'react';
-import type { AuditEntry, PatientHistory } from '@shared/types';
+import type { AuditEntry, HistoryPatient, PatientHistory } from '@shared/types';
 import { useApi } from '../../hooks/useApi';
 import { useSyncEngine } from '../../hooks/useSync';
 import { usePatients } from '../../hooks/usePatients';
@@ -31,9 +31,17 @@ export default function AuditTrail() {
   const [concurrentOnly, setConcurrentOnly] = useState(false);
   const [view, setView] = useState<View>('graph');
 
-  // The graph is drawn per patient; start with one that has a clash to show.
-  const graphPatient =
-    patientId || patients.find((p) => p.hasOpenConflicts)?.id || patients[0]?.id || '';
+  // The graph is drawn per patient, from the server's own list (a device copy can
+  // be out of date); it starts with the most contested record.
+  const graphList = useApi<{ patients: HistoryPatient[] }>(
+    connected && view === 'graph' ? '/audit-log/patients' : null,
+    connected,
+  );
+  const graphPatients = graphList.data?.patients ?? [];
+  const [graphPick, setGraphPick] = useState('');
+  const graphPatient = graphPatients.some((p) => p.id === graphPick)
+    ? graphPick
+    : (graphPatients[0]?.id ?? '');
   const history = useApi<PatientHistory>(
     connected && view === 'graph' && graphPatient ? `/audit-log/history/${graphPatient}` : null,
     connected,
@@ -126,12 +134,11 @@ export default function AuditTrail() {
               id="graph-patient"
               className="form-input"
               value={graphPatient}
-              onChange={(e) => setPatientId(e.target.value)}
+              onChange={(e) => setGraphPick(e.target.value)}
             >
-              {patients.map((p) => (
+              {graphPatients.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name}
-                  {p.hasOpenConflicts ? ' · conflict open' : ''}
+                  {`${p.name} · ${p.commits} edit${p.commits === 1 ? '' : 's'} from ${p.devices} tablet${p.devices === 1 ? '' : 's'}${p.openConflicts ? ' · conflict open' : ''}`}
                 </option>
               ))}
             </select>
@@ -142,8 +149,19 @@ export default function AuditTrail() {
       {view === 'graph' ? (
         !connected ? (
           <OfflineNotice message="The audit trail lives on the server. Connect to view it." />
-        ) : history.error ? (
-          <ErrorNotice message={`Could not load this patient's history: ${history.error}`} />
+        ) : graphList.error || history.error ? (
+          <ErrorNotice
+            message={`Could not load the history: ${graphList.error ?? history.error}`}
+          />
+        ) : graphList.data && graphPatients.length === 0 ? (
+          <div className="card">
+            <EmptyState
+              icon="git"
+              tone="slate"
+              title="No synced edits yet"
+              message="Patient edits appear here once a tablet syncs them."
+            />
+          </div>
         ) : !history.data || history.loading ? (
           <SkeletonRows rows={4} />
         ) : history.data.commits.length === 0 ? (

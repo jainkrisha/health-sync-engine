@@ -13,3 +13,12 @@ export async function currentSeq(name = 'patients'): Promise<number> {
   const doc = await Counter.findById(name).lean();
   return doc?.value ?? 0;
 }
+
+/**
+ * A random number fixed for the life of this database. It changes when the
+ * database is reset, which tells devices to drop their old copies.
+ */
+export async function dataEpoch(): Promise<number> {
+  const doc = await Counter.findOneAndUpdate({ _id: 'epoch' }, { $setOnInsert: { value: Math.floor(Math.random() * 2 ** 31) } }, { upsert: true, new: true });
+  return doc!.value;
+}
