@@ -57,6 +57,7 @@ export function Layout() {
   const allNav: NavItem[] = [
     { to: '/dashboard', label: 'Dashboard', short: 'Home', icon: 'dashboard', show: true },
     { to: '/patients', label: 'Patients', short: 'Patients', icon: 'patients', show: true },
+    { to: '/phcs', label: 'PHC library', short: 'PHCs', icon: 'clinic', show: Boolean(user && portalForRole(user.role) === 'district') },
     { to: '/conflicts', label: 'Conflict Review', short: 'Review', icon: 'alert', show: perms.canReviewConflicts, count: reviewCount },
     { to: '/audit', label: 'Audit Trail', short: 'Audit', icon: 'shield', show: perms.canViewAudit },
     { to: '/admin', label: 'Users & Devices', short: 'Users', icon: 'users', show: perms.isAdmin },

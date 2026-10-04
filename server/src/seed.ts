@@ -25,6 +25,9 @@ const demoUsers: { username: string; name: string; role: Role; facility: string 
   { username: 'admin', name: 'Admin User', role: 'admin', facility: DISTRICT_FACILITY },
   { username: 'worker1', name: 'Dr. Priya (PHC Wagholi)', role: 'health_worker', facility: 'PHC Wagholi' },
   { username: 'worker2', name: 'Dr. Rahul (PHC Lonikand)', role: 'health_worker', facility: 'PHC Lonikand' },
+  { username: 'worker3', name: 'Dr. Kavita (PHC Hadapsar)', role: 'health_worker', facility: 'PHC Hadapsar' },
+  { username: 'worker4', name: 'Dr. Imran (PHC Uruli Kanchan)', role: 'health_worker', facility: 'PHC Uruli Kanchan' },
+  { username: 'worker5', name: 'Nurse Sunita (PHC Khed)', role: 'health_worker', facility: 'PHC Khed' },
   { username: 'reviewer', name: 'Dr. Mehta (Reviewer)', role: 'clinical_reviewer', facility: DISTRICT_FACILITY },
   { username: 'auditor', name: 'Audit Officer', role: 'auditor', facility: DISTRICT_FACILITY },
 ];
