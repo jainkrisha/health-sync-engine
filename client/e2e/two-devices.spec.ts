@@ -154,6 +154,15 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   // The auditor sees the manual decision in the read-only trail.
   const auditor = await device(browser, users.auditor);
   await openMenuItem(auditor, 'Audit Trail');
+  // Branch graph: both tablets' doses side by side in the merge, with the reviewer's result.
+  await auditor.locator('#graph-patient').selectOption({ label: patientName });
+  const merge = auditor.locator('.bg-merge');
+  await expect(merge.getByText('850 mg', { exact: true })).toBeVisible();
+  await expect(merge.getByText('1000 mg', { exact: true })).toBeVisible();
+  await expect(merge.getByText(/Resolved by/)).toBeVisible();
+  await expect(auditor.locator('.bg-clash')).toHaveCount(2);
+  // The flat list still filters by resolution type.
+  await auditor.getByRole('tab', { name: 'All entries' }).click();
   await auditor.getByLabel('Resolution').selectOption('manual');
   await expect(auditor.getByText(/Confirmed with the doctor/).first()).toBeVisible();
   await expect(auditor.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);

@@ -201,6 +201,20 @@ describe('sync and merge', () => {
     expect(audit.body.entries[0].report).toMatch(/Checked with doctor/);
   });
 
+  it('returns the patient history with clocks, devices and the conflict', async () => {
+    const res = await request(server.app).get(`/api/audit-log/history/${patientId}`).set('Authorization', `Bearer ${tokens.auditor}`);
+    expect(res.status).toBe(200);
+    const commits = res.body.commits as { id: string; clientId: string; vectorClock: Record<string, number>; status: string }[];
+    expect(new Set(commits.map((c) => c.clientId))).toEqual(new Set(['dev-a', 'dev-b']));
+    expect(commits.every((c) => Object.keys(c.vectorClock).length > 0)).toBe(true);
+    const conflicts = res.body.conflicts as Conflict[];
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0]).toMatchObject({ status: 'resolved', currentClientId: 'dev-a', incomingClientId: 'dev-b' });
+    expect(commits.find((c) => c.id === conflicts[0].mutationId)?.status).toBe('resolved');
+    const worker = await request(server.app).get(`/api/audit-log/history/${patientId}`).set('Authorization', `Bearer ${tokens.worker1}`);
+    expect(worker.status).toBe(403);
+  });
+
   it('keeps the audit trail append-only', async () => {
     await expect(AuditEntryModel.updateOne({}, { $set: { report: 'tampered' } })).rejects.toThrow(/append-only/);
     await expect(AuditEntryModel.deleteMany({})).rejects.toThrow(/append-only/);

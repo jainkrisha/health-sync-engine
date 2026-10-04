@@ -340,6 +340,30 @@ export interface AuditEntry {
   timestamp: string;
 }
 
+/** One mutation in a patient's history, as the audit trail's branch graph draws it. */
+export interface HistoryCommit {
+  id: string;
+  clientId: string;
+  deviceName: string;
+  userName: string;
+  operation: MutationOperation;
+  field: MutationField | null;
+  payload: Mutation['payload'];
+  vectorClock: VectorClock;
+  /** When the device made the edit. */
+  timestamp: string;
+  /** When the server received it. */
+  receivedAt: string;
+  status: MutationStatus;
+  decisions: AuditEntry[];
+}
+
+export interface PatientHistory {
+  patientName: string;
+  commits: HistoryCommit[];
+  conflicts: Conflict[];
+}
+
 // ---------------------------------------------------------------------------
 // Sync wire protocol
 // ---------------------------------------------------------------------------
