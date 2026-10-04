@@ -5,6 +5,14 @@
  */
 import { expect, test, type Browser, type Page } from '@playwright/test';
 
+/** Desktop navigation is the card wheel: open it at the left edge, then pick a card. */
+async function openMenuItem(page: Page, name: string | RegExp) {
+  await page.mouse.move(2, 420);
+  const link = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name, exact: typeof name === 'string' });
+  await link.focus();
+  await page.keyboard.press('Enter');
+}
+
 const run = Date.now().toString(36);
 const password = 'password123';
 const users = {
@@ -39,7 +47,7 @@ async function setOffline(page: Page, offline: boolean) {
 }
 
 async function openPatient(page: Page) {
-  await page.getByRole('link', { name: 'Patients', exact: true }).click();
+  await openMenuItem(page, 'Patients');
   await page.getByRole('link', { name: new RegExp(patientName) }).first().click();
   await expect(page.getByRole('heading', { name: patientName })).toBeVisible();
 }
@@ -110,7 +118,7 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
 
   // A clinical reviewer resolves it with a corrected dose.
   const reviewer = await device(browser, users.reviewer);
-  await reviewer.getByRole('link', { name: /^Conflict Review/ }).click();
+  await openMenuItem(reviewer, 'Conflict Review');
   const card = reviewer.locator('article').filter({ hasText: patientName });
   await expect(card.getByText('850 mg · Twice daily').first()).toBeVisible();
   await expect(card.getByText('1000 mg · Twice daily').first()).toBeVisible();
@@ -145,7 +153,7 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
 
   // The auditor sees the manual decision in the read-only trail.
   const auditor = await device(browser, users.auditor);
-  await auditor.getByRole('link', { name: /^Audit Trail/ }).click();
+  await openMenuItem(auditor, 'Audit Trail');
   await auditor.getByLabel('Resolution').selectOption('manual');
   await expect(auditor.getByText(/Confirmed with the doctor/).first()).toBeVisible();
   await expect(auditor.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);

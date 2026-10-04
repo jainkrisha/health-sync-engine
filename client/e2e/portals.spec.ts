@@ -22,7 +22,7 @@ test('PHC and Admin passes at sign-in', async ({ page }) => {
   await phc.getByLabel('PHC name').fill('PHC Hadapsar');
   await phc.getByRole('button', { name: 'Create PHC account' }).click();
   await expect(page).toHaveURL(/dashboard/);
-  await expect(page.getByText('PHC Hadapsar').first()).toBeVisible();
+  await expect(page.getByText('PHC Hadapsar').filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);
   await page.getByRole('button', { name: /Sign out|Log out/ }).first().click();
 
@@ -40,7 +40,8 @@ test('PHC and Admin passes at sign-in', async ({ page }) => {
   await admin.locator('#pass-district-r-password').fill('password123');
   await admin.getByRole('button', { name: 'Create district account' }).click();
   await expect(page).toHaveURL(/dashboard/);
-  await expect(page.getByText('District Hospital').first()).toBeVisible();
-  await expect(page.getByRole('link', { name: /^Conflict Review/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /^Audit Trail/ })).toBeVisible();
+  await expect(page.getByText('District Hospital').filter({ visible: true }).first()).toBeVisible();
+  await page.mouse.move(2, 420); // the card wheel opens at the left edge
+  await expect(page.getByRole('link', { name: 'Conflict Review', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Audit Trail', exact: true })).toBeVisible();
 });

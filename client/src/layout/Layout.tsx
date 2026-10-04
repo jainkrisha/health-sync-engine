@@ -13,6 +13,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SyncStatus } from './SyncStatus';
 import { ScrollProgress, BackToTop } from './ScrollAids';
 import { deviceLabel } from '../lib/deviceProfile';
+import { NavWheel, type WheelItem } from './NavWheel';
 
 interface NavItem {
   to: string;
@@ -65,6 +66,22 @@ export function Layout() {
   const nav = allNav.filter((n) => n.show);
 
   const district = user && portalForRole(user.role) === 'district';
+
+  // Desktop: the card wheel. Each card says what is behind it in one line.
+  const LINES: Record<string, { line: string; color: string }> = {
+    '/dashboard': { line: "Today's numbers, sync activity and recent patients", color: '#2b3d55' },
+    '/patients': { line: 'Every record on this device, searchable', color: '#9a4022' },
+    '/patients/new': { line: 'Register a new patient, saved here first', color: '#c4612f' },
+    '/phcs': { line: 'Each PHC as a register on the shelf', color: '#4a7562' },
+    '/conflicts': { line: 'Dose clashes waiting for a clinician', color: '#7a3b3b' },
+    '/audit': { line: 'Every merge decision, append-only', color: '#5c4a24' },
+    '/admin': { line: 'Roles, accounts and syncing devices', color: '#3a4b5e' },
+  };
+  const wheelItems: WheelItem[] = [
+    ...nav.slice(0, 2),
+    ...(perms.canEditPatients ? [{ to: '/patients/new', label: 'Add patient', short: 'Add', icon: 'plus' as IconName, show: true }] : []),
+    ...nav.slice(2),
+  ].map((n) => ({ to: n.to, label: n.label, icon: n.icon, count: n.count, line: LINES[n.to].line, color: LINES[n.to].color }));
   const current = nav.find((n) => location.pathname.startsWith(n.to));
 
   const handleLogout = () => {
@@ -85,11 +102,11 @@ export function Layout() {
         <div className="fixed inset-0 z-drawer animate-overlay-in bg-slate-950/50 backdrop-blur-sm lg:hidden" onClick={() => setMenuOpen(false)} aria-hidden="true" />
       )}
 
-      {/* The column keeps the dark sidebar colour the full height of long pages; the panel inside stays pinned. */}
-      <div className="hidden w-64 flex-shrink-0 bg-slate-900 lg:block" aria-hidden="true" />
+      {/* Phones and tablets: a slide-in drawer. Desktop uses the card wheel instead. */}
       <aside
-        className={`fixed inset-y-0 left-0 z-drawer flex w-72 flex-col bg-slate-900 text-slate-300 shadow-pop transition-transform duration-300 ease-out
-          lg:w-64 lg:translate-x-0 lg:shadow-none ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-drawer flex w-72 flex-col bg-slate-900 text-slate-300 shadow-pop transition-transform duration-300 ease-out lg:hidden ${
+          menuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
         aria-label="Main navigation"
       >
         <div className="flex items-center gap-3 px-5 pb-5 pt-6">
@@ -167,10 +184,38 @@ export function Layout() {
             <button className="btn-icon -ml-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-expanded={menuOpen}>
               <Icon name="menu" className="h-5 w-5" />
             </button>
-            <img src="/favicon.svg" alt="" className="h-7 w-7 rounded-lg lg:hidden" />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900 dark:text-white lg:hidden">{current?.label ?? 'HealthSync'}</span>
-            <div className="ml-auto flex-shrink-0">
+            <img src="/favicon.svg" alt="" className="h-7 w-7 rounded-lg lg:h-8 lg:w-8" />
+            <span className="hidden flex-col leading-tight lg:flex">
+              <span className="text-[15px] font-bold tracking-tight text-slate-900 dark:text-white">HealthSync</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">{district ? 'District central system' : 'PHC'} · {deviceLabel}</span>
+            </span>
+            <span className="hidden h-6 w-px bg-slate-200 lg:mx-3 lg:block dark:bg-slate-700" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900 dark:text-white">{current?.label ?? 'HealthSync'}</span>
+            <div className="ml-auto flex flex-shrink-0 items-center gap-2">
               <SyncStatus />
+              {user && (
+                <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 lg:flex dark:border-slate-700">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 text-[11px] font-bold text-white" aria-hidden="true">
+                    {initials(user.name)}
+                  </span>
+                  <span className="hidden min-w-0 flex-col leading-tight xl:flex">
+                    <span className="max-w-[11rem] truncate text-xs font-semibold text-slate-900 dark:text-white">{user.name}</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">{user.facility}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="btn-icon"
+                    aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                    data-tip={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                  >
+                    <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
+                  </button>
+                  <button type="button" onClick={handleLogout} className="btn-icon" aria-label="Log out" data-tip="Log out" data-tip-pos="left">
+                    <Icon name="logout" className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <ScrollProgress />
@@ -238,6 +283,8 @@ export function Layout() {
           </li>
         </ul>
       </nav>
+
+      <NavWheel items={wheelItems} />
 
       <BackToTop />
 
