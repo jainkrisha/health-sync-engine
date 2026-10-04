@@ -28,7 +28,7 @@ export function SyncStatus() {
         : 'bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700';
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="flex flex-nowrap items-center justify-end gap-1.5 sm:gap-2">
       <div
         role="status"
         aria-live="polite"

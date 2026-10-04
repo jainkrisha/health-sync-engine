@@ -3,6 +3,7 @@
  * The server never auto-merges these; a clinical reviewer picks a value here.
  */
 import { useEffect, useState } from 'react';
+import { CaseRing } from './CaseRing';
 import { Link } from 'react-router-dom';
 import type { Conflict, ConflictChoice, MedicationCritical } from '@shared/types';
 import { compare } from '@shared/vectorClock';
@@ -82,7 +83,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
   };
 
   return (
-    <li className="relative">
+    <li className="relative scroll-mt-28" id={`conflict-${conflict.id}`}>
       <span className={`absolute -left-[33px] top-5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-slate-50 dark:ring-slate-950 ${pending ? 'bg-orange-500' : 'bg-teal-500'}`} aria-hidden="true" />
       <article className={`card overflow-hidden p-0 transition-shadow sm:p-0 ${open ? 'shadow-card-lg' : 'hover:shadow-card-hover'} ${pending ? 'border-l-4 border-l-orange-400 dark:border-l-orange-500' : ''}`}>
         <button
@@ -189,6 +190,26 @@ export default function ConflictDashboard() {
   );
 
   const conflicts = data?.conflicts ?? [];
+  // The ring also shows recently settled cases, so it is never a lonely tile.
+  const settled = useApi<{ conflicts: Conflict[] }>(connected ? '/conflicts?status=resolved' : null, connected);
+  const ringPending = tab === 'pending_review' ? conflicts : [];
+
+  const jumpTo = (c: Conflict) => {
+    const go = () => {
+      const el = document.getElementById(`conflict-${c.id}`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const card = el.querySelector('article');
+      card?.classList.remove('case-flash');
+      void (card as HTMLElement | null)?.offsetWidth;
+      card?.classList.add('case-flash');
+    };
+    const want = c.status === 'pending_review' ? 'pending_review' : 'resolved';
+    if (want !== tab) {
+      setTab(want);
+      setTimeout(go, 450);
+    } else go();
+  };
 
   return (
     <div>
@@ -201,6 +222,10 @@ export default function ConflictDashboard() {
           </button>
         }
       />
+
+      {connected && (ringPending.length > 0 || (settled.data?.conflicts.length ?? 0) > 0) && (
+        <CaseRing pending={ringPending} resolved={settled.data?.conflicts ?? []} onSelect={jumpTo} />
+      )}
 
       <div className="segmented mb-6" role="tablist" aria-label="Conflict status">
         {(['pending_review', 'resolved'] as const).map((t) => (

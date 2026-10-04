@@ -168,8 +168,8 @@ export function Layout() {
               <Icon name="menu" className="h-5 w-5" />
             </button>
             <img src="/favicon.svg" alt="" className="h-7 w-7 rounded-lg lg:hidden" />
-            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white lg:hidden">{current?.label ?? 'HealthSync'}</span>
-            <div className="ml-auto">
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900 dark:text-white lg:hidden">{current?.label ?? 'HealthSync'}</span>
+            <div className="ml-auto flex-shrink-0">
               <SyncStatus />
             </div>
           </div>
