@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Icon, type IconName } from './Icon';
 
 export interface ConfirmDialogProps {
   isOpen: boolean;
@@ -11,6 +12,12 @@ export interface ConfirmDialogProps {
   variant?: 'danger' | 'warning' | 'info';
 }
 
+const VARIANTS: Record<NonNullable<ConfirmDialogProps['variant']>, { button: string; icon: IconName; iconTone: string }> = {
+  danger: { button: 'btn-danger', icon: 'trash', iconTone: 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-900/50' },
+  warning: { button: 'btn bg-amber-600 text-white hover:bg-amber-700 focus-visible:ring-amber-500', icon: 'alert', iconTone: 'bg-amber-50 text-amber-600 ring-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-900/50' },
+  info: { button: 'btn-primary', icon: 'info', iconTone: 'bg-teal-50 text-teal-600 ring-teal-100 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-900/50' },
+};
+
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
@@ -21,41 +28,78 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
   variant = 'warning',
 }) => {
-  if (!isOpen) return null;
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Callers pass inline handlers; read the latest one without re-running the effect.
+  const cancelHandler = useRef(onCancel);
+  useEffect(() => {
+    cancelHandler.current = onCancel;
+  });
 
-  const variantStyles = {
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500',
-    warning: 'bg-amber-600 hover:bg-amber-700 text-white focus:ring-amber-500',
-    info: 'bg-teal-600 hover:bg-teal-700 text-white focus:ring-teal-500',
-  };
+  // Focus the safe choice, close on Escape, keep Tab inside the dialog, and lock page scroll.
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    cancelRef.current?.focus();
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelHandler.current();
+      } else if (e.key === 'Tab' && panelRef.current) {
+        const focusable = panelRef.current.querySelectorAll<HTMLElement>('button');
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
+      previouslyFocused?.focus?.();
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+  const v = VARIANTS[variant];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-[fadeIn_0.15s_ease-out]"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
-    >
-      <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden transform transition-all">
-        <div className="p-6">
-          <h3 id="confirm-dialog-title" className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
-            {title}
-          </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">{message}</p>
+    <div className="fixed inset-0 z-overlay flex items-end justify-center p-4 sm:items-center" role="presentation">
+      <div className="absolute inset-0 animate-overlay-in bg-slate-900/50 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-message"
+        className="relative w-full max-w-md animate-scale-in overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-pop dark:border-slate-700 dark:bg-slate-900"
+      >
+        <div className="flex gap-4 p-6">
+          <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ring-4 ${v.iconTone}`}>
+            <Icon name={v.icon} className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h3 id="confirm-dialog-title" className="text-base font-semibold text-slate-900 dark:text-white">
+              {title}
+            </h3>
+            <p id="confirm-dialog-message" className="mt-1.5 text-sm leading-6 text-slate-600 dark:text-slate-400">
+              {message}
+            </p>
+          </div>
         </div>
-        <div className="bg-slate-50 dark:bg-slate-800/60 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-300 dark:border-slate-700"
-          >
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/80 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-800/40">
+          <button ref={cancelRef} type="button" onClick={onCancel} className="btn-secondary">
             {cancelText}
           </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${variantStyles[variant]}`}
-          >
+          <button type="button" onClick={onConfirm} className={v.button}>
             {confirmText}
           </button>
         </div>

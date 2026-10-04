@@ -32,11 +32,11 @@ const RULE_LABEL: Record<string, string> = {
 
 export function AuditList({ entries, showPatient = true }: { entries: AuditEntry[]; showPatient?: boolean }) {
   return (
-    <ol className="relative space-y-4 border-l border-slate-200 pl-6 dark:border-slate-700">
+    <ol className="relative ml-1.5 space-y-5 border-l border-slate-200 pl-6 dark:border-slate-700">
       {entries.map((e) => (
         <li key={e.id} className="relative">
           <span
-            className={`absolute -left-[31px] top-1.5 h-3 w-3 rounded-full ring-4 ring-white dark:ring-slate-900 ${
+            className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full ring-4 ring-white dark:ring-slate-900 ${
               e.resolutionType === 'manual' ? 'bg-violet-500' : e.outcome === 'conflict' ? 'bg-orange-500' : e.concurrent ? 'bg-medical-500' : 'bg-teal-500'
             }`}
             aria-hidden="true"
@@ -49,7 +49,7 @@ export function AuditList({ entries, showPatient = true }: { entries: AuditEntry
             <span className="text-slate-400">{RULE_LABEL[e.rule] ?? e.rule}</span>
             {e.concurrent && <span className="badge-blue">Concurrent edit</span>}
           </div>
-          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{e.report}</p>
+          <p className="mt-1.5 text-sm leading-6 text-slate-800 dark:text-slate-200">{e.report}</p>
           <p className="mt-0.5 text-xs text-slate-400">
             {e.resolutionType === 'manual'
               ? `Manual review by ${e.resolvedByName ?? 'reviewer'}`

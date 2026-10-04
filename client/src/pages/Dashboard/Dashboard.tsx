@@ -16,7 +16,7 @@ import { getOutboxSince, type OutboxSummary } from '../../db/mutationLog';
 import { onDataChanged } from '../../lib/events';
 import { StatCard } from '../../components/Card';
 import { Icon } from '../../components/Icon';
-import { EmptyState, PageHeader, initials, relativeTime } from '../../components/ui';
+import { EmptyState, PageHeader, SectionHeading, initials, relativeTime } from '../../components/ui';
 
 // Day keys use the device's local calendar date. (toISOString() would shift them
 // to UTC, putting today's changes under yesterday east of Greenwich, e.g. in IST.)
@@ -135,25 +135,30 @@ export default function Dashboard() {
         <DashboardSkeleton />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard value={patients.length} label="Patients on this device" icon="🩺" accent="medical" />
-            <StatCard value={sync.pendingCount} label="Changes waiting to sync" subLabel={`Last sync ${relativeTime(sync.lastSyncedAt)}`} icon="⏳" accent={sync.pendingCount ? 'warning' : 'teal'} />
-            <StatCard value={openConflicts} label="Patients with a dose under review" icon="⚠" accent={openConflicts ? 'danger' : 'teal'} />
+          <div className="stagger grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            <StatCard value={patients.length} label="Patients on this device" icon="stethoscope" accent="medical" to="/patients" />
+            <StatCard value={sync.pendingCount} label="Changes waiting to sync" subLabel={`Last sync ${relativeTime(sync.lastSyncedAt)}`} icon="hourglass" accent={sync.pendingCount ? 'warning' : 'teal'} />
+            <StatCard
+              value={openConflicts}
+              label="Patients with a dose under review"
+              icon="alert"
+              accent={openConflicts ? 'danger' : 'teal'}
+              to={openConflicts ? (perms.canReviewConflicts ? '/conflicts' : '/patients') : undefined}
+            />
             <StatCard
               value={rate === null ? '—' : `${rate}%`}
               label="Concurrent edits auto-resolved"
               subLabel={stats.data ? `${stats.data.resolutions.automatic} automatic · ${stats.data.resolutions.manual} by reviewers` : 'Connect to load system stats'}
-              icon="🔀"
+              icon="merge"
               accent="teal"
             />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
             <section className="card lg:col-span-2" aria-labelledby="chart-h">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 id="chart-h" className="section-title">This device, last 7 days</h2>
-                <span className="text-xs text-slate-400">changes by day</span>
-              </div>
+              <SectionHeading id="chart-h" icon="activity" aside={<span className="text-xs text-slate-400">Changes by day</span>}>
+                This device, last 7 days
+              </SectionHeading>
               <div className="h-64" role="img" aria-label={`Bar chart of changes synced and pending over the last 7 days. ${chartData.map((d) => `${d.label}: ${d.synced} synced, ${d.pending} pending, ${d.conflicts} sent to review`).join('; ')}`}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
@@ -174,24 +179,24 @@ export default function Dashboard() {
             </section>
 
             <section className="card" aria-labelledby="system-h">
-              <h2 id="system-h" className="section-title mb-4">System</h2>
+              <SectionHeading id="system-h" icon="hospital">System</SectionHeading>
               {stats.data ? (
                 <dl className="space-y-4">
                   <div className="flex items-center justify-between">
                     <dt className="text-sm text-slate-600 dark:text-slate-300">Patients on server</dt>
-                    <dd className="text-lg font-bold text-slate-900 dark:text-white">{stats.data.patients}</dd>
+                    <dd className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{stats.data.patients}</dd>
                   </div>
                   <div className="flex items-center justify-between">
                     <dt className="text-sm text-slate-600 dark:text-slate-300">Conflicts awaiting review</dt>
-                    <dd className="text-lg font-bold text-orange-600 dark:text-orange-400">{stats.data.conflicts.pending}</dd>
+                    <dd className="text-lg font-bold tabular-nums text-orange-600 dark:text-orange-400">{stats.data.conflicts.pending}</dd>
                   </div>
                   <div className="flex items-center justify-between">
                     <dt className="text-sm text-slate-600 dark:text-slate-300">Conflicts resolved</dt>
-                    <dd className="text-lg font-bold text-slate-900 dark:text-white">{stats.data.conflicts.resolved}</dd>
+                    <dd className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{stats.data.conflicts.resolved}</dd>
                   </div>
                   <div className="flex items-center justify-between">
                     <dt className="text-sm text-slate-600 dark:text-slate-300">Registered devices</dt>
-                    <dd className="text-lg font-bold text-slate-900 dark:text-white">{stats.data.devices}</dd>
+                    <dd className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{stats.data.devices}</dd>
                   </div>
                   {rate !== null && (
                     <div>
@@ -199,7 +204,7 @@ export default function Dashboard() {
                         <span>Auto-resolved</span><span>Manual / pending</span>
                       </div>
                       <div className="flex h-2.5 overflow-hidden rounded-full bg-orange-200 dark:bg-orange-900/50" role="img" aria-label={`${rate}% of concurrent edits resolved automatically`}>
-                        <div className="bg-teal-600" style={{ width: `${rate}%` }} />
+                        <div className="bg-teal-600 transition-[width] duration-700 ease-out" style={{ width: `${rate}%` }} />
                       </div>
                     </div>
                   )}
@@ -208,16 +213,31 @@ export default function Dashboard() {
                   )}
                 </dl>
               ) : (
-                <p className="text-sm text-slate-500 dark:text-slate-400">{sync.connected ? 'Loading…' : 'Offline. System-wide stats appear when the server is reachable.'}</p>
+                sync.connected ? (
+                  <div className="space-y-4" aria-busy="true" aria-label="Loading">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center justify-between"><div className="skeleton h-3.5 w-36" /><div className="skeleton h-5 w-8" /></div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState compact tone="slate" icon="wifiOff" title="You're offline" message="System-wide stats appear when the server is reachable." />
+                )
               )}
             </section>
           </div>
 
           <section className="card" aria-labelledby="recent-h">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 id="recent-h" className="section-title">Recently updated</h2>
-              <Link to="/patients" className="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300">All patients</Link>
-            </div>
+            <SectionHeading
+              id="recent-h"
+              icon="clock"
+              aside={
+                <Link to="/patients" className="link inline-flex items-center gap-1 text-sm">
+                  All patients <Icon name="arrowRight" className="h-3.5 w-3.5" />
+                </Link>
+              }
+            >
+              Recently updated
+            </SectionHeading>
             {patients.length === 0 ? (
               <EmptyState
                 icon="patients"
@@ -229,14 +249,14 @@ export default function Dashboard() {
               <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                 {patients.slice(0, 6).map((p) => (
                   <li key={p.id}>
-                    <Link to={`/patients/${p.id}`} className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-medical-100 text-xs font-semibold text-medical-700 dark:bg-medical-900/50 dark:text-medical-300">{initials(p.name)}</span>
+                    <Link to={`/patients/${p.id}`} className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/10 dark:bg-teal-900/40 dark:text-teal-300">{initials(p.name)}</span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-slate-800 dark:text-slate-100">{p.name}</span>
+                        <span className="block truncate text-sm font-semibold text-slate-800 group-hover:text-teal-700 dark:text-slate-100 dark:group-hover:text-teal-300">{p.name}</span>
                         <span className="block text-xs text-slate-400">Updated {relativeTime(p.updatedAt)}</span>
                       </span>
                       {p.hasOpenConflicts && <span className="badge-conflict">Review</span>}
-                      <Icon name="chevronRight" className="h-4 w-4 text-slate-400" />
+                      <Icon name="chevronRight" className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-600 dark:text-slate-600" />
                     </Link>
                   </li>
                 ))}

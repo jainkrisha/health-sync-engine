@@ -1,15 +1,14 @@
 /**
  * Card.tsx — Reusable card components for the medical UI.
- * OWNERSHIP: Person B (shared — any teammate may import, never modify without flagging).
  *
  * Exports:
  *   <Card>          — generic white rounded container (mirrors .card CSS class but as a component)
- *   <StatCard>      — summary metric card: icon + label + value + optional sub-label
- *
- * No network calls. No side effects.
+ *   <StatCard>      — summary metric card: icon + value + label + optional sub-label (and optional link)
  */
 
 import type { ReactNode, ElementType } from 'react'
+import { Link } from 'react-router-dom'
+import { Icon, type IconName } from './Icon'
 
 // ─── Generic card wrapper ─────────────────────────────────────────────────────
 
@@ -21,11 +20,7 @@ interface CardProps {
 }
 
 export function Card({ children, className = '', as: Tag = 'div' }: CardProps) {
-  return (
-    <Tag className={`card ${className}`}>
-      {children}
-    </Tag>
-  )
+  return <Tag className={`card ${className}`}>{children}</Tag>
 }
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
@@ -37,71 +32,55 @@ interface StatCardProps {
   label: string
   /** Optional smaller text beneath the label */
   subLabel?: string
-  /** Emoji or single-character icon shown in the coloured circle */
-  icon: string
+  icon: IconName
   /** Colour family — maps to Tailwind palette tokens from tailwind.config.js */
   accent?: 'medical' | 'teal' | 'warning' | 'danger'
+  /** Makes the whole card a link to where the number can be acted on. */
+  to?: string
 }
 
-const accentClasses: Record<NonNullable<StatCardProps['accent']>, { ring: string; bg: string; text: string }> = {
-  medical: {
-    ring: 'ring-medical-100',
-    bg:   'bg-medical-50',
-    text: 'text-medical-600',
-  },
-  teal: {
-    ring: 'ring-teal-100',
-    bg:   'bg-teal-50',
-    text: 'text-teal-600',
-  },
-  warning: {
-    ring: 'ring-amber-100',
-    bg:   'bg-amber-50',
-    text: 'text-amber-600',
-  },
-  danger: {
-    ring: 'ring-red-100',
-    bg:   'bg-red-50',
-    text: 'text-red-500',
-  },
+const accentClasses: Record<NonNullable<StatCardProps['accent']>, string> = {
+  medical: 'bg-medical-50 text-medical-600 ring-medical-100 dark:bg-medical-900/40 dark:text-medical-300 dark:ring-medical-800/60',
+  teal: 'bg-teal-50 text-teal-600 ring-teal-100 dark:bg-teal-900/40 dark:text-teal-300 dark:ring-teal-800/60',
+  warning: 'bg-amber-50 text-amber-600 ring-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800/60',
+  danger: 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-800/60',
 }
 
-export function StatCard({
-  value,
-  label,
-  subLabel,
-  icon,
-  accent = 'medical',
-}: StatCardProps) {
-  const a = accentClasses[accent]
-
-  return (
-    <div
-      className="card flex items-start gap-4"
-      aria-label={`${value} — ${label}`}
-    >
-      {/* Icon circle */}
-      <div
-        className={`
-          flex-shrink-0 h-11 w-11 rounded-full ring-2 flex items-center
-          justify-center text-xl select-none
-          ${a.ring} ${a.bg} ${a.text}
-        `}
-        aria-hidden="true"
-      >
-        {icon}
-      </div>
-
-      {/* Text — aria-hidden because the container label covers it */}
-      <div className="min-w-0" aria-hidden="true">
-        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 leading-none tabular-nums">
-          {value}
-        </p>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">{label}</p>
-        {subLabel && (
-          <p className="text-xs text-slate-400 mt-0.5">{subLabel}</p>
+export function StatCard({ value, label, subLabel, icon, accent = 'medical', to }: StatCardProps) {
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <span
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ring-4 ${accentClasses[accent]}`}
+          aria-hidden="true"
+        >
+          <Icon name={icon} className="h-5 w-5" />
+        </span>
+        {to && (
+          <Icon
+            name="arrowRight"
+            className="h-4 w-4 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-teal-600 dark:text-slate-600"
+          />
         )}
       </div>
+      <div className="mt-3 min-w-0 sm:mt-4" aria-hidden="true">
+        <p className="text-2xl font-bold leading-none tracking-tight sm:text-[1.75rem] text-slate-900 tabular-nums dark:text-white">{value}</p>
+        <p className="mt-2 text-[13px] font-medium leading-snug text-slate-600 sm:text-sm dark:text-slate-300">{label}</p>
+        {subLabel && <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{subLabel}</p>}
+      </div>
+    </>
+  )
+
+  if (to) {
+    return (
+      <Link to={to} className="card card-interactive group block p-4 sm:p-6" aria-label={`${value} — ${label}`}>
+        {body}
+      </Link>
+    )
+  }
+  return (
+    <div className="card p-4 sm:p-6" role="group" aria-label={`${value} — ${label}`}>
+      {body}
     </div>
   )
 }
