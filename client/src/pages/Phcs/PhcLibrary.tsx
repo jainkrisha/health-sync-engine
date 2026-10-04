@@ -330,10 +330,21 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
               style={{ zIndex: isTurned ? i + 1 : max - i + 1 }}
               aria-hidden={!(i === turned || i === turned - 1)}
             >
-              <div className="leaf-face front" style={i === 0 ? { borderRadius: '3px 6px 6px 3px', boxShadow: '0 40px 60px -24px rgba(40,25,10,0.6)' } : undefined}>
+              <div
+                className="leaf-face front turnable"
+                style={i === 0 ? { borderRadius: '3px 6px 6px 3px', boxShadow: '0 40px 60px -24px rgba(40,25,10,0.6)' } : undefined}
+                onClick={(e) => !(e.target as HTMLElement).closest('a,button') && go(1)}
+                title="Turn the page"
+              >
                 {leaf.front}
               </div>
-              <div className="leaf-face back">{leaf.back}</div>
+              <div
+                className="leaf-face back turnable"
+                onClick={(e) => !(e.target as HTMLElement).closest('a,button') && go(-1)}
+                title="Turn back"
+              >
+                {leaf.back}
+              </div>
             </div>
           );
         })}

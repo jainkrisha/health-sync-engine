@@ -127,6 +127,14 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
     { id: 'dl-devices', n: '04', title: 'Devices', text: `${numbers.online} of ${numbers.devices} devices online now.` },
   ];
   const maxDay = Math.max(1, ...numbers.byDay.map((d) => d.synced + d.conflicts));
+  const splitMax = Math.max(1, numbers.auto, numbers.manual, numbers.pending);
+  const reviewMax = Math.max(1, ...numbers.byDay.map((d) => d.conflicts));
+  const sparkMax = Math.max(1, ...numbers.byDay.map((d) => d.synced + d.conflicts));
+  const sparkLine = numbers.byDay.length
+    ? numbers.byDay
+        .map((d, i) => `${i === 0 ? 'M' : 'L'}${((i / Math.max(1, numbers.byDay.length - 1)) * 300).toFixed(1)},${(76 - ((d.synced + d.conflicts) / sparkMax) * 68).toFixed(1)}`)
+        .join(' ')
+    : 'M0,76 L300,76';
 
   return (
     <div className="dl" ref={rootRef} aria-label="District overview">
@@ -266,11 +274,45 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
           <span className="dl-k">Wards</span>
         </div>
         <div className="dl-mosaic">
+          {/* 01 · how concurrent edits were settled, and the week's flow of changes */}
           <article className="dl-card dl-card-lead" data-rv="up">
-            <div className="dl-card-fr" style={{ backgroundImage: 'url(/landing/corridor.webp)' }}>
-              <div className="dl-card-lab">
+            <div className="dl-panel">
+              <div className="dl-panel-head">
                 <b>Merged automatically</b>
                 <span className="dl-card-big">{numbers.auto}</span>
+              </div>
+              <div className="dl-split" role="img" aria-label={`Settled automatically ${numbers.auto}, by clinicians ${numbers.manual}, waiting ${numbers.pending}`}>
+                {[
+                  { label: 'Automatic (CRDT rules)', value: numbers.auto, tone: 'sage' },
+                  { label: 'Decided by clinicians', value: numbers.manual, tone: 'navy' },
+                  { label: 'Waiting for review', value: numbers.pending, tone: 'orange' },
+                ].map((r) => (
+                  <div key={r.label} className="dl-split-row">
+                    <span className="dl-split-label">{r.label}</span>
+                    <span className="dl-split-track">
+                      <i className={`dl-tone-${r.tone}`} style={{ width: `${(r.value / splitMax) * 100}%` }} />
+                    </span>
+                    <span className="dl-split-val">{r.value}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="dl-spark">
+                <span className="dl-k">Changes reaching the district · last 7 days</span>
+                <svg viewBox="0 0 300 80" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="dl-spark-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="#e0663a" stopOpacity="0.45" />
+                      <stop offset="1" stopColor="#e0663a" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={`${sparkLine} L300,80 L0,80 Z`} fill="url(#dl-spark-fill)" />
+                  <path d={sparkLine} fill="none" stroke="#f0a063" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                </svg>
+                <div className="dl-spark-days">
+                  {numbers.byDay.map((d) => (
+                    <span key={d.date}>{new Date(`${d.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'narrow' })}</span>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="dl-card-meta">
@@ -278,11 +320,32 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
               <span>01 / 03</span>
             </div>
           </article>
+
+          {/* 02 · resolution rate as a gauge */}
           <article className="dl-card" data-rv="up">
-            <div className="dl-card-fr" style={{ backgroundImage: 'url(/landing/room.webp)' }}>
-              <div className="dl-card-lab">
+            <div className="dl-panel dl-panel-center">
+              <svg className="dl-gauge" viewBox="0 0 120 120" role="img" aria-label={`${numbers.rate}% resolved without a human`}>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(236,231,218,0.12)" strokeWidth="10" />
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="50"
+                  fill="none"
+                  stroke="#e0663a"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(numbers.rate / 100) * 314.16} 314.16`}
+                  transform="rotate(-90 60 60)"
+                />
+                <text x="60" y="66" textAnchor="middle" className="dl-gauge-num">
+                  {numbers.rate}%
+                </text>
+              </svg>
+              <div className="dl-panel-foot">
                 <b>Resolution rate</b>
-                <span className="dl-card-big">{numbers.rate}%</span>
+                <span>
+                  {numbers.auto} of {numbers.auto + numbers.manual + numbers.pending} concurrent edits
+                </span>
               </div>
             </div>
             <div className="dl-card-meta">
@@ -290,11 +353,21 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
               <span>02 / 03</span>
             </div>
           </article>
+
+          {/* 03 · dose clashes per day */}
           <article className="dl-card" data-rv="up">
-            <div className="dl-card-fr" style={{ backgroundImage: 'url(/landing/ward.webp)' }}>
-              <div className="dl-card-lab">
+            <div className="dl-panel">
+              <div className="dl-panel-head">
                 <b>Sent to review</b>
                 <span className="dl-card-big">{numbers.weekReview}</span>
+              </div>
+              <div className="dl-cols" role="img" aria-label={`Dose clashes per day: ${numbers.byDay.map((d) => d.conflicts).join(', ')}`}>
+                {numbers.byDay.map((d) => (
+                  <span key={d.date} className="dl-col">
+                    <i style={{ height: `${Math.max(3, (d.conflicts / reviewMax) * 100)}%` }} />
+                    <em>{new Date(`${d.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'narrow' })}</em>
+                  </span>
+                ))}
               </div>
             </div>
             <div className="dl-card-meta">
@@ -386,7 +459,7 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
             <Arrow />
           </button>
         </div>
-        <p className="dl-credit">Photographs: Unsplash (Fabio Sasso, Adhy Savala, Max Tcvetkov, Alexander Mass, National Cancer Institute).</p>
+        <p className="dl-credit">Photographs: Unsplash (National Cancer Institute, Fabio Sasso, Adhy Savala, Alexander Mass).</p>
       </section>
     </div>
   );
