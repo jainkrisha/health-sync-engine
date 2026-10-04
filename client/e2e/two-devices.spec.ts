@@ -8,7 +8,9 @@ import { expect, test, type Browser, type Page } from '@playwright/test';
 /** Desktop navigation is the card wheel: open it at the left edge, then pick a card. */
 async function openMenuItem(page: Page, name: string | RegExp) {
   await page.mouse.move(2, 420);
-  const link = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name, exact: typeof name === 'string' });
+  const link = page
+    .getByRole('navigation', { name: 'Main navigation' })
+    .getByRole('link', { name, exact: typeof name === 'string' });
   await link.focus();
   await page.keyboard.press('Enter');
 }
@@ -31,10 +33,16 @@ async function device(browser: Browser, user: { username: string; role: string }
   await page.getByRole('button', { name: 'Skip intro' }).click();
   // Health workers sign in on the PHC pass; everyone else on the district (Admin) pass.
   const portal = user.role === 'health_worker' ? 'phc' : 'district';
-  const pass = page.getByRole('region', { name: portal === 'phc' ? 'PHC sign-in pass' : 'Admin sign-in pass' });
+  const pass = page.getByRole('region', {
+    name: portal === 'phc' ? 'PHC sign-in pass' : 'Admin sign-in pass',
+  });
   await pass.locator(`#pass-${portal}-user`).fill(user.username);
   await pass.locator(`#pass-${portal}-pass`).fill(password);
-  await pass.getByRole('button', { name: portal === 'phc' ? 'Sign in to PHC' : 'Sign in to district system' }).click();
+  await pass
+    .getByRole('button', {
+      name: portal === 'phc' ? 'Sign in to PHC' : 'Sign in to district system',
+    })
+    .click();
   await expect(page).toHaveURL(/dashboard/);
   await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
   return page;
@@ -43,12 +51,20 @@ async function device(browser: Browser, user: { username: string; role: string }
 async function setOffline(page: Page, offline: boolean) {
   const toggle = page.getByLabel('Simulate offline');
   if ((await toggle.isChecked()) !== offline) await toggle.click({ force: true });
-  await expect(page.getByRole('status').filter({ hasText: offline ? 'Offline' : 'Synced' }).first()).toBeVisible();
+  await expect(
+    page
+      .getByRole('status')
+      .filter({ hasText: offline ? 'Offline' : 'Synced' })
+      .first(),
+  ).toBeVisible();
 }
 
 async function openPatient(page: Page) {
   await openMenuItem(page, 'Patients');
-  await page.getByRole('link', { name: new RegExp(patientName) }).first().click();
+  await page
+    .getByRole('link', { name: new RegExp(patientName) })
+    .first()
+    .click();
   await expect(page.getByRole('heading', { name: patientName })).toBeVisible();
 }
 
@@ -147,7 +163,11 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
     });
     const first = rows[0] as { enc: { iv: Uint8Array; data: ArrayBuffer } };
     const text = new TextDecoder().decode(new Uint8Array(first.enc.data));
-    return { keys: Object.keys(first).sort(), ivLength: first.enc.iv.length, readable: text.includes('Penicillin') || text.includes('Metformin') };
+    return {
+      keys: Object.keys(first).sort(),
+      ivLength: first.enc.iv.length,
+      readable: text.includes('Penicillin') || text.includes('Metformin'),
+    };
   });
   expect(stored).toEqual({ keys: ['enc', 'id', 'updatedAt'], ivLength: 12, readable: false });
 
@@ -155,7 +175,12 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   const auditor = await device(browser, users.auditor);
   await openMenuItem(auditor, 'Audit Trail');
   // Branch graph: both tablets' doses side by side in the merge, with the reviewer's result.
-  await auditor.locator('#graph-patient').selectOption({ label: patientName });
+  const graphPick = auditor.locator('#graph-patient');
+  await expect(graphPick.locator('option', { hasText: patientName })).toHaveCount(1);
+  const option = (await graphPick.locator('option').allTextContents()).find((o) =>
+    o.startsWith(patientName),
+  )!;
+  await graphPick.selectOption({ label: option });
   const merge = auditor.locator('.bg-merge');
   await expect(merge.getByText('850 mg', { exact: true })).toBeVisible();
   await expect(merge.getByText('1000 mg', { exact: true })).toBeVisible();

@@ -14,7 +14,7 @@ import { WRITE_ROLES } from '@shared/types';
 import { MutationLog } from '../models/MutationLog';
 import { ConflictModel } from '../models/Conflict';
 import { DeviceModel } from '../models/Device';
-import { currentSeq } from '../models/Counter';
+import { currentSeq, dataEpoch } from '../models/Counter';
 import { mutationSchema } from '../validation';
 import type { AuthUser } from '../middleware/auth';
 import { withLock } from './lock';
@@ -105,7 +105,7 @@ export async function processMutations(rawMutations: unknown[], opts: PushOption
 export async function pullChanges(since: number): Promise<PullResponse> {
   const serverSeq = await currentSeq();
   const patients = await loadDocs(since > 0 ? { seq: { $gt: since } } : {});
-  return { patients, serverSeq };
+  return { patients, serverSeq, epoch: await dataEpoch() };
 }
 
 async function touchDevice(opts: PushOptions): Promise<void> {
