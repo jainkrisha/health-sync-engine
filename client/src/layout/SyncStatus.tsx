@@ -22,7 +22,7 @@ export function SyncStatus() {
 
   const tone =
     sync.status === 'idle' && !hasPending
-      ? 'bg-teal-50 text-teal-800 ring-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:ring-teal-900'
+      ? 'bg-sage-50 text-sage-800 ring-sage-200 dark:bg-sage-950/60 dark:text-sage-200 dark:ring-sage-800'
       : sync.status === 'error'
         ? 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900'
         : 'bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700';

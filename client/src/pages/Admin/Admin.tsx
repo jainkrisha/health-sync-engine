@@ -179,10 +179,10 @@ export default function Admin() {
 
 function DeviceStatus({ online }: { online: boolean }) {
   return online ? (
-    <span className="badge-teal">
+    <span className="badge-sage">
       <span className="relative flex h-2 w-2" aria-hidden="true">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-60" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sage-400 opacity-60" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-sage-500" />
       </span>
       Online
     </span>

@@ -92,7 +92,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
   const styles: Record<ToastType, { bar: string; icon: string; name: IconName }> = {
-    success: { bar: 'bg-teal-500', icon: 'text-teal-600 dark:text-teal-400', name: 'checkCircle' },
+    success: { bar: 'bg-sage-500', icon: 'text-sage-600 dark:text-sage-400', name: 'checkCircle' },
     error: { bar: 'bg-rose-500', icon: 'text-rose-600 dark:text-rose-400', name: 'xCircle' },
     warning: { bar: 'bg-amber-500', icon: 'text-amber-600 dark:text-amber-400', name: 'alert' },
     info: { bar: 'bg-medical-500', icon: 'text-medical-600 dark:text-medical-400', name: 'info' },

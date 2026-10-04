@@ -111,8 +111,8 @@ export default function Dashboard() {
       })()
     : null;
 
-  const axisColor = theme === 'dark' ? '#94a3b8' : '#64748b';
-  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0';
+  const axisColor = theme === 'dark' ? '#a39a88' : '#7a7263';
+  const gridColor = theme === 'dark' ? '#2a2620' : '#e2dbcc';
 
   return (
     <div className="space-y-6">
@@ -169,13 +169,13 @@ export default function Dashboard() {
                     <XAxis dataKey="label" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis allowDecimals={false} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip
-                      contentStyle={{ background: theme === 'dark' ? '#0f172a' : '#fff', border: `1px solid ${gridColor}`, borderRadius: 8, fontSize: 12 }}
-                      cursor={{ fill: theme === 'dark' ? '#1e293b' : '#f1f5f9' }}
+                      contentStyle={{ background: theme === 'dark' ? '#1b1814' : '#fdfbf7', border: `1px solid ${gridColor}`, borderRadius: 8, fontSize: 12 }}
+                      cursor={{ fill: theme === 'dark' ? '#2a2620' : '#efe9dd' }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="synced" name="Synced" stackId="a" fill="#0d9488" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="conflicts" name="Sent to review" stackId="a" fill="#f97316" />
-                    <Bar dataKey="pending" name="Pending" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="synced" name="Synced" stackId="a" fill={theme === 'dark' ? '#8ea3bb' : '#3a4b5e'} radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="conflicts" name="Sent to review" stackId="a" fill="#e0663a" />
+                    <Bar dataKey="pending" name="Pending" stackId="a" fill="#f0a63a" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -207,7 +207,7 @@ export default function Dashboard() {
                         <span>Auto-resolved</span><span>Manual / pending</span>
                       </div>
                       <div className="flex h-2.5 overflow-hidden rounded-full bg-orange-200 dark:bg-orange-900/50" role="img" aria-label={`${rate}% of concurrent edits resolved automatically`}>
-                        <div className="bg-teal-600 transition-[width] duration-700 ease-out" style={{ width: `${rate}%` }} />
+                        <div className="bg-sage-600 transition-[width] duration-700 ease-out" style={{ width: `${rate}%` }} />
                       </div>
                     </div>
                   )}

@@ -38,8 +38,8 @@ function ValuePanel({
   tone: 'a' | 'b';
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-xl border p-4 pl-5 ${tone === 'a' ? 'border-medical-200 bg-medical-50/50 dark:border-medical-900/70 dark:bg-medical-950/20' : 'border-violet-200 bg-violet-50/40 dark:border-violet-900/70 dark:bg-violet-950/20'}`}>
-      <span className={`absolute inset-y-0 left-0 w-1 ${tone === 'a' ? 'bg-medical-500' : 'bg-violet-500'}`} aria-hidden="true" />
+    <div className={`relative overflow-hidden rounded-xl border p-4 pl-5 ${tone === 'a' ? 'border-medical-200 bg-medical-50/50 dark:border-medical-900/70 dark:bg-medical-950/20' : 'border-amber-200 bg-amber-50/50 dark:border-amber-900/60 dark:bg-amber-950/20'}`}>
+      <span className={`absolute inset-y-0 left-0 w-1 ${tone === 'a' ? 'bg-medical-500' : 'bg-amber-500'}`} aria-hidden="true" />
       <p className="eyebrow">{title}</p>
       <p className="mt-1.5 text-lg font-bold tracking-tight text-slate-900 dark:text-white">{describe(value)}</p>
       <dl className="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
@@ -84,7 +84,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
 
   return (
     <li className="relative scroll-mt-28" id={`conflict-${conflict.id}`}>
-      <span className={`absolute -left-[33px] top-5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-slate-50 dark:ring-slate-950 ${pending ? 'bg-orange-500' : 'bg-teal-500'}`} aria-hidden="true" />
+      <span className={`absolute -left-[33px] top-5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-slate-50 dark:ring-slate-950 ${pending ? 'bg-orange-500' : 'bg-sage-500'}`} aria-hidden="true" />
       <article className={`card overflow-hidden p-0 transition-shadow sm:p-0 ${open ? 'shadow-card-lg' : 'hover:shadow-card-hover'} ${pending ? 'border-l-4 border-l-orange-400 dark:border-l-orange-500' : ''}`}>
         <button
           type="button"
@@ -96,7 +96,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">{conflict.patientName || 'Patient'}</h3>
               <span className="badge-slate"><Icon name="pill" className="h-3 w-3" /> {conflict.label}</span>
-              {pending ? <span className="badge-conflict">Awaiting review</span> : <span className="badge-teal">Resolved</span>}
+              {pending ? <span className="badge-conflict">Awaiting review</span> : <span className="badge-sage">Resolved</span>}
             </div>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
               <span className="font-medium">{describe(conflict.currentValue)}</span> vs <span className="font-medium">{describe(conflict.incomingValue)}</span>

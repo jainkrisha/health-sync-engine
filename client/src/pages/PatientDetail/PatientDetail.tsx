@@ -28,7 +28,7 @@ import {
   relativeTime,
 } from '../../components/ui';
 
-const SEVERITY_STYLE = { severe: 'badge-danger', moderate: 'badge-warning', mild: 'badge-teal', unknown: 'badge-slate' } as const;
+const SEVERITY_STYLE = { severe: 'badge-danger', moderate: 'badge-warning', mild: 'badge-sage', unknown: 'badge-slate' } as const;
 
 const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
@@ -169,7 +169,7 @@ export default function PatientDetail() {
             {pending ? (
               <span className="badge-warning"><Icon name="clock" className="h-3 w-3" /> Changes not synced yet</span>
             ) : (
-              <span className="badge-teal"><Icon name="check" className="h-3 w-3" /> Synced</span>
+              <span className="badge-sage"><Icon name="check" className="h-3 w-3" /> Synced</span>
             )}
           </span>
         }
