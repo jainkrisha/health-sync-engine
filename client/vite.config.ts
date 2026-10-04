@@ -33,6 +33,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registered from main.tsx so the app can check for new builds while it is open.
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'icons.svg'],
       workbox: {
         // Never serve the app shell for API or socket requests.
