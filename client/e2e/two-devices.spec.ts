@@ -19,12 +19,12 @@ async function device(browser: Browser, user: { username: string; role: string }
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('/');
-  // Health workers sign in at their PHC; everyone else uses the district hospital's central system.
-  const portal = user.role === 'health_worker' ? /^PHC/ : /^Admin/;
-  await page.getByRole('radio', { name: portal }).check({ force: true });
-  await page.getByLabel('Username').fill(user.username);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: user.role === 'health_worker' ? 'Sign in to PHC' : 'Sign in to district system' }).click();
+  // Health workers sign in on the PHC pass; everyone else on the district (Admin) pass.
+  const portal = user.role === 'health_worker' ? 'phc' : 'district';
+  const pass = page.getByRole('region', { name: portal === 'phc' ? 'PHC sign-in pass' : 'Admin sign-in pass' });
+  await pass.locator(`#pass-${portal}-user`).fill(user.username);
+  await pass.locator(`#pass-${portal}-pass`).fill(password);
+  await pass.getByRole('button', { name: portal === 'phc' ? 'Sign in to PHC' : 'Sign in to district system' }).click();
   await expect(page).toHaveURL(/dashboard/);
   await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
   return page;

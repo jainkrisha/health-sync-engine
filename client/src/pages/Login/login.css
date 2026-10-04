@@ -1,0 +1,498 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Sign-in: liquid-metal background + two hanging ID passes (PHC and Admin).
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.login-page {
+  --charcoal: #15130f;
+  --charcoal-2: #1f1b16;
+  --cream: #ece7da;
+  --cream-2: #e2dccb;
+  --ink: #1d2733;
+  --navy: #3a4b5e;
+  --orange: #e0663a;
+  --orange-2: #c4542c;
+  --amber: #f0a63a;
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+  color: var(--cream);
+}
+
+/* ── Liquid metal background ─────────────────────────────────────────────── */
+.liquid-metal {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 38%, #2a241d 0%, #1b1813 48%, #110f0c 100%);
+}
+/* Fine film grain over the charcoal, as on the reference card photo. */
+.liquid-metal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: radial-gradient(rgba(255, 240, 220, 0.6) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
+}
+.lm-drift {
+  position: absolute;
+  display: block;
+  will-change: transform;
+  animation: lmPath1 24s ease-in-out infinite alternate;
+}
+.lm-path-2 { animation-name: lmPath2; }
+.lm-path-3 { animation-name: lmPath3; }
+@keyframes lmPath1 {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(6vw, 9vh); }
+  66% { transform: translate(-3vw, 15vh); }
+  100% { transform: translate(4vw, -4vh); }
+}
+@keyframes lmPath2 {
+  0% { transform: translate(0, 0); }
+  30% { transform: translate(-7vw, -6vh); }
+  70% { transform: translate(4vw, -12vh); }
+  100% { transform: translate(-5vw, 5vh); }
+}
+@keyframes lmPath3 {
+  0% { transform: translate(0, 0); }
+  40% { transform: translate(8vw, -5vh); }
+  75% { transform: translate(2vw, 10vh); }
+  100% { transform: translate(-6vw, 3vh); }
+}
+
+/* A chrome droplet: dark horizon band, bright sky reflection, a faint teal bounce light. */
+.lm-drop {
+  display: block;
+  border-radius: 46% 54% 52% 48% / 52% 44% 56% 48%;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.95) 0 6%, rgba(255, 255, 255, 0) 16%),
+    radial-gradient(ellipse 70% 40% at 55% 88%, rgba(240, 140, 80, 0.32) 0%, rgba(240, 140, 80, 0) 70%),
+    linear-gradient(172deg, #f4f1ea 0%, #b9b4aa 20%, #5d5850 38%, #16130f 50%, #3b3630 58%, #8d877c 74%, #d9d4c9 92%, #f4f1ea 100%);
+  box-shadow:
+    inset -10px -14px 26px rgba(0, 0, 0, 0.55),
+    inset 10px 12px 22px rgba(255, 255, 255, 0.35),
+    0 26px 50px -18px rgba(0, 0, 0, 0.75);
+  opacity: 0.92;
+  will-change: transform, border-radius;
+  animation: lmMorph 8s ease-in-out infinite alternate;
+}
+@keyframes lmMorph {
+  0% { border-radius: 46% 54% 52% 48% / 52% 44% 56% 48%; transform: rotate(0deg) scale(1); }
+  35% { border-radius: 58% 42% 40% 60% / 44% 58% 42% 56%; transform: rotate(8deg) scale(1.04, 0.97); }
+  70% { border-radius: 40% 60% 58% 42% / 60% 40% 60% 40%; transform: rotate(-6deg) scale(0.97, 1.04); }
+  100% { border-radius: 52% 48% 44% 56% / 48% 56% 44% 52%; transform: rotate(4deg) scale(1.02); }
+}
+
+/* ── Hanging pass ─────────────────────────────────────────────────────────── */
+.pass-col {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* The whole assembly (strap + clip + sleeve) pivots around the strap's anchor at the top. */
+.pass-hanger {
+  --dir: 1;
+  transform-origin: 50% 0;
+  animation: passDrop 1.7s both;
+  animation-delay: var(--delay, 0s);
+}
+.pass-hanger.from-right { --dir: -1; }
+@keyframes passDrop {
+  0% { transform: translateY(-120vh) rotate(0deg); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  42% { transform: translateY(18px) rotate(0deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  /* the string snaps taut: a short jerk back up, then the card swings */
+  50% { transform: translateY(-6px) rotate(calc(var(--dir) * -6deg)); animation-timing-function: ease-in-out; }
+  60% { transform: translateY(3px) rotate(calc(var(--dir) * 4.2deg)); animation-timing-function: ease-in-out; }
+  70% { transform: translateY(-1px) rotate(calc(var(--dir) * -2.6deg)); animation-timing-function: ease-in-out; }
+  80% { transform: translateY(0) rotate(calc(var(--dir) * 1.4deg)); animation-timing-function: ease-in-out; }
+  90% { transform: rotate(calc(var(--dir) * -0.6deg)); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+/* After landing, a slow idle sway — paused while someone is typing on the card. */
+.pass-sway {
+  transform-origin: 50% 0;
+  animation: passSway 6s ease-in-out 2;
+  animation-delay: calc(var(--delay, 0s) + 1.7s);
+}
+.pass-sway:focus-within,
+.pass-sway:hover { animation-play-state: paused; }
+@keyframes passSway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(0.7deg); }
+  75% { transform: rotate(-0.7deg); }
+}
+
+/* Lanyard strap: woven band with stitched edges. */
+.pass-strap {
+  position: relative;
+  width: 26px;
+  height: var(--strap-len, 96px);
+  margin: 0 auto;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 4px),
+    linear-gradient(90deg, var(--strap-dark) 0%, var(--strap) 18%, var(--strap-light) 50%, var(--strap) 82%, var(--strap-dark) 100%);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  /* The strap emerges from behind the title rather than cutting through it. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.15) 40px, #000 150px);
+  mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, 0.15) 40px, #000 150px);
+}
+.pass-strap::before,
+.pass-strap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.55) 0 4px, transparent 4px 8px);
+}
+.pass-strap::before { left: 3px; }
+.pass-strap::after { right: 3px; }
+.pass-strap-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font: 600 8px/1 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.pass-phc { --strap: #c4612f; --strap-dark: #8e4220; --strap-light: #df7a43; --accent: #e0663a; }
+.pass-district { --strap: #3a4b5e; --strap-dark: #26323f; --strap-light: #4f6378; --accent: #e0663a; }
+
+/* Metal clip joining the strap to the sleeve. */
+.pass-clip {
+  position: relative;
+  z-index: 2;
+  width: 46px;
+  height: 22px;
+  margin: -2px auto -9px;
+  border-radius: 5px 5px 8px 8px;
+  background: linear-gradient(180deg, #f8fafc 0%, #94a3b8 45%, #e2e8f0 60%, #64748b 100%);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.pass-clip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 18px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: #334155;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Translucent plastic sleeve holding the card. */
+.pass-sleeve {
+  position: relative;
+  width: min(340px, calc(100vw - 32px));
+  padding: 26px 12px 12px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(120, 116, 108, 0.42), rgba(60, 57, 52, 0.35));
+  border: 1px solid rgba(255, 250, 240, 0.22);
+  box-shadow:
+    0 1px 0 rgba(255, 250, 240, 0.25) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 40px 70px -24px rgba(0, 0, 0, 0.85),
+    0 14px 28px -12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+/* Slot punched in the sleeve, and a soft glare across the plastic. */
+.pass-sleeve::before {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 64px;
+  height: 9px;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.pass-sleeve::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 32%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.12) 100%);
+}
+.pass-rivet {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f8fafc, #64748b 70%);
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.4);
+}
+
+/* Card flip (front: sign in, back: create account). */
+.pass-flip {
+  perspective: 1400px;
+}
+.pass-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pass-inner.is-flipped { transform: rotateY(180deg); }
+.pass-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-width: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.pass-face.back { transform: rotateY(180deg); }
+.pass-face[aria-hidden='true'] { visibility: hidden; transition: visibility 0s linear 0.35s; }
+.pass-face[aria-hidden='false'] { visibility: visible; }
+
+/* The printed card itself. */
+.pass-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse 120% 60% at 100% 0%, rgba(224, 102, 58, 0.05), transparent 60%),
+    linear-gradient(180deg, #efeadd 0%, #e4dece 100%);
+  color: var(--ink);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 0 0 1px rgba(29, 39, 51, 0.12), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+}
+.pass-mono { font-family: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace; }
+
+/* Printed field: the ID is typed straight onto the card. */
+.pass-field {
+  width: 100%;
+  border: 0;
+  border-bottom: 1.5px dashed rgba(29, 39, 51, 0.3);
+  background: transparent;
+  padding: 6px 2px 5px;
+  font: 600 15px/1.2 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.pass-field::placeholder { color: rgba(29, 39, 51, 0.3); font-weight: 500; }
+.pass-field:hover { border-bottom-color: rgba(29, 39, 51, 0.5); }
+.pass-field:focus { border-bottom-style: solid; border-bottom-color: var(--orange); background: rgba(224, 102, 58, 0.07); }
+.pass-field[aria-invalid='true'] { border-bottom-color: #c0262d; }
+
+/* The dark LCD strip for the password. */
+.pass-lcd {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #1c1a17, #11100d);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition: box-shadow 0.15s;
+}
+.pass-lcd:focus-within { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 2px var(--orange); }
+.pass-lcd[data-invalid='true'] { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 2px #c0262d; }
+.pass-lcd input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 9px 10px;
+  font: 500 16px/1 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 2.5px;
+  color: #f0a063;
+  text-shadow: 0 0 6px rgba(240, 140, 80, 0.55);
+  outline: none;
+}
+.pass-lcd input::placeholder { color: rgba(240, 160, 99, 0.3); text-shadow: none; }
+
+/* Barcode strip. */
+.pass-barcode {
+  height: 30px;
+  background: repeating-linear-gradient(90deg,
+    #1d2733 0 2px, transparent 2px 3px, #1d2733 3px 4px, transparent 4px 7px,
+    #1d2733 7px 10px, transparent 10px 11px, #1d2733 11px 12px, transparent 12px 15px,
+    #1d2733 15px 16px, transparent 16px 18px, #1d2733 18px 21px, transparent 21px 22px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pass-hanger, .pass-sway, .lm-drift, .lm-drop { animation: none !important; }
+  .pass-inner { transition: none; }
+}
+
+/* Buttons printed in the card palette. */
+.pass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border-radius: 7px;
+  padding: 11px 14px;
+  background: var(--orange);
+  color: #fff8f0;
+  font: 600 14px/1 'Geist', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 6px 14px -6px rgba(196, 84, 44, 0.8);
+  transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.pass-btn:hover { background: var(--orange-2); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 10px 20px -8px rgba(196, 84, 44, 0.9); }
+.pass-btn:active { transform: scale(0.98); }
+.pass-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.pass-btn:disabled { opacity: 0.6; pointer-events: none; }
+.pass-link {
+  font: 600 12px/1.2 'Geist', 'Inter', system-ui, sans-serif;
+  color: var(--navy);
+  text-decoration: underline;
+  text-decoration-color: rgba(58, 75, 94, 0.35);
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.pass-link:hover { color: var(--orange-2); text-decoration-color: currentColor; }
+.pass-link:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 2px; }
+.pass-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 3px;
+  background: var(--orange);
+  color: #fff8f0;
+  font: 700 9.5px/1 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: 1.2px;
+}
+.pass-label {
+  display: block;
+  font: 600 9px/1 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(29, 39, 51, 0.55);
+}
+
+/* Mobile portal switch */
+.pass-switch {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 250, 240, 0.14);
+}
+.pass-switch button {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font: 600 13px/1 'Geist', 'Inter', system-ui, sans-serif;
+  color: rgba(236, 231, 218, 0.7);
+  transition: background-color 0.15s, color 0.15s;
+}
+.pass-switch button[aria-pressed='true'] { background: var(--cream); color: var(--ink); }
+
+/* ── Intro: doctor and nurse at a PHC desk ───────────────────────────────── */
+.phc-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  background: #ece7da;
+  animation: piIn 0.5s ease-out both;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+.phc-intro.is-leaving { opacity: 0; filter: blur(6px); pointer-events: none; }
+@keyframes piIn { from { opacity: 0; } to { opacity: 1; } }
+.phc-intro-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.pi-cam {
+  transform-box: view-box;
+  transform-origin: 820px 636px;
+  animation: piCam 6.2s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes piCam {
+  0% { transform: scale(1.08) translate(10px, 6px); }
+  10% { transform: scale(1.02) translate(0, 0); }
+  34% { transform: scale(1.06) translate(-6px, 0); }
+  57% { transform: scale(4.1); }
+  78% { transform: scale(4.5); }
+  100% { transform: scale(11); }
+}
+.pi-arm { animation: piArm 1.6s ease-in-out 0.6s 2 alternate both; transform-box: fill-box; transform-origin: 100% 0; }
+@keyframes piArm { from { transform: rotate(0); } to { transform: rotate(-4deg); } }
+.pi-nurse { animation: piNurse 3s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes piNurse { from { transform: rotate(-0.6deg); } to { transform: rotate(0.6deg); } }
+.pi-sun { animation: piSun 4s ease-in-out infinite alternate; }
+@keyframes piSun { from { opacity: 0.85; } to { opacity: 1; } }
+
+.pi-screen > g { opacity: 0; animation: piLine 0.45s ease-out both; }
+.pi-l1 { animation-delay: 3.3s !important; }
+.pi-l2 { animation-delay: 3.6s !important; }
+.pi-l3 { animation-delay: 3.9s !important; }
+.pi-l4 { animation-delay: 4.2s !important; }
+.pi-sync { animation-delay: 4.5s !important; }
+@keyframes piLine { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.pi-pulses circle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: piPulse 1.4s ease-out 4.5s 2 forwards;
+}
+.pi-pulses circle:nth-child(2) { animation-delay: 4.85s; }
+.pi-pulses circle:nth-child(3) { animation-delay: 5.2s; }
+@keyframes piPulse {
+  0% { opacity: 0.9; transform: scale(0.6); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+.phc-intro-captions {
+  position: absolute;
+  left: clamp(16px, 5vw, 64px);
+  bottom: clamp(20px, 6vh, 64px);
+  width: min(380px, calc(100vw - 32px));
+  height: 120px;
+}
+.phc-intro-caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(236, 231, 218, 0.92);
+  box-shadow: 0 0 0 1px rgba(29, 39, 51, 0.12), 0 14px 30px -14px rgba(29, 39, 51, 0.5);
+  color: #1d2733;
+  opacity: 0;
+  animation: piCaption 1.8s ease both;
+}
+.phc-intro-caption:last-child { animation-duration: 2.4s; }
+@keyframes piCaption {
+  0% { opacity: 0; transform: translateY(10px); }
+  15%, 82% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+.phc-intro-n {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #e0663a;
+  color: #fff8f0;
+  font: 700 10px/1 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: 1px;
+}
+.phc-intro-title { margin-top: 8px; font: 800 22px/1.1 'Geist', 'Inter', sans-serif; letter-spacing: -0.5px; }
+.phc-intro-text { margin-top: 4px; font: 500 13px/1.45 'Geist', 'Inter', sans-serif; color: #3a4b5e; }
+.phc-intro-skip {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(29, 39, 51, 0.85);
+  color: #ece7da;
+  font: 600 12px/1 'Geist', 'Inter', sans-serif;
+  transition: background-color 0.15s;
+}
+.phc-intro-skip:hover { background: #1d2733; }
+.phc-intro-skip:focus-visible { outline: 2px solid #e0663a; outline-offset: 2px; }

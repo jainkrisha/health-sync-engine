@@ -1,71 +1,83 @@
-import { useState } from 'react';
+/**
+ * Sign-in: two ID passes hang from lanyards over a liquid-metal background —
+ * one for PHC doctors, one for the district hospital's central system. Each pass
+ * is its own form: type your ID and password straight onto the card, or flip it
+ * over to create an account.
+ */
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { PORTALS, PORTAL_ROLES, ROLES, ROLE_LABELS, type Portal } from '@shared/types';
+import { PORTAL_ROLES, ROLE_LABELS, type Portal, type Role } from '@shared/types';
 import { Icon } from '../../components/Icon';
 import { Spinner } from '../../components/ui';
 import { deviceLabel, profileKey } from '../../lib/deviceProfile';
+import { LiquidMetal } from './LiquidMetal';
+import { ParticleTitle } from './ParticleTitle';
+import { PhcIntro, shouldPlayIntro } from './PhcIntro';
+import './login.css';
 
 const loginSchema = z.object({
-  username: z.string().trim().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required'),
+  username: z.string().trim().min(1, 'Enter your ID'),
+  password: z.string().min(1, 'Enter your password'),
 });
 
-const registerSchema = z
-  .object({
-    portal: z.enum(PORTALS),
-    facility: z.string().trim().max(80).optional(),
-    name: z.string().trim().min(1, 'Your name is required').max(80),
-    username: z
-      .string()
-      .trim()
-      .min(3, 'At least 3 characters')
-      .max(40)
-      .regex(/^[a-zA-Z0-9_.-]+$/, 'Letters, numbers, dots, dashes or underscores only'),
-    password: z.string().min(6, 'At least 6 characters'),
-    role: z.enum(ROLES),
-  })
-  .superRefine((v, ctx) => {
-    if (v.portal === 'phc' && !v.facility) {
-      ctx.addIssue({ code: 'custom', path: ['facility'], message: 'Enter the name of your PHC' });
-    }
-    if (!PORTAL_ROLES[v.portal].includes(v.role)) {
-      ctx.addIssue({ code: 'custom', path: ['role'], message: 'Pick a role for this portal' });
-    }
-  });
+const registerSchema = z.object({
+  facility: z.string().trim().max(80).optional(),
+  name: z.string().trim().min(1, 'Your name is required').max(80),
+  username: z
+    .string()
+    .trim()
+    .min(3, 'At least 3 characters')
+    .max(40)
+    .regex(/^[a-zA-Z0-9_.-]+$/, 'Letters, numbers, dots, dashes or underscores'),
+  password: z.string().min(6, 'At least 6 characters'),
+  role: z.string(),
+});
 
 type LoginValues = z.infer<typeof loginSchema>;
 type RegisterValues = z.infer<typeof registerSchema>;
 
-const ROLE_HELP: Record<(typeof ROLES)[number], string> = {
-  health_worker: 'Records and edits patient data at the PHC.',
-  clinical_reviewer: 'Resolves medication conflicts between PHC devices.',
-  admin: "Every PHC's data, conflict review, audit trail, users and devices.",
-  auditor: 'Read-only access to records and the audit trail.',
+const ROLE_HELP: Partial<Record<Role, string>> = {
+  admin: 'Every PHC, users and devices',
+  clinical_reviewer: 'Resolves dose conflicts',
+  auditor: 'Read-only audit access',
 };
 
-const PORTAL_INFO: Record<
-  Portal,
-  { title: string; subtitle: string; icon: 'clinic' | 'hospital' }
-> = {
+const PASS = {
   phc: {
     title: 'PHC',
-    subtitle: 'Local doctor at a Primary Health Centre. Works offline.',
-    icon: 'clinic',
+    org: 'Primary Health Centre',
+    chip: 'HEALTH WORKER',
+    meta: [
+      ['MODE', 'OFFLINE-FIRST'],
+      ['STORE', 'AES-256'],
+    ],
+    serial: '4127-0806-PHC',
+    signIn: 'Sign in to PHC',
+    create: 'Create PHC account',
+    footer: 'Works with no network. Syncs when back online.',
+    strapText: 'HEALTHSYNC · PHC · HEALTHSYNC · PHC · HEALTHSYNC',
   },
   district: {
-    title: 'Admin',
-    subtitle: 'Central system at the district hospital. All PHCs.',
-    icon: 'hospital',
+    title: 'ADMIN',
+    org: 'District Hospital · Central',
+    chip: 'DISTRICT SYSTEM',
+    meta: [
+      ['SCOPE', 'ALL PHCS'],
+      ['VIEW', 'LIVE'],
+    ],
+    serial: '0921-4410-DST',
+    signIn: 'Sign in to district system',
+    create: 'Create district account',
+    footer: 'Conflict review, audit trail, users and devices.',
+    strapText: 'HEALTHSYNC · DISTRICT · HEALTHSYNC · DISTRICT',
   },
-};
+} as const;
 
 const PORTAL_KEY = profileKey('portal');
-
 function readPortal(): Portal {
   try {
     return localStorage.getItem(PORTAL_KEY) === 'district' ? 'district' : 'phc';
@@ -73,356 +85,358 @@ function readPortal(): Portal {
     return 'phc';
   }
 }
+function rememberPortal(p: Portal) {
+  try {
+    localStorage.setItem(PORTAL_KEY, p);
+  } catch {
+    // ignore
+  }
+}
 
-export function Login() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [portal, setPortal] = useState<Portal>(readPortal);
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-[#b4232b]" role="alert">
+      <Icon name="alert" className="h-3 w-3" /> {message}
+    </p>
+  );
+}
+
+function Stripes() {
+  return (
+    <span className="flex h-3.5 items-stretch gap-[2px]" aria-hidden="true">
+      {['#e0663a', '#f0a63a', '#e9c46a', '#5f8f7a', '#4f6378', '#2d3a48'].map((c) => (
+        <span key={c} className="w-[3px] rounded-[1px]" style={{ background: c }} />
+      ))}
+    </span>
+  );
+}
+
+function IdPass({ portal, delay, from }: { portal: Portal; delay: number; from: 'left' | 'right' }) {
+  const info = PASS[portal];
+  const [side, setSide] = useState<'front' | 'back'>('front');
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, register } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const loginForm = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
   const registerForm = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { portal: readPortal(), role: PORTAL_ROLES[readPortal()][0], facility: '' },
+    defaultValues: { role: PORTAL_ROLES[portal][0], facility: '' },
   });
 
-  const choosePortal = (next: Portal) => {
-    setPortal(next);
-    setServerError(null);
-    registerForm.setValue('portal', next);
-    registerForm.setValue('role', PORTAL_ROLES[next][0]);
-    registerForm.clearErrors();
-    try {
-      localStorage.setItem(PORTAL_KEY, next);
-    } catch {
-      // ignore
-    }
-  };
-
-  const onLogin = async (values: LoginValues) => {
+  const onLogin = async (v: LoginValues) => {
     setServerError(null);
     try {
-      await login(values.username, values.password, portal);
+      await login(v.username, v.password, portal);
+      rememberPortal(portal);
       navigate('/dashboard');
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Login failed');
+      setServerError(err instanceof Error ? err.message : 'Sign-in failed');
     }
   };
 
-  const onRegister = async (values: RegisterValues) => {
+  const onRegister = async (v: RegisterValues) => {
     setServerError(null);
+    if (portal === 'phc' && !v.facility?.trim()) {
+      registerForm.setError('facility', { message: 'Enter the name of your PHC' });
+      return;
+    }
     try {
-      await register(values);
+      await register({ ...v, portal, role: v.role as Role, facility: portal === 'phc' ? v.facility : undefined });
+      rememberPortal(portal);
       navigate('/dashboard');
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Registration failed');
     }
   };
 
-  const switchMode = (next: 'login' | 'register') => {
-    setMode(next);
+  const flip = (to: 'front' | 'back') => {
+    setSide(to);
     setServerError(null);
   };
 
-  const [showPassword, setShowPassword] = useState(false);
+  // Faces are stacked absolutely for the flip; the card takes the height of the side showing.
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | undefined>(undefined);
+  useLayoutEffect(() => {
+    const el = side === 'front' ? frontRef.current : backRef.current;
+    if (!el) return;
+    const measure = () => setHeight(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [side]);
 
-  const submitting =
-    mode === 'login' ? loginForm.formState.isSubmitting : registerForm.formState.isSubmitting;
+  const lErr = loginForm.formState.errors;
+  const rErr = registerForm.formState.errors;
+  const id = `pass-${portal}`;
+
+  const header = (
+    <div className="flex items-center justify-between gap-2 bg-[var(--navy)] px-3 py-2 text-[var(--cream)]">
+      <span className="flex items-center gap-2">
+        <img src="/favicon.svg" alt="" className="h-4 w-4 rounded-[4px]" />
+        <span className="pass-mono text-[10px] font-semibold tracking-[2px]">HEALTHSYNC</span>
+      </span>
+      <Stripes />
+    </div>
+  );
+
+  const errorBox = serverError && (
+    <div role="alert" className="mt-3 flex items-start gap-2 rounded-md border border-[#e9b4a4] bg-[#f6ddd3] px-2.5 py-2 text-[12px] font-medium leading-snug text-[#8a2a1a]">
+      <Icon name="alert" className="mt-px h-3.5 w-3.5 flex-shrink-0" />
+      <span>{serverError}</span>
+    </div>
+  );
 
   return (
-    <div className="grid min-h-screen bg-slate-50 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] dark:bg-slate-950">
-      {/* Brand panel: same dark slate as the app sidebar, with the teal accent. */}
-      <aside className="relative hidden overflow-hidden bg-slate-900 p-12 text-slate-300 lg:flex lg:flex-col">
-        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-medical-500/10 blur-3xl" aria-hidden="true" />
-        <div className="relative flex items-center gap-3">
-          <img src="/favicon.svg" alt="" className="h-10 w-10 rounded-xl shadow-teal-glow" />
-          <span className="text-xl font-bold tracking-tight text-white">HealthSync</span>
-        </div>
-        <div className="relative my-auto max-w-md">
-          <h2 className="text-4xl font-bold leading-tight tracking-tight text-white">Patient records that keep working when the network does not.</h2>
-          <p className="mt-4 text-base leading-7 text-slate-400">
-            Every PHC device keeps an encrypted copy. When devices reconnect, edits merge field by field, and nothing clinical is guessed.
-          </p>
-          <ul className="mt-10 space-y-5">
-            {[
-              { icon: 'wifiOff' as const, title: 'Works offline', text: 'Add, edit and review patients with no connection.' },
-              { icon: 'merge' as const, title: 'Safe merging', text: 'Allergies are never lost; conflicting doses go to a reviewer.' },
-              { icon: 'shield' as const, title: 'Full audit trail', text: 'Every merge decision is recorded and cannot be edited.' },
-            ].map((f) => (
-              <li key={f.title} className="flex gap-4">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/5 text-teal-300 ring-1 ring-inset ring-white/10">
-                  <Icon name={f.icon} className="h-5 w-5" />
-                </span>
-                <span>
-                  <span className="block font-semibold text-white">{f.title}</span>
-                  <span className="block text-sm text-slate-400">{f.text}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className="relative text-xs text-slate-500">Group 17 mini project · Offline-first, conflict-resolving health records</p>
-      </aside>
-
-      <div className="relative flex items-center justify-center bg-gradient-to-br from-slate-50 via-slate-50 to-teal-50/70 px-4 py-10 sm:px-8 dark:from-slate-950 dark:via-slate-950 dark:to-teal-950/30">
-      <button
-        onClick={toggleTheme}
-        className="btn-icon absolute right-4 top-4"
-        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        data-tip={theme === 'dark' ? 'Light mode' : 'Dark mode'}
-        data-tip-pos="left"
-      >
-        <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
-      </button>
-
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="mb-8 text-center lg:text-left">
-          <img src="/favicon.svg" alt="" className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-teal-glow lg:hidden" />
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
-            {mode === 'login' ? 'Sign in to HealthSync' : 'Create your account'}
-          </h1>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            {mode === 'login' ? 'Choose where you work, then sign in.' : 'Offline-first patient records for field health teams.'}
-          </p>
-        </div>
-
-        <fieldset className="mb-4">
-          <legend className="sr-only">Sign in as</legend>
-          <div className="grid grid-cols-2 gap-3">
-            {PORTALS.map((p) => (
-              <label
-                key={p}
-                className="relative flex cursor-pointer flex-col gap-1 rounded-xl border-2 border-slate-200 bg-white p-3.5 text-sm shadow-sm transition-[border-color,background-color,box-shadow] duration-150 hover:border-slate-300 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-500 has-[:focus-visible]:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:has-[:checked]:border-teal-500 dark:has-[:checked]:bg-teal-950/40"
-              >
-                <input
-                  type="radio"
-                  name="portal"
-                  value={p}
-                  checked={portal === p}
-                  onChange={() => choosePortal(p)}
-                  className="sr-only"
-                  aria-label={`${PORTAL_INFO[p].title}: ${PORTAL_INFO[p].subtitle}`}
-                />
-                {portal === p && (
-                  <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-white animate-scale-in" aria-hidden="true">
-                    <Icon name="check" className="h-3 w-3" />
-                  </span>
-                )}
-                <span className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
-                  <Icon
-                    name={PORTAL_INFO[p].icon}
-                    className="h-5 w-5 text-teal-600 dark:text-teal-400"
-                  />
-                  {PORTAL_INFO[p].title}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {PORTAL_INFO[p].subtitle}
-                </span>
-              </label>
-            ))}
+    <section className={`pass-col pass-${portal}`} aria-label={`${info.title === 'ADMIN' ? 'Admin' : 'PHC'} sign-in pass`}>
+      <div className={`pass-hanger ${from === 'right' ? 'from-right' : ''}`} style={{ ['--delay' as string]: `${delay}s` }}>
+        <div className="pass-sway" style={{ ['--delay' as string]: `${delay}s` }}>
+          <div className="pass-strap">
+            <span className="pass-strap-text">{info.strapText}</span>
           </div>
-        </fieldset>
+          <div className="pass-clip" />
+          <div className="pass-sleeve">
+            <span className="pass-rivet" style={{ left: 9, top: 9 }} />
+            <span className="pass-rivet" style={{ right: 9, top: 9 }} />
+            <span className="pass-rivet" style={{ left: 9, bottom: 9 }} />
+            <span className="pass-rivet" style={{ right: 9, bottom: 9 }} />
 
-        <div className="card overflow-hidden p-0 shadow-card-lg sm:p-0">
-          <div
-            className="grid grid-cols-2 border-b border-slate-100 text-sm font-semibold dark:border-slate-800"
-            role="tablist"
-          >
-            {(['login', 'register'] as const).map((m) => (
-              <button
-                key={m}
-                role="tab"
-                aria-selected={mode === m}
-                onClick={() => switchMode(m)}
-                className={`py-3.5 transition-[color,box-shadow,background-color] duration-150 ${
-                  mode === m
-                    ? 'text-teal-700 shadow-[inset_0_-2px_0] shadow-teal-600 dark:text-teal-300'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/40 dark:hover:text-white'
-                }`}
-              >
-                {m === 'login' ? 'Sign in' : 'Create account'}
-              </button>
-            ))}
-          </div>
-
-          <div className="p-6 sm:p-8">
-            {serverError && (
-              <div
-                role="alert"
-                className="mb-5 flex animate-fade-in items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
-              >
-                <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                <span>{serverError}</span>
-              </div>
-            )}
-
-            {mode === 'login' ? (
-              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5" noValidate>
-                <div>
-                  <label htmlFor="login-username" className="form-label">
-                    Username
-                  </label>
-                  <input
-                    id="login-username"
-                    autoComplete="username"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    className={`form-input ${loginForm.formState.errors.username ? 'form-input-error' : ''}`}
-                    {...loginForm.register('username')}
-                  />
-                  {loginForm.formState.errors.username && (
-                    <p className="form-error">{loginForm.formState.errors.username.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="login-password" className="form-label">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="login-password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      className={`form-input pr-11 ${loginForm.formState.errors.password ? 'form-input-error' : ''}`}
-                      {...loginForm.register('password')}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="btn-icon absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
-                      aria-label={showPassword ? 'Hide characters' : 'Show characters'}
-                      aria-pressed={showPassword}
-                    >
-                      <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-4 w-4" />
-                    </button>
-                  </div>
-                  {loginForm.formState.errors.password && (
-                    <p className="form-error">{loginForm.formState.errors.password.message}</p>
-                  )}
-                </div>
-                <button type="submit" className="btn-primary w-full py-2.5" disabled={submitting}>
-                  {submitting && <Spinner />}
-                  {portal === 'phc' ? 'Sign in to PHC' : 'Sign in to district system'}
-                </button>
-                <div className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-500 ring-1 ring-inset ring-slate-200/70 dark:bg-slate-800/50 dark:text-slate-400 dark:ring-slate-700/60">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">Demo accounts</span> (password <code className="font-mono">password123</code>):{' '}
-                  {portal === 'phc' ? (
-                    <><code className="font-mono">worker1</code>, <code className="font-mono">worker2</code></>
-                  ) : (
-                    <><code className="font-mono">admin</code>, <code className="font-mono">reviewer</code>, <code className="font-mono">auditor</code></>
-                  )}
-                </div>
-              </form>
-            ) : (
-              <form
-                onSubmit={registerForm.handleSubmit(onRegister)}
-                className="space-y-4"
-                noValidate
-              >
-                <div>
-                  <label htmlFor="reg-name" className="form-label">
-                    Full name
-                  </label>
-                  <input
-                    id="reg-name"
-                    autoComplete="name"
-                    className="form-input"
-                    {...registerForm.register('name')}
-                  />
-                  {registerForm.formState.errors.name && (
-                    <p className="form-error">{registerForm.formState.errors.name.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="reg-username" className="form-label">
-                    Username
-                  </label>
-                  <input
-                    id="reg-username"
-                    autoComplete="username"
-                    className="form-input"
-                    {...registerForm.register('username')}
-                  />
-                  {registerForm.formState.errors.username && (
-                    <p className="form-error">{registerForm.formState.errors.username.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="reg-password" className="form-label">
-                    Password
-                  </label>
-                  <input
-                    id="reg-password"
-                    type="password"
-                    autoComplete="new-password"
-                    className="form-input"
-                    {...registerForm.register('password')}
-                  />
-                  {registerForm.formState.errors.password && (
-                    <p className="form-error">{registerForm.formState.errors.password.message}</p>
-                  )}
-                </div>
-                {portal === 'phc' ? (
-                  <div>
-                    <label htmlFor="reg-facility" className="form-label">
-                      PHC name
-                    </label>
-                    <input
-                      id="reg-facility"
-                      placeholder="e.g. PHC Wagholi"
-                      className="form-input"
-                      {...registerForm.register('facility')}
-                    />
-                    {registerForm.formState.errors.facility && (
-                      <p className="form-error">{registerForm.formState.errors.facility.message}</p>
-                    )}
-                  </div>
-                ) : (
-                  <fieldset>
-                    <legend className="form-label">Role at the district hospital</legend>
-                    <div className="grid gap-2">
-                      {PORTAL_ROLES.district.map((r) => (
-                        <label
-                          key={r}
-                          className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm transition-colors hover:border-slate-300 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50 dark:border-slate-700 dark:hover:border-slate-600 dark:has-[:checked]:bg-teal-950/40"
-                        >
-                          <input
-                            type="radio"
-                            value={r}
-                            className="mt-0.5 accent-teal-600"
-                            {...registerForm.register('role')}
-                          />
-                          <span>
-                            <span className="block font-semibold text-slate-800 dark:text-slate-100">
-                              {ROLE_LABELS[r]}
-                            </span>
-                            <span className="block text-xs text-slate-500 dark:text-slate-400">
-                              {ROLE_HELP[r]}
-                            </span>
+            <div className="pass-flip">
+              <div className={`pass-inner ${side === 'back' ? 'is-flipped' : ''}`} style={{ height }}>
+                {/* ── Front: sign in ─────────────────────────────────────── */}
+                <div className="pass-face front" ref={frontRef} aria-hidden={side !== 'front'}>
+                  <div className="pass-card">
+                    {header}
+                    <form onSubmit={loginForm.handleSubmit(onLogin)} noValidate className="px-4 pb-3 pt-3" aria-label={info.signIn}>
+                      <p className="pass-mono text-[8.5px] font-semibold tracking-[1.6px] text-[rgba(29,39,51,0.55)]">
+                        DISTRICT HEALTH NETWORK · ACCESS PASS
+                      </p>
+                      <p className="mt-1 text-[42px] font-extrabold leading-[0.95] tracking-[-1.5px] text-[var(--ink)]" style={{ fontFamily: 'Geist, Inter, sans-serif' }}>
+                        {info.title}
+                      </p>
+                      <div className="mt-2.5 flex items-end gap-3">
+                        <span className="pass-chip">{info.chip}</span>
+                        {info.meta.map(([k, v]) => (
+                          <span key={k}>
+                            <span className="pass-label">{k}</span>
+                            <span className="pass-mono block text-[10.5px] font-bold tracking-[1px] text-[var(--ink)]">{v}</span>
                           </span>
+                        ))}
+                      </div>
+
+                      <div className="mt-4">
+                        <label htmlFor={`${id}-user`} className="pass-label">
+                          Username
                         </label>
-                      ))}
+                        <input
+                          id={`${id}-user`}
+                          className="pass-field"
+                          autoComplete="username"
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          placeholder="your-id"
+                          aria-invalid={lErr.username ? true : undefined}
+                          disabled={side !== 'front'}
+                          {...loginForm.register('username')}
+                        />
+                        <FieldError message={lErr.username?.message} />
+                      </div>
+
+                      <div className="mt-3">
+                        <label htmlFor={`${id}-pass`} className="pass-label mb-1">
+                          Password
+                        </label>
+                        <div className="pass-lcd" data-invalid={lErr.password ? 'true' : undefined}>
+                          <input
+                            id={`${id}-pass`}
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="current-password"
+                            placeholder="••••••••"
+                            aria-invalid={lErr.password ? true : undefined}
+                            disabled={side !== 'front'}
+                            {...loginForm.register('password')}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((s) => !s)}
+                            className="mr-1 flex h-8 w-8 items-center justify-center rounded text-[#f0a063]/70 transition-colors hover:text-[#f0a063] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e0663a]"
+                            aria-label={showPassword ? 'Hide characters' : 'Show characters'}
+                            aria-pressed={showPassword}
+                            tabIndex={side === 'front' ? 0 : -1}
+                          >
+                            <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-4 w-4" />
+                          </button>
+                          <span className="mr-2.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#e0663a] shadow-[0_0_6px_rgba(224,102,58,0.9)]" aria-hidden="true" />
+                        </div>
+                        <FieldError message={lErr.password?.message} />
+                      </div>
+
+                      {errorBox}
+
+                      <button type="submit" className="pass-btn mt-4" disabled={loginForm.formState.isSubmitting || side !== 'front'}>
+                        {loginForm.formState.isSubmitting && <Spinner className="h-4 w-4" />}
+                        {info.signIn}
+                      </button>
+
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        <button type="button" className="pass-link" onClick={() => flip('back')} tabIndex={side === 'front' ? 0 : -1}>
+                          Create account
+                        </button>
+                        <span className="pass-mono text-[9.5px] text-[rgba(29,39,51,0.55)]">
+                          DEMO PW <b className="text-[var(--ink)]">password123</b>
+                        </span>
+                      </div>
+                    </form>
+
+                    <div className="flex items-end justify-between gap-3 border-t border-dashed border-[rgba(29,39,51,0.2)] px-4 pb-3 pt-2.5">
+                      <div className="w-[46%]">
+                        <div className="pass-barcode" aria-hidden="true" />
+                        <p className="pass-mono mt-1 text-[8px] tracking-[1px] text-[rgba(29,39,51,0.6)]">{info.serial}</p>
+                      </div>
+                      <p className="pass-mono max-w-[48%] text-right text-[8px] font-semibold leading-[1.45] tracking-[0.6px] text-[rgba(29,39,51,0.6)]">
+                        {portal === 'phc' ? 'DEMO IDS: WORKER1 · WORKER2' : 'DEMO IDS: ADMIN · REVIEWER · AUDITOR'}
+                      </p>
                     </div>
-                  </fieldset>
-                )}
-                <button type="submit" className="btn-primary w-full py-2.5" disabled={submitting}>
-                  {submitting && <Spinner />}
-                  {portal === 'phc' ? 'Create PHC account' : 'Create district account'}
-                </button>
-              </form>
-            )}
+                  </div>
+                </div>
+
+                {/* ── Back: create account ───────────────────────────────── */}
+                <div className="pass-face back" ref={backRef} aria-hidden={side !== 'back'}>
+                  <div className="pass-card">
+                    {header}
+                    <form onSubmit={registerForm.handleSubmit(onRegister)} noValidate className="space-y-3 px-4 pb-4 pt-3" aria-label={info.create}>
+                      <div>
+                        <p className="pass-mono text-[8.5px] font-semibold tracking-[1.6px] text-[rgba(29,39,51,0.55)]">NEW PASS · {info.org.toUpperCase()}</p>
+                        <p className="mt-1 text-[26px] font-extrabold leading-none tracking-[-0.8px] text-[var(--ink)]">Create account</p>
+                      </div>
+                      {(
+                        [
+                          ['name', 'Full name', 'text', 'name', 'Dr. Asha Rao'],
+                          ['username', 'Username', 'text', 'username', 'asha.rao'],
+                          ['password', 'Password', 'password', 'new-password', '6+ characters'],
+                        ] as const
+                      ).map(([field, label, type, ac, ph]) => (
+                        <div key={field}>
+                          <label htmlFor={`${id}-r-${field}`} className="pass-label">
+                            {label}
+                          </label>
+                          <input
+                            id={`${id}-r-${field}`}
+                            type={type}
+                            className="pass-field"
+                            autoComplete={ac}
+                            placeholder={ph}
+                            aria-invalid={rErr[field] ? true : undefined}
+                            disabled={side !== 'back'}
+                            {...registerForm.register(field)}
+                          />
+                          <FieldError message={rErr[field]?.message} />
+                        </div>
+                      ))}
+                      {portal === 'phc' ? (
+                        <div>
+                          <label htmlFor={`${id}-r-facility`} className="pass-label">
+                            PHC name
+                          </label>
+                          <input
+                            id={`${id}-r-facility`}
+                            className="pass-field"
+                            placeholder="PHC Hadapsar"
+                            aria-invalid={rErr.facility ? true : undefined}
+                            disabled={side !== 'back'}
+                            {...registerForm.register('facility')}
+                          />
+                          <FieldError message={rErr.facility?.message} />
+                        </div>
+                      ) : (
+                        <fieldset>
+                          <legend className="pass-label mb-1.5">Role</legend>
+                          <div className="grid gap-1.5">
+                            {PORTAL_ROLES.district.map((r) => (
+                              <label
+                                key={r}
+                                className="flex cursor-pointer items-center gap-2 rounded-md border border-[rgba(29,39,51,0.18)] px-2.5 py-1.5 text-[12px] transition-colors hover:border-[rgba(29,39,51,0.35)] has-[:checked]:border-[#e0663a] has-[:checked]:bg-[rgba(224,102,58,0.08)]"
+                              >
+                                <input type="radio" value={r} className="accent-[#e0663a]" disabled={side !== 'back'} {...registerForm.register('role')} />
+                                <span className="font-semibold text-[var(--ink)]">{ROLE_LABELS[r]}</span>
+                                <span className="ml-auto text-[10.5px] text-[rgba(29,39,51,0.55)]">{ROLE_HELP[r]}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </fieldset>
+                      )}
+                      {errorBox}
+                      <button type="submit" className="pass-btn" disabled={registerForm.formState.isSubmitting || side !== 'back'}>
+                        {registerForm.formState.isSubmitting && <Spinner className="h-4 w-4" />}
+                        {info.create}
+                      </button>
+                      <button type="button" className="pass-link block" onClick={() => flip('front')} tabIndex={side === 'back' ? 0 : -1}>
+                        ← Back to sign in
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <p className="mt-5 text-center text-xs leading-5 text-slate-400 lg:text-left">
-          {deviceLabel}.{' '}
-          {portal === 'phc'
-            ? 'The first sign-in needs a connection; after that the PHC works offline and syncs when the network is back.'
-            : 'The district system shows live data from every PHC as it syncs.'}
-        </p>
       </div>
+    </section>
+  );
+}
+
+export function Login() {
+  const [portal, setPortal] = useState<Portal>(readPortal);
+  const [introDone, setIntroDone] = useState(() => !shouldPlayIntro());
+  const [wide, setWide] = useState(() => window.matchMedia('(min-width: 768px)').matches);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const on = () => setWide(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+
+  return (
+    <div className="login-page relative min-h-screen overflow-x-hidden">
+      <LiquidMetal />
+      {!introDone && <PhcIntro onDone={() => setIntroDone(true)} />}
+
+      <div className="relative z-10 flex min-h-screen flex-col">
+        {/* Title and tagline float above the straps, which run up to the top edge. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-center px-4 pt-6 sm:pt-8">
+          <ParticleTitle className="pointer-events-auto h-[72px] w-full max-w-[720px] sm:h-[110px]" />
+          <p className="mt-1 text-center text-[11px] font-medium uppercase tracking-[3px] text-[rgba(236,231,218,0.55)] sm:mt-2">
+            Offline-first patient records · choose your pass
+          </p>
+        </div>
+
+        {!introDone ? null : wide ? (
+          <div className="relative mx-auto grid w-full max-w-[860px] grid-cols-2 gap-10 px-6 pb-16" style={{ ['--strap-len' as string]: '172px' }}>
+            <IdPass portal="phc" delay={0.15} from="left" />
+            <IdPass portal="district" delay={0.45} from="right" />
+          </div>
+        ) : (
+          <div className="relative mx-auto flex w-full flex-col items-center px-4 pb-10" style={{ ['--strap-len' as string]: '196px' }}>
+            <div className="pass-switch absolute top-[140px] z-20" role="group" aria-label="Choose a pass">
+              {(['phc', 'district'] as const).map((p) => (
+                <button key={p} type="button" aria-pressed={portal === p} onClick={() => setPortal(p)}>
+                  {p === 'phc' ? 'PHC' : 'Admin'}
+                </button>
+              ))}
+            </div>
+            <IdPass key={portal} portal={portal} delay={0.1} from={portal === 'phc' ? 'left' : 'right'} />
+          </div>
+        )}
+
+        <p className="relative mt-auto pb-5 text-center text-[11px] text-[rgba(236,231,218,0.45)]">
+          {deviceLabel} · The first sign-in needs a connection; after that the PHC works offline.
+        </p>
       </div>
     </div>
   );

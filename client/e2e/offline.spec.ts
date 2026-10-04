@@ -20,10 +20,10 @@ test('records can be created and read with no network, then sync', async ({ brow
   });
   test.skip(!hasSw, 'Service worker only runs in the production build (npm run build && npm run preview)');
 
-  await page.getByLabel('Username').fill(user.username);
-  await page.getByLabel('Password').fill(user.password);
-  await page.getByRole('radio', { name: /^PHC/ }).check({ force: true });
-  await page.getByRole('button', { name: 'Sign in to PHC' }).click();
+  const pass = page.getByRole('region', { name: 'PHC sign-in pass' });
+  await pass.locator('#pass-phc-user').fill(user.username);
+  await pass.locator('#pass-phc-pass').fill(user.password);
+  await pass.getByRole('button', { name: 'Sign in to PHC' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
 
   await context.setOffline(true);
