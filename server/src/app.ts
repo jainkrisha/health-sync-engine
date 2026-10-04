@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { AUDIT_ROLES, REVIEW_ROLES } from '@shared/types';
+import { AUDIT_ROLES, PORTAL_ROLES, REVIEW_ROLES } from '@shared/types';
 import { config } from './config';
 import { requireAuth, requireRole } from './middleware/auth';
 import { errorHandler } from './middleware/error';
@@ -12,6 +12,7 @@ import { conflictsRouter } from './routes/conflicts';
 import { auditRouter } from './routes/audit';
 import { usersRouter, devicesRouter } from './routes/users';
 import { statsRouter } from './routes/stats';
+import { phcsRouter } from './routes/phcs';
 
 export function createApp() {
   const app = express();
@@ -31,6 +32,7 @@ export function createApp() {
   app.use('/api/users', requireAuth, requireRole('admin'), usersRouter);
   app.use('/api/devices', requireAuth, requireRole('admin'), devicesRouter);
   app.use('/api/stats', requireAuth, statsRouter);
+  app.use('/api/phcs', requireAuth, requireRole(...PORTAL_ROLES.district), phcsRouter);
 
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: 'Not found' });

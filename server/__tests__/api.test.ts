@@ -213,6 +213,18 @@ describe('sync and merge', () => {
     expect(res.body.resolutions.manual).toBe(1);
     expect(res.body.mutationsByDay).toHaveLength(7);
   });
+
+  it('lists PHCs for the district only', async () => {
+    const worker = await request(server.app).get('/api/phcs').set('Authorization', `Bearer ${tokens.worker1}`);
+    expect(worker.status).toBe(403);
+    const res = await request(server.app).get('/api/phcs').set('Authorization', `Bearer ${tokens.admin}`);
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.phcs)).toBe(true);
+    for (const phc of res.body.phcs) {
+      expect(phc).toMatchObject({ name: expect.any(String), patientCount: expect.any(Number) });
+      expect(phc.activity).toHaveLength(7);
+    }
+  });
 });
 
 describe('REST patient routes', () => {

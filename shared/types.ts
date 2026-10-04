@@ -382,6 +382,20 @@ export interface StatsResponse {
   devices: number;
 }
 
+/** District view of one Primary Health Centre (GET /api/phcs). */
+export interface PhcSummary {
+  name: string;
+  staff: { name: string; username: string; role: Role }[];
+  devices: { clientId: string; deviceName: string; username: string; lastSyncAt: string; online: boolean }[];
+  patientCount: number;
+  recentPatients: { id: string; name: string; updatedAt: string; needsReview: boolean }[];
+  activity: { date: string; count: number }[];
+  syncedThisWeek: number;
+  openConflicts: { patientName: string; label: string; createdAt: string }[];
+  lastSyncAt: string | null;
+  since: string | null;
+}
+
 export interface DeviceInfo {
   clientId: string;
   deviceName: string;

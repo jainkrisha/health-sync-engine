@@ -11,8 +11,9 @@ import PatientDetail from './pages/PatientDetail/PatientDetail';
 import ConflictDashboard from './pages/ConflictDashboard/ConflictDashboard';
 import AuditTrail from './pages/AuditTrail/AuditTrail';
 import Admin from './pages/Admin/Admin';
+import PhcLibrary from './pages/Phcs/PhcLibrary';
 import NotFound from './pages/NotFound';
-import { AUDIT_ROLES, REVIEW_ROLES, WRITE_ROLES } from '@shared/types';
+import { AUDIT_ROLES, PORTAL_ROLES, REVIEW_ROLES, WRITE_ROLES } from '@shared/types';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -67,6 +68,14 @@ export const router = createBrowserRouter([
         element: (
           <RoleGuard allow={AUDIT_ROLES} fallback="redirect">
             <AuditTrail />
+          </RoleGuard>
+        ),
+      },
+      {
+        path: 'phcs',
+        element: (
+          <RoleGuard allow={PORTAL_ROLES.district} fallback="redirect">
+            <PhcLibrary />
           </RoleGuard>
         ),
       },
