@@ -1,0 +1,268 @@
+/* PHC library: one book per Primary Health Centre on a wooden shelf. */
+.phc-library {
+  --wall: #e9e1d2;
+  --wall-2: #ddd2bf;
+  --wood: #9a6a43;
+  --wood-dark: #6f4a2c;
+  --wood-light: #b98458;
+  --ink: #1d2733;
+  --cream: #f4efe3;
+  --orange: #e0663a;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 30%, #f1ebde 0%, var(--wall) 55%, var(--wall-2) 100%);
+  box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.08), inset 0 -60px 120px -60px rgba(80, 50, 20, 0.25);
+  padding: 28px clamp(16px, 4vw, 56px) 40px;
+}
+.dark .phc-library {
+  background: radial-gradient(ellipse 80% 70% at 50% 30%, #2a241d 0%, #1f1a15 60%, #15120e 100%);
+}
+
+/* Shelf: the books stand on a plank with a front lip and a soft shadow. */
+.phc-shelf {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 28px 34px;
+  padding: 26px 8px 0;
+}
+.phc-shelf-row {
+  position: relative;
+  padding-bottom: 34px;
+}
+.phc-shelf-row::after {
+  content: '';
+  position: absolute;
+  left: -40px;
+  right: -40px;
+  bottom: 0;
+  height: 22px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 22px),
+    linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 40%, var(--wood-dark) 100%);
+  box-shadow: 0 18px 24px -12px rgba(60, 35, 15, 0.55), inset 0 1px 0 rgba(255, 230, 200, 0.4);
+}
+.phc-shelf-row::before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  right: -40px;
+  bottom: 22px;
+  height: 14px;
+  background: linear-gradient(180deg, rgba(60, 35, 15, 0) 0%, rgba(60, 35, 15, 0.22) 100%);
+}
+
+/* A book standing face-out, with a visible spine edge and page block. */
+.phc-book {
+  position: relative;
+  width: 168px;
+  height: 232px;
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateY(-14deg);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: left;
+}
+.phc-book:hover,
+.phc-book:focus-visible {
+  transform: perspective(900px) rotateY(-4deg) translateY(-10px);
+}
+.phc-book:focus-visible { outline: none; filter: drop-shadow(0 0 0 #e0663a) drop-shadow(0 0 6px rgba(224, 102, 58, 0.7)); }
+.phc-book-pages {
+  position: absolute;
+  top: 4px;
+  right: -12px;
+  width: 14px;
+  height: calc(100% - 8px);
+  transform: rotateY(90deg);
+  transform-origin: left;
+  background: repeating-linear-gradient(90deg, #f6f1e4 0 1px, #e3dccb 1px 2px);
+}
+.phc-book-cover {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px 6px 6px 3px;
+  overflow: hidden;
+  box-shadow: 0 22px 30px -16px rgba(40, 25, 10, 0.75), inset 4px 0 0 rgba(0, 0, 0, 0.18), inset 6px 0 6px -2px rgba(0, 0, 0, 0.25);
+}
+
+/* Cover art shared by the shelf book and the open book. */
+.cover-art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 16px 14px 12px 18px;
+  display: flex;
+  flex-direction: column;
+  color: var(--cream);
+  background:
+    radial-gradient(ellipse 120% 70% at 70% 20%, rgba(255, 255, 255, 0.14), transparent 60%),
+    linear-gradient(160deg, var(--c1), var(--c2));
+}
+.cover-art::before {
+  content: '';
+  position: absolute;
+  inset: 8px 8px 8px 12px;
+  border: 1px solid rgba(244, 239, 227, 0.35);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.cover-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.5) 0.6px, transparent 0.7px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
+.cover-kicker { font: 600 8.5px/1.2 'Geist Mono', ui-monospace, monospace; letter-spacing: 2px; opacity: 0.8; }
+.cover-title { margin-top: 10px; font: 800 22px/1.02 'Geist', 'Inter', sans-serif; letter-spacing: -0.6px; text-wrap: balance; }
+.cover-emblem { margin: auto 0; align-self: center; }
+.cover-foot { display: flex; justify-content: space-between; font: 600 8px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 1.4px; opacity: 0.8; }
+
+/* ── The open book ───────────────────────────────────────────────────────── */
+.book-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 16px 96px;
+  background: rgba(233, 225, 210, 0.82);
+  backdrop-filter: blur(16px) saturate(0.9);
+  -webkit-backdrop-filter: blur(16px) saturate(0.9);
+  animation: bookStageIn 0.35s ease-out both;
+  overflow: hidden;
+}
+.dark .book-stage { background: rgba(21, 18, 14, 0.86); }
+@keyframes bookStageIn { from { opacity: 0; } to { opacity: 1; } }
+
+.book {
+  --w: min(360px, 44vw);
+  --h: calc(var(--w) * 1.38);
+  position: relative;
+  width: calc(var(--w) * 2);
+  height: var(--h);
+  perspective: 2400px;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: bookIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (max-width: 700px) {
+  .book { --w: min(320px, calc(100vw - 40px)); }
+}
+/* Closed: show the cover centred; open: centre the spread. */
+.book.is-closed { transform: translateX(calc(var(--w) * -0.5)); }
+@media (max-width: 700px) {
+  .book.is-open { transform: translateX(calc(var(--w) * -0.5)); }
+}
+@keyframes bookIn {
+  from { opacity: 0; translate: 0 40px; scale: 0.7; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+
+.leaf {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--w);
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.leaf.is-turned { transform: rotateY(-180deg); }
+.leaf-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+.leaf-face.back { transform: rotateY(180deg); }
+
+.page {
+  background:
+    linear-gradient(90deg, rgba(120, 90, 50, 0.16) 0%, rgba(120, 90, 50, 0) 7%),
+    linear-gradient(180deg, #fbf8f0 0%, #f2ecdf 100%);
+  color: var(--ink);
+  padding: clamp(18px, 3.4vw, 34px) clamp(16px, 3vw, 30px);
+  box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.06);
+  border-radius: 0 6px 6px 0;
+}
+.leaf-face.back .page,
+.page.left {
+  border-radius: 6px 0 0 6px;
+  background:
+    linear-gradient(270deg, rgba(120, 90, 50, 0.18) 0%, rgba(120, 90, 50, 0) 8%),
+    linear-gradient(180deg, #fbf8f0 0%, #f2ecdf 100%);
+}
+.page-num { position: absolute; bottom: 14px; font: 600 10px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 1px; color: rgba(29, 39, 51, 0.45); }
+.page-kicker { font: 600 9.5px/1.2 'Geist Mono', ui-monospace, monospace; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); }
+.page-title { margin-top: 6px; font: 800 clamp(20px, 2.4vw, 28px)/1.05 'Geist', 'Inter', sans-serif; letter-spacing: -0.6px; }
+.page-rule { height: 1px; margin: 14px 0; background: repeating-linear-gradient(90deg, rgba(29, 39, 51, 0.3) 0 4px, transparent 4px 8px); }
+
+/* Back cover sits under everything on the right. */
+.book-back {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--w);
+  height: 100%;
+  border-radius: 0 6px 6px 0;
+  background: linear-gradient(160deg, var(--c2), var(--c1));
+  box-shadow: 0 40px 60px -24px rgba(40, 25, 10, 0.6);
+}
+.book-back::before {
+  content: '';
+  position: absolute;
+  inset: 6px 8px 6px 0;
+  border-radius: 0 4px 4px 0;
+  background: repeating-linear-gradient(0deg, #f6f1e4 0 1px, #e7e0cf 1px 2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf, .book, .phc-book { transition: none; animation: none; }
+}
+
+/* The 3D shelf (an iframe) fills the page under the header. */
+.phc-shelf-frame {
+  position: relative;
+  height: calc(100vh - 13rem);
+  min-height: 520px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #e2d8c6;
+  box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.08), 0 30px 60px -36px rgba(27, 24, 20, 0.5);
+}
+@media (max-width: 1023px) {
+  .phc-shelf-frame { height: calc(100vh - 15rem); }
+}
+
+/* Open-register pages: always dark ink on paper, whatever the app theme, in the UI typeface. */
+.book .page,
+.book .page h3,
+.book .page p,
+.book .page li,
+.book .page b,
+.book .page span { color: #1d2733; }
+.book .page { font-family: 'Geist', 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.55; }
+.book .page .page-kicker { color: #bb4f29; font-family: 'Geist Mono', ui-monospace, monospace; }
+.book .page .page-title { font-family: 'Geist', 'Inter', sans-serif; font-weight: 800; color: #1d2733; letter-spacing: -0.02em; }
+.book .page .page-num { color: rgba(29, 39, 51, 0.5); }
+.book .page a { color: #bb4f29; }
+
+/* Clicking a page turns it: the right-hand page forward, the left-hand page back. */
+.leaf-face.turnable { cursor: pointer; }
+.leaf-face.front.turnable:hover .page { box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.06), inset -18px 0 24px -20px rgba(120, 90, 50, 0.45); }
+.leaf-face.back.turnable:hover .page { box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.06), inset 18px 0 24px -20px rgba(120, 90, 50, 0.45); }

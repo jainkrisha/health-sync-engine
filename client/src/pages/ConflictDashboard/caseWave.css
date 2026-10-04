@@ -1,0 +1,203 @@
+/* Review-case wave (after the "Character Wave" carousel), in the HealthSync palette. */
+.case-wave {
+  position: relative;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border-radius: 20px;
+  color: #ece7da;
+  background: #1b1814;
+  box-shadow: 0 30px 60px -30px rgba(17, 15, 12, 0.7);
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+}
+.case-wave-head {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 20px 22px 0;
+}
+.case-wave-kicker { font: 600 10px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 2.4px; text-transform: uppercase; color: #a39a88; }
+.case-wave-title { margin-top: 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.case-wave-help { font: 500 10.5px/1.4 'Geist Mono', ui-monospace, monospace; letter-spacing: 1px; color: #7a7263; }
+
+.case-wave-stage {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  position: relative;
+  height: 400px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(224, 102, 58, 0.06), transparent 24rem),
+    #1b1814;
+  perspective: 1100px;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+.case-wave-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 34%, rgba(0, 0, 0, 0.13) 70%, rgba(0, 0, 0, 0.36) 120%);
+}
+.case-wave-stage::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  transform: rotate(7deg);
+  mix-blend-mode: soft-light;
+}
+.case-wave-deck { position: absolute; inset: 0; z-index: 2; transform-style: preserve-3d; }
+
+.case-wave-card {
+  --focus: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(130px, 11vw, 168px);
+  aspect-ratio: 0.69;
+  padding: clamp(8px, 0.78vw, 12px);
+  border: 0;
+  border-radius: clamp(10px, 1.05vw, 16px);
+  color: #ece7da;
+  text-align: center;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 34%), var(--card-color);
+  box-shadow:
+    0 calc(7px + var(--focus) * 20px) calc(13px + var(--focus) * 40px) rgba(0, 0, 0, calc(0.25 + var(--focus) * 0.34)),
+    inset 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.24);
+  appearance: none;
+  outline: none;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  cursor: pointer;
+}
+.case-wave-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(240, 160, 99, calc(0.05 + var(--focus) * 0.3));
+  border-radius: inherit;
+  pointer-events: none;
+}
+.case-wave-card:focus-visible::after { border-color: #f0a063; box-shadow: 0 0 0 3px rgba(224, 102, 58, 0.3); }
+
+/* The "portrait" of a case: who, and the two doses that clash. */
+.case-wave-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: clamp(7px, 0.75vw, 11px);
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.12), transparent 60%),
+    rgba(17, 15, 12, 0.32);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.05), inset 0 -16px 28px rgba(0, 0, 0, 0.16);
+  transform: translateZ(7px);
+}
+.case-wave-chip {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #e0663a;
+  color: #fff8f0;
+  font: 700 7.5px/1 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.case-wave-initials { font-size: clamp(30px, 2.6vw, 40px); font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+.case-wave-dose { display: flex; align-items: baseline; gap: 4px; font: 600 10px/1 'Geist Mono', ui-monospace, monospace; color: #f5c3ab; }
+.case-wave-dose i { font-style: normal; font-size: 8px; color: rgba(236, 231, 218, 0.55); }
+
+.case-wave-identity {
+  display: grid;
+  place-items: center;
+  gap: clamp(2px, 0.25vw, 4px);
+  margin-top: clamp(7px, 0.72vw, 11px);
+  transform: translateZ(8px);
+}
+.case-wave-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(11px, 0.85vw, 13px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.case-wave-role {
+  max-width: 100%;
+  overflow: hidden;
+  font: 500 clamp(8px, 0.6vw, 9.5px)/1.2 'Geist Mono', ui-monospace, monospace;
+  color: rgba(236, 231, 218, 0.6);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.case-wave-open {
+  margin-top: clamp(4px, 0.4vw, 7px);
+  padding: 4px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  color: rgba(236, 231, 218, 0.85);
+  background: rgba(17, 15, 12, 0.86);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.case-wave-card[aria-current='true'] .case-wave-open { color: #fff8f0; background: #e0663a; border-color: transparent; }
+
+@media (max-width: 680px) {
+  .case-wave-stage { height: 520px; }
+  .case-wave-card { width: clamp(118px, 34vw, 140px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .case-wave-card { will-change: auto; }
+}
+
+/* The case opened from the wave. */
+.case-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 72px 16px 40px;
+  background: rgba(17, 15, 12, 0.6);
+  backdrop-filter: blur(6px);
+  animation: caseModalIn 0.25s ease-out both;
+}
+@keyframes caseModalIn { from { opacity: 0; } to { opacity: 1; } }
+.case-modal-panel { width: min(860px, 100%); animation: caseModalPanel 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes caseModalPanel { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.case-modal li > span:first-child { display: none; }
+
+/* The selected case: an orange rim and glow so it reads as picked. */
+.case-wave-card[aria-current='true'] {
+  box-shadow:
+    0 0 0 2px rgba(224, 102, 58, 0.85),
+    0 0 40px 2px rgba(224, 102, 58, 0.35),
+    0 30px 60px rgba(0, 0, 0, 0.55);
+}

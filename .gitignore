@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.env
+test-results/
+playwright-report/
+
+# Local Python virtualenv (not part of the project)
+venv/

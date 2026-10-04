@@ -1,0 +1,328 @@
+/* Audit trail branch graph, in the ID-card palette. */
+.bg-wrap {
+  --bg-surface: #ffffff;
+  --bg-review: #423d35;
+  --bg-ink: #1b1814;
+  --bg-muted: #7a7263;
+  --bg-line: #e2dbcc;
+  --bg-soft: #f7f4ee;
+  --bg-ember: #e0663a;
+}
+.dark .bg-wrap {
+  --bg-surface: #1b1814;
+  --bg-review: #e2dbcc;
+  --bg-ink: #efe9dd;
+  --bg-muted: #a39a89;
+  --bg-line: #2a2620;
+  --bg-soft: #221f1a;
+}
+
+.bg-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.bg-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--bg-line);
+  border-radius: 999px;
+  background: var(--bg-soft);
+  font-size: 12px;
+  color: var(--bg-ink);
+}
+.bg-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lane);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane) 22%, transparent);
+}
+.bg-legend-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.bg-legend-people {
+  color: var(--bg-muted);
+}
+.bg-help {
+  margin: 0 0 18px;
+  max-width: 70ch;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--bg-muted);
+}
+
+.bg-graph {
+  position: relative;
+}
+.bg-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.bg-svg path {
+  transition:
+    stroke-width 0.2s,
+    opacity 0.2s;
+}
+.bg-node-pending {
+  animation: bg-pulse 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes bg-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-node-pending {
+    animation: none;
+  }
+}
+
+.bg-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bg-row {
+  position: relative;
+  min-height: 50px;
+  margin-left: calc(var(--graph-w) + 6px);
+  padding: 10px 12px 12px;
+  border-radius: 12px;
+  outline: none;
+  transition: background-color 0.2s;
+}
+.bg-row + .bg-row {
+  margin-top: 2px;
+}
+.bg-row.is-lit,
+.bg-row:focus-visible {
+  background: var(--bg-soft);
+}
+.bg-row.is-clash {
+  box-shadow: inset 3px 0 0 var(--bg-ember);
+}
+
+.bg-msg {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--bg-ink);
+}
+.bg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--bg-muted);
+}
+.bg-hash {
+  font:
+    500 11.5px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--bg-soft);
+  border: 1px solid var(--bg-line);
+  color: var(--bg-ink);
+}
+.bg-branch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--lane);
+  background: color-mix(in srgb, var(--lane) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lane) 35%, transparent);
+}
+.dark .bg-branch {
+  color: color-mix(in srgb, var(--lane) 70%, white);
+}
+.bg-clock {
+  opacity: 0.85;
+}
+.bg-decisions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.bg-clash {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #7d3520;
+  background: #fdf3ee;
+  border: 1px solid #f5c3ab;
+}
+.dark .bg-clash {
+  color: #f5c3ab;
+  background: rgba(224, 102, 58, 0.12);
+  border-color: rgba(224, 102, 58, 0.35);
+}
+.bg-clash .h-3\.5 {
+  margin-top: 2px;
+}
+.bg-link {
+  display: inline;
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--bg-ember);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.bg-link.bg-hash {
+  display: inline-block;
+  text-decoration: none;
+  margin-left: auto;
+}
+
+/* The merge node: both sides of the clash, side by side. */
+.bg-merge {
+  padding: 12px 14px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--bg-line);
+  background: var(--bg-surface);
+  box-shadow: 0 1px 2px rgba(27, 24, 20, 0.06);
+}
+.bg-row-pending .bg-merge {
+  border: 1.5px dashed var(--bg-ember);
+  background: color-mix(in srgb, var(--bg-ember) 5%, var(--bg-surface));
+}
+.bg-merge-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--bg-ink);
+}
+.bg-merge-head .bg-msg {
+  margin-right: auto;
+}
+.bg-diff {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+.bg-side {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--lane) 40%, transparent);
+  border-top: 4px solid var(--lane);
+  background: color-mix(in srgb, var(--lane) 7%, var(--bg-surface));
+}
+.bg-side.is-kept {
+  box-shadow: 0 0 0 2px #6e9f86;
+}
+.bg-side.is-dropped {
+  opacity: 0.6;
+}
+.bg-side.is-dropped .bg-side-value {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+.bg-side-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--lane);
+}
+.dark .bg-side-head {
+  color: color-mix(in srgb, var(--lane) 70%, white);
+}
+.bg-side-value {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--bg-ink);
+  font-variant-numeric: tabular-nums;
+}
+.bg-side-sub {
+  font-size: 11.5px;
+  color: var(--bg-muted);
+}
+.bg-vs {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--bg-ember);
+  box-shadow: 0 0 0 4px var(--bg-surface);
+}
+.bg-merge-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--bg-muted);
+}
+.bg-merge-foot b {
+  color: var(--bg-ink);
+}
+.bg-note {
+  flex-basis: 100%;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .bg-diff {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .bg-vs {
+    top: 50%;
+  }
+  .bg-row {
+    padding-right: 4px;
+  }
+}
