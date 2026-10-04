@@ -3,7 +3,7 @@ import { FIELD_LABELS } from '@shared/mergeEngine';
 import { formatDateTime, shortId } from './ui';
 
 const OUTCOME_STYLE: Record<string, string> = {
-  applied: 'badge-teal',
+  applied: 'badge-sage',
   merged: 'badge-blue',
   kept_existing: 'badge-slate',
   duplicate: 'badge-slate',
@@ -37,7 +37,7 @@ export function AuditList({ entries, showPatient = true }: { entries: AuditEntry
         <li key={e.id} className="relative">
           <span
             className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full ring-4 ring-white dark:ring-slate-900 ${
-              e.resolutionType === 'manual' ? 'bg-violet-500' : e.outcome === 'conflict' ? 'bg-orange-500' : e.concurrent ? 'bg-medical-500' : 'bg-teal-500'
+              e.resolutionType === 'manual' ? 'bg-medical-700' : e.outcome === 'conflict' ? 'bg-orange-500' : e.concurrent ? 'bg-medical-500' : 'bg-sage-500'
             }`}
             aria-hidden="true"
           />

@@ -136,12 +136,13 @@
     @apply inline-flex items-center gap-1 whitespace-nowrap rounded-badge px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
   }
   .badge-teal { @apply badge bg-teal-50 text-teal-800 ring-teal-600/15 dark:bg-teal-900/40 dark:text-teal-300 dark:ring-teal-400/20; }
+  .badge-sage { @apply badge bg-sage-50 text-sage-800 ring-sage-600/20 dark:bg-sage-900/40 dark:text-sage-200 dark:ring-sage-400/20; }
   .badge-blue { @apply badge bg-medical-50 text-medical-800 ring-medical-600/15 dark:bg-medical-900/40 dark:text-medical-300 dark:ring-medical-400/20; }
   .badge-warning { @apply badge bg-amber-50 text-amber-800 ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-400/20; }
   .badge-danger { @apply badge bg-rose-50 text-rose-700 ring-rose-600/15 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-400/20; }
   .badge-conflict { @apply badge bg-orange-50 text-orange-800 ring-orange-600/20 dark:bg-orange-900/30 dark:text-orange-300 dark:ring-orange-400/20; }
   .badge-slate { @apply badge bg-slate-100 text-slate-700 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-400/15; }
-  .badge-violet { @apply badge bg-violet-50 text-violet-800 ring-violet-600/15 dark:bg-violet-900/30 dark:text-violet-300 dark:ring-violet-400/20; }
+  .badge-violet { @apply badge bg-medical-800 text-medical-50 ring-medical-900/30 dark:bg-medical-700 dark:text-medical-50 dark:ring-medical-400/30; }
 
   /* ── Type ─────────────────────────────────────────────────────────────── */
   .page-title {

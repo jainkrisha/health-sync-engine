@@ -14,19 +14,19 @@ export interface TourScene {
 }
 
 const C = {
-  wall: 0xe8edf2,
-  wallDark: 0xd5dde6,
-  slate: 0x334155,
-  slateDark: 0x1e293b,
-  slateMid: 0x64748b,
-  teal: 0x14b8a6,
-  tealDark: 0x0f766e,
-  tealLight: 0x99f6e4,
-  white: 0xf8fafc,
+  wall: 0xefe9dd,
+  wallDark: 0xe2dbcc,
+  slate: 0x423d35,
+  slateDark: 0x1b1814,
+  slateMid: 0x7a7263,
+  teal: 0xe0663a, // burnt orange accent (ID-card palette)
+  tealDark: 0x9a4022,
+  tealLight: 0xf5c3ab,
+  white: 0xfaf7f0,
   wood: 0xc9a27e,
-  orange: 0xf97316,
+  orange: 0x3a4b5e, // navy for contrast against the orange accent
   skin: 0xe7c9a8,
-  green: 0x22c55e,
+  green: 0x3f8f6a,
 };
 
 const ROOM_W = 14;
@@ -100,16 +100,16 @@ function label(text: string, sub: string) {
   canvas.width = 1024;
   canvas.height = 256;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#0f172a';
+  ctx.fillStyle = '#1b1814';
   ctx.beginPath();
   ctx.roundRect(8, 8, 1008, 240, 36);
   ctx.fill();
-  ctx.fillStyle = '#14b8a6';
+  ctx.fillStyle = '#e0663a';
   ctx.fillRect(56, 70, 16, 116);
-  ctx.fillStyle = '#f8fafc';
+  ctx.fillStyle = '#ece7da';
   ctx.font = '700 92px Inter, system-ui, sans-serif';
   ctx.fillText(text, 100, 150);
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = '#a39a88';
   ctx.font = '500 40px Inter, system-ui, sans-serif';
   ctx.fillText(sub, 102, 206);
   const tex = new THREE.CanvasTexture(canvas);
@@ -125,9 +125,9 @@ function monitor(w = 1.1, h = 0.7) {
   canvas.width = 512;
   canvas.height = 256;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#04151a';
+  ctx.fillStyle = '#11100d';
   ctx.fillRect(0, 0, 512, 256);
-  ctx.strokeStyle = '#2dd4bf';
+  ctx.strokeStyle = '#f0a063';
   ctx.lineWidth = 6;
   ctx.beginPath();
   for (let x = 0; x <= 512; x += 4) {
@@ -195,12 +195,12 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
   renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf1f5f9);
-  scene.fog = new THREE.Fog(0xf1f5f9, 16, 34);
+  scene.background = new THREE.Color(0xf2ede3);
+  scene.fog = new THREE.Fog(0xf2ede3, 16, 34);
 
   const camera = new THREE.PerspectiveCamera(50, 16 / 9, 0.1, 120);
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 1.6));
+  scene.add(new THREE.HemisphereLight(0xfffaf0, 0xcdc4b1, 1.6));
   const sun = new THREE.DirectionalLight(0xffffff, 1.6);
   sun.position.set(8, 14, 6);
   sun.castShadow = true;
@@ -254,7 +254,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
   // ── Ward ─────────────────────────────────────────────────────────────────
   {
     const z = ROOM_Z[1];
-    buildRoomShell(scene, z, 0xdfe7ea, true, true);
+    buildRoomShell(scene, z, 0xe6ddcd, true, true);
     const bedFrame = mat(C.slateMid);
     const sheet = mat(C.white);
     const blanket = mat(C.tealLight);
@@ -266,7 +266,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
       scene.add(box(0.5, 0.14, 0.7, sheet, -5.2, 0.98, bz));
       scene.add(box(0.12, 1.2, 1.1, bedFrame, -5.55, 0.9, bz));
       // patient lying down
-      const p = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 1.1, 6, 12), mat(i === 1 ? C.orange : 0x93c5fd));
+      const p = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 1.1, 6, 12), mat(i === 1 ? C.orange : 0x8ea3bb));
       p.rotation.z = Math.PI / 2;
       p.position.set(-4.2, 1.12, bz);
       p.castShadow = true;
@@ -276,7 +276,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
       scene.add(head);
       // IV stand
       scene.add(cyl(0.03, 0.03, 2, mat(C.slate), -3, 1, bz - 0.7, 8));
-      const bag = box(0.22, 0.32, 0.08, mat(0xbfdbfe, { transparent: true, opacity: 0.85 }), -3, 1.85, bz - 0.7);
+      const bag = box(0.22, 0.32, 0.08, mat(0xdbe3ec, { transparent: true, opacity: 0.85 }), -3, 1.85, bz - 0.7);
       scene.add(bag);
       // bedside table + monitor
       scene.add(box(0.6, 0.7, 0.6, mat(C.white), -5.9, 0.35, bz - 0.9));
@@ -289,7 +289,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
       }
       // privacy curtain
       if (i < 2) {
-        const curtain = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.4, 12, 1), mat(0x7dd3c0, { side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
+        const curtain = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.4, 12, 1), mat(0xe7a07a, { side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
         const pos = curtain.geometry.attributes.position;
         for (let v = 0; v < pos.count; v++) pos.setZ(v, Math.sin(pos.getX(v) * 6) * 0.06);
         curtain.geometry.computeVertexNormals();
@@ -308,11 +308,11 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
   // ── Operating theatre ────────────────────────────────────────────────────
   {
     const z = ROOM_Z[2];
-    buildRoomShell(scene, z, 0xcfe9e5, true, true);
+    buildRoomShell(scene, z, 0xf0dccf, true, true);
     scene.add(cyl(0.35, 0.5, 0.8, mat(C.slateMid), 0, 0.4, z - 1));
     scene.add(box(2.6, 0.18, 0.9, mat(C.slate), 0, 0.88, z - 1));
-    scene.add(box(2.4, 0.1, 0.8, mat(0x99f6e4), 0, 1.0, z - 1));
-    const patient = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 1.2, 6, 12), mat(0x5eead4));
+    scene.add(box(2.4, 0.1, 0.8, mat(0xf5c3ab), 0, 1.0, z - 1));
+    const patient = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 1.2, 6, 12), mat(0xee9f7a));
     patient.rotation.z = Math.PI / 2;
     patient.position.set(0.1, 1.27, z - 1);
     scene.add(patient);
@@ -337,7 +337,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
     scene.add(person(C.tealDark, 1.2, z - 2.0, { cap: C.teal, rotY: -0.4 }));
     scene.add(person(C.tealDark, 1.6, z + 0.2, { cap: C.teal, rotY: -2.5 }));
     // trolley and anaesthesia machine
-    scene.add(box(1.2, 0.08, 0.6, mat(0xcbd5e1, { metalness: 0.6, roughness: 0.3 }), -2.6, 1.0, z + 0.6));
+    scene.add(box(1.2, 0.08, 0.6, mat(0xcdc4b1, { metalness: 0.6, roughness: 0.3 }), -2.6, 1.0, z + 0.6));
     for (const dx of [-0.5, 0.5]) for (const dz of [-0.24, 0.24]) scene.add(cyl(0.03, 0.03, 1, mat(C.slate), -2.6 + dx, 0.5, z + 0.6 + dz, 6));
     scene.add(box(0.9, 1.6, 0.8, mat(C.slate), 3.4, 0.8, z - 2.4));
     const mon = monitor(0.9, 0.6);
@@ -354,7 +354,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
   let couch: THREE.Mesh | null = null;
   {
     const z = ROOM_Z[3];
-    buildRoomShell(scene, z, 0xe2e8f0, false, true);
+    buildRoomShell(scene, z, 0xe9e3d6, false, true);
     const gantry = new THREE.Group();
     // Housing: a rounded block with the bore cut through it.
     const shape = new THREE.Shape();
@@ -380,7 +380,7 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
     housing.position.z = -0.45;
     housing.castShadow = true;
     housing.receiveShadow = true;
-    const inner = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.9, 48, 1, true), mat(0xcbd5e1, { side: THREE.BackSide }));
+    const inner = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.9, 48, 1, true), mat(0xcdc4b1, { side: THREE.BackSide }));
     inner.rotation.x = Math.PI / 2;
     inner.position.y = 0.05;
     const accent = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.045, 12, 64), new THREE.MeshBasicMaterial({ color: C.teal }));
@@ -388,16 +388,16 @@ export function createHospitalScene(canvas: HTMLCanvasElement): TourScene {
     gantry.add(housing, inner, accent);
     gantry.position.set(0, 1.75, z - 2.8);
     scene.add(gantry);
-    animated.push((t) => ((accent.material as THREE.MeshBasicMaterial).color.setHSL(0.47, 0.75, 0.42 + Math.sin(t * 3) * 0.08)));
+    animated.push((t) => ((accent.material as THREE.MeshBasicMaterial).color.setHSL(0.045, 0.72, 0.42 + Math.sin(t * 3) * 0.08)));
     scene.add(box(0.8, 0.8, 3.6, mat(C.slateMid), 0, 0.4, z + 0.2));
     couch = box(0.7, 0.14, 3.2, mat(C.white), 0, 0.88, z + 0.4);
     scene.add(couch);
-    const pt = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 1.2, 6, 12), mat(0x93c5fd));
+    const pt = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 1.2, 6, 12), mat(0x8ea3bb));
     pt.rotation.x = Math.PI / 2;
     pt.position.set(0, 0.28, 0.2);
     couch.add(pt);
     // control window and technician
-    scene.add(box(4.6, 1.6, 0.12, mat(0x9bd9d0, { transparent: true, opacity: 0.35, roughness: 0.1 }), 4.6, 2.0, z + 3.2));
+    scene.add(box(4.6, 1.6, 0.12, mat(0xd8c9b4, { transparent: true, opacity: 0.35, roughness: 0.1 }), 4.6, 2.0, z + 3.2));
     scene.add(box(2, 0.9, 0.8, mat(C.slate), 5.4, 0.45, z + 4.6));
     scene.add(person(C.teal, 5.4, z + 5.4, { rotY: Math.PI }));
     const mon = monitor(1.0, 0.6);

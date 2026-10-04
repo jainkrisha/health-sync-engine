@@ -36,8 +36,8 @@ export default defineConfig({
         name: 'HealthSync',
         short_name: 'HealthSync',
         description: 'Offline-first patient record system',
-        theme_color: '#0f172a',
-        background_color: '#f8fafc',
+        theme_color: '#1b1814',
+        background_color: '#f7f4ee',
         display: 'standalone',
         start_url: '/',
         icons: [
