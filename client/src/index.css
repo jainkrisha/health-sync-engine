@@ -1,5 +1,5 @@
-/* Inter is loaded when online; offline it falls back to system-ui (not an error). */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Inter (UI) and Geist Mono (loader, ID cards) load when online; offline it falls back to system-ui (not an error). */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400..800&family=Geist+Mono:wght@200..700&display=swap');
 
 @tailwind base;
 @tailwind components;
