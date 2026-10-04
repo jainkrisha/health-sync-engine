@@ -9,7 +9,7 @@ import { useSyncEngine } from '../../hooks/useSync';
 import { usePatients } from '../../hooks/usePatients';
 import { AuditList } from '../../components/AuditList';
 import { Icon } from '../../components/Icon';
-import { EmptyState, OfflineNotice, PageHeader, SkeletonRows } from '../../components/ui';
+import { EmptyState, ErrorNotice, OfflineNotice, PageHeader, SkeletonRows } from '../../components/ui';
 
 type TypeFilter = 'all' | 'automatic' | 'manual';
 
@@ -40,6 +40,9 @@ export default function AuditTrail() {
     manual: entries.filter((e) => e.resolutionType === 'manual').length,
   };
 
+  const activeFilters = [patientId, from, to, type !== 'all' ? type : '', concurrentOnly ? 'c' : ''].filter(Boolean).length;
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   const clear = () => {
     setPatientId('');
     setFrom('');
@@ -53,13 +56,27 @@ export default function AuditTrail() {
       <PageHeader
         title="Audit trail"
         subtitle={
-          <span className="inline-flex items-center gap-1.5">
-            <Icon name="lock" className="h-3.5 w-3.5" /> Append-only record of how every change was merged. Entries cannot be edited or deleted.
+          <span className="flex items-start gap-1.5">
+            <Icon name="lock" className="mt-1 h-3.5 w-3.5 flex-shrink-0" /> Append-only record of how every change was merged. Entries cannot be edited or deleted.
           </span>
         }
       />
 
-      <div className="card mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <button
+        type="button"
+        className="btn-secondary mb-3 w-full justify-between md:hidden"
+        aria-expanded={filtersOpen}
+        aria-controls="audit-filters"
+        onClick={() => setFiltersOpen((o) => !o)}
+      >
+        <span className="inline-flex items-center gap-2">
+          <Icon name="list" className="h-4 w-4" /> Filters
+          {activeFilters > 0 && <span className="rounded-full bg-teal-600 px-1.5 text-[11px] font-bold text-white tabular-nums">{activeFilters}</span>}
+        </span>
+        <Icon name="chevronDown" className={`h-4 w-4 transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <div id="audit-filters" className={`card mb-6 gap-4 md:grid md:grid-cols-2 lg:grid-cols-5 ${filtersOpen ? 'grid animate-fade-in' : 'hidden'}`}>
         <div className="lg:col-span-2">
           <label htmlFor="audit-patient" className="form-label">Patient</label>
           <select id="audit-patient" className="form-input" value={patientId} onChange={(e) => setPatientId(e.target.value)}>
@@ -89,8 +106,10 @@ export default function AuditTrail() {
             Only concurrent edits (real merges)
           </label>
           <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-            <span>{entries.length} entries · {counts.automatic} automatic · {counts.manual} manual</span>
-            <button className="btn-ghost px-2 py-1 text-xs" onClick={clear}>Clear filters</button>
+            <span className="tabular-nums">{entries.length} entries · {counts.automatic} automatic · {counts.manual} manual</span>
+            <button className="btn-ghost btn-sm" onClick={clear} disabled={activeFilters === 0}>
+              <Icon name="x" className="h-3.5 w-3.5" /> Clear filters
+            </button>
           </div>
         </div>
       </div>
@@ -100,9 +119,17 @@ export default function AuditTrail() {
       ) : loading && !data ? (
         <SkeletonRows rows={4} />
       ) : error ? (
-        <p className="form-error" role="alert">{error}</p>
+        <ErrorNotice message={`Could not load the audit trail: ${error}`} />
       ) : entries.length === 0 ? (
-        <EmptyState icon="shield" title="No audit entries match" message="Try widening the filters." />
+        <div className="card">
+          <EmptyState
+            icon="shield"
+            tone="slate"
+            title="No audit entries match"
+            message="Try widening the filters."
+            action={activeFilters > 0 && <button type="button" className="btn-secondary" onClick={clear}>Clear filters</button>}
+          />
+        </div>
       ) : (
         <div className="card">
           <AuditList entries={entries} />

@@ -126,25 +126,66 @@ export function Login() {
     setServerError(null);
   };
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const submitting =
     mode === 'login' ? loginForm.formState.isSubmitting : registerForm.formState.isSubmitting;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-teal-50 p-4 dark:from-slate-950 dark:to-slate-900">
+    <div className="grid min-h-screen bg-slate-50 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] dark:bg-slate-950">
+      {/* Brand panel: same dark slate as the app sidebar, with the teal accent. */}
+      <aside className="relative hidden overflow-hidden bg-slate-900 p-12 text-slate-300 lg:flex lg:flex-col">
+        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-medical-500/10 blur-3xl" aria-hidden="true" />
+        <div className="relative flex items-center gap-3">
+          <img src="/favicon.svg" alt="" className="h-10 w-10 rounded-xl shadow-teal-glow" />
+          <span className="text-xl font-bold tracking-tight text-white">HealthSync</span>
+        </div>
+        <div className="relative my-auto max-w-md">
+          <h2 className="text-4xl font-bold leading-tight tracking-tight text-white">Patient records that keep working when the network does not.</h2>
+          <p className="mt-4 text-base leading-7 text-slate-400">
+            Every PHC device keeps an encrypted copy. When devices reconnect, edits merge field by field, and nothing clinical is guessed.
+          </p>
+          <ul className="mt-10 space-y-5">
+            {[
+              { icon: 'wifiOff' as const, title: 'Works offline', text: 'Add, edit and review patients with no connection.' },
+              { icon: 'merge' as const, title: 'Safe merging', text: 'Allergies are never lost; conflicting doses go to a reviewer.' },
+              { icon: 'shield' as const, title: 'Full audit trail', text: 'Every merge decision is recorded and cannot be edited.' },
+            ].map((f) => (
+              <li key={f.title} className="flex gap-4">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/5 text-teal-300 ring-1 ring-inset ring-white/10">
+                  <Icon name={f.icon} className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="block font-semibold text-white">{f.title}</span>
+                  <span className="block text-sm text-slate-400">{f.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="relative text-xs text-slate-500">Group 17 mini project · Offline-first, conflict-resolving health records</p>
+      </aside>
+
+      <div className="relative flex items-center justify-center bg-gradient-to-br from-slate-50 via-slate-50 to-teal-50/70 px-4 py-10 sm:px-8 dark:from-slate-950 dark:via-slate-950 dark:to-teal-950/30">
       <button
         onClick={toggleTheme}
-        className="btn-ghost fixed right-4 top-4"
+        className="btn-icon absolute right-4 top-4"
         aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        data-tip={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        data-tip-pos="left"
       >
         <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
       </button>
 
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
-          <img src="/favicon.svg" alt="" className="mx-auto mb-3 h-14 w-14" />
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">HealthSync</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Offline-first patient records for field health teams
+      <div className="w-full max-w-md animate-fade-in">
+        <div className="mb-8 text-center lg:text-left">
+          <img src="/favicon.svg" alt="" className="mx-auto mb-4 h-14 w-14 rounded-2xl shadow-teal-glow lg:hidden" />
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+            {mode === 'login' ? 'Sign in to HealthSync' : 'Create your account'}
+          </h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            {mode === 'login' ? 'Choose where you work, then sign in.' : 'Offline-first patient records for field health teams.'}
           </p>
         </div>
 
@@ -154,7 +195,7 @@ export function Login() {
             {PORTALS.map((p) => (
               <label
                 key={p}
-                className="flex cursor-pointer flex-col gap-1 rounded-xl border-2 border-slate-200 bg-white p-3 text-sm shadow-sm transition-colors has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-500 dark:border-slate-700 dark:bg-slate-900 dark:has-[:checked]:bg-teal-950/40"
+                className="relative flex cursor-pointer flex-col gap-1 rounded-xl border-2 border-slate-200 bg-white p-3.5 text-sm shadow-sm transition-[border-color,background-color,box-shadow] duration-150 hover:border-slate-300 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-500 has-[:focus-visible]:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600 dark:has-[:checked]:border-teal-500 dark:has-[:checked]:bg-teal-950/40"
               >
                 <input
                   type="radio"
@@ -165,6 +206,11 @@ export function Login() {
                   className="sr-only"
                   aria-label={`${PORTAL_INFO[p].title}: ${PORTAL_INFO[p].subtitle}`}
                 />
+                {portal === p && (
+                  <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-white animate-scale-in" aria-hidden="true">
+                    <Icon name="check" className="h-3 w-3" />
+                  </span>
+                )}
                 <span className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
                   <Icon
                     name={PORTAL_INFO[p].icon}
@@ -180,7 +226,7 @@ export function Login() {
           </div>
         </fieldset>
 
-        <div className="card border-t-4 border-t-teal-600 p-0">
+        <div className="card overflow-hidden p-0 shadow-card-lg sm:p-0">
           <div
             className="grid grid-cols-2 border-b border-slate-100 text-sm font-semibold dark:border-slate-800"
             role="tablist"
@@ -191,10 +237,10 @@ export function Login() {
                 role="tab"
                 aria-selected={mode === m}
                 onClick={() => switchMode(m)}
-                className={`py-3 transition-colors ${
+                className={`py-3.5 transition-[color,box-shadow,background-color] duration-150 ${
                   mode === m
                     ? 'text-teal-700 shadow-[inset_0_-2px_0] shadow-teal-600 dark:text-teal-300'
-                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/40 dark:hover:text-white'
                 }`}
               >
                 {m === 'login' ? 'Sign in' : 'Create account'}
@@ -206,9 +252,10 @@ export function Login() {
             {serverError && (
               <div
                 role="alert"
-                className="mb-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
+                className="mb-5 flex animate-fade-in items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
               >
-                {serverError}
+                <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <span>{serverError}</span>
               </div>
             )}
 
@@ -221,7 +268,9 @@ export function Login() {
                   <input
                     id="login-username"
                     autoComplete="username"
-                    className="form-input"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    className={`form-input ${loginForm.formState.errors.username ? 'form-input-error' : ''}`}
                     {...loginForm.register('username')}
                   />
                   {loginForm.formState.errors.username && (
@@ -232,13 +281,24 @@ export function Login() {
                   <label htmlFor="login-password" className="form-label">
                     Password
                   </label>
-                  <input
-                    id="login-password"
-                    type="password"
-                    autoComplete="current-password"
-                    className="form-input"
-                    {...loginForm.register('password')}
-                  />
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      className={`form-input pr-11 ${loginForm.formState.errors.password ? 'form-input-error' : ''}`}
+                      {...loginForm.register('password')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="btn-icon absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
+                      aria-label={showPassword ? 'Hide characters' : 'Show characters'}
+                      aria-pressed={showPassword}
+                    >
+                      <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-4 w-4" />
+                    </button>
+                  </div>
                   {loginForm.formState.errors.password && (
                     <p className="form-error">{loginForm.formState.errors.password.message}</p>
                   )}
@@ -247,11 +307,14 @@ export function Login() {
                   {submitting && <Spinner />}
                   {portal === 'phc' ? 'Sign in to PHC' : 'Sign in to district system'}
                 </button>
-                <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-                  Demo accounts (after <code className="font-mono">npm run server:seed</code>,
-                  password password123):{' '}
-                  {portal === 'phc' ? 'worker1, worker2' : 'admin, reviewer, auditor'}
-                </p>
+                <div className="rounded-xl bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-500 ring-1 ring-inset ring-slate-200/70 dark:bg-slate-800/50 dark:text-slate-400 dark:ring-slate-700/60">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Demo accounts</span> (password <code className="font-mono">password123</code>):{' '}
+                  {portal === 'phc' ? (
+                    <><code className="font-mono">worker1</code>, <code className="font-mono">worker2</code></>
+                  ) : (
+                    <><code className="font-mono">admin</code>, <code className="font-mono">reviewer</code>, <code className="font-mono">auditor</code></>
+                  )}
+                </div>
               </form>
             ) : (
               <form
@@ -324,7 +387,7 @@ export function Login() {
                       {PORTAL_ROLES.district.map((r) => (
                         <label
                           key={r}
-                          className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 text-sm has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50 dark:border-slate-700 dark:has-[:checked]:bg-teal-950/40"
+                          className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm transition-colors hover:border-slate-300 has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50 dark:border-slate-700 dark:hover:border-slate-600 dark:has-[:checked]:bg-teal-950/40"
                         >
                           <input
                             type="radio"
@@ -353,12 +416,13 @@ export function Login() {
             )}
           </div>
         </div>
-        <p className="mt-4 text-center text-xs text-slate-400">
+        <p className="mt-5 text-center text-xs leading-5 text-slate-400 lg:text-left">
           {deviceLabel}.{' '}
           {portal === 'phc'
             ? 'The first sign-in needs a connection; after that the PHC works offline and syncs when the network is back.'
             : 'The district system shows live data from every PHC as it syncs.'}
         </p>
+      </div>
       </div>
     </div>
   );

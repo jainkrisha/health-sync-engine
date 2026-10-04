@@ -65,12 +65,37 @@ export default {
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       borderRadius: {
-        card: '0.75rem',
+        card: '0.875rem',
         badge: '9999px',
       },
       boxShadow: {
-        card: '0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px -1px rgba(0,0,0,0.05)',
-        'card-lg': '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05)',
+        // Shadows are tinted with slate-900 so depth reads as part of the palette, not grey smudge.
+        card: '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)',
+        'card-lg': '0 4px 6px -1px rgb(15 23 42 / 0.06), 0 10px 24px -6px rgb(15 23 42 / 0.10)',
+        'card-hover': '0 2px 4px -1px rgb(15 23 42 / 0.06), 0 12px 28px -8px rgb(15 23 42 / 0.14)',
+        pop: '0 20px 48px -12px rgb(15 23 42 / 0.28)',
+        'teal-glow': '0 6px 16px -6px rgb(13 148 136 / 0.55)',
+      },
+      transitionTimingFunction: {
+        out: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      },
+      keyframes: {
+        fadeIn: { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'none' } },
+        slideUp: { from: { opacity: '0', transform: 'translateY(12px) scale(0.98)' }, to: { opacity: '1', transform: 'none' } },
+        scaleIn: { from: { opacity: '0', transform: 'scale(0.96)' }, to: { opacity: '1', transform: 'none' } },
+        overlayIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'slide-up': 'slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'scale-in': 'scaleIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'overlay-in': 'overlayIn 0.2s ease-out both',
+      },
+      zIndex: {
+        header: '20',
+        drawer: '40',
+        overlay: '50',
+        toast: '60',
       },
     },
   },

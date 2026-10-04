@@ -1,30 +1,76 @@
 /** Small presentational building blocks shared by every page. */
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { formatClock, type VectorClock } from '@shared/vectorClock';
 import { ROLE_LABELS, type Role } from '@shared/types';
 import { Icon, type IconName } from './Icon';
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  back,
+  eyebrow,
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  actions?: ReactNode;
+  /** Optional "back" link shown above the title, e.g. { to: '/patients', label: 'Patients' }. */
+  back?: { to: string; label: string };
+  eyebrow?: ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-5 mb-6">
-      <div className="min-w-0">
-        <h1 className="page-title">{title}</h1>
-        {subtitle && <p className="page-subtitle">{subtitle}</p>}
+    <header className="mb-6 border-b border-slate-200/80 pb-5 sm:mb-8 sm:pb-6 dark:border-slate-800">
+      {back && (
+        <Link
+          to={back.to}
+          aria-label={`Back to ${back.label}`}
+          className="group mb-3 inline-flex items-center gap-1 rounded-md text-sm font-medium text-slate-500 transition-colors hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300"
+        >
+          <Icon name="chevronRight" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
+          {back.label}
+        </Link>
+      )}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
+          <h1 className="page-title">{title}</h1>
+          {subtitle && <div className="page-subtitle">{subtitle}</div>}
+        </div>
+        {actions && <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">{actions}</div>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
-    </div>
+    </header>
   );
 }
 
-export function EmptyState({ icon, title, message, action }: { icon: IconName; title: string; message?: string; action?: ReactNode }) {
+export function EmptyState({
+  icon,
+  title,
+  message,
+  action,
+  tone = 'teal',
+  compact = false,
+}: {
+  icon: IconName;
+  title: string;
+  message?: string;
+  action?: ReactNode;
+  tone?: 'teal' | 'rose' | 'slate';
+  compact?: boolean;
+}) {
+  const toneClass = {
+    teal: 'bg-teal-50 text-teal-600 ring-teal-100 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-800/50',
+    rose: 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-800/50',
+    slate: 'bg-slate-100 text-slate-500 ring-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700',
+  }[tone];
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center fade-in">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300">
-        <Icon name={icon} className="h-7 w-7" />
+    <div className={`fade-in flex flex-col items-center justify-center text-center ${compact ? 'py-8' : 'py-14 sm:py-20'}`}>
+      <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ring-8 ${toneClass}`}>
+        <Icon name={icon} className="h-6 w-6" />
       </div>
-      <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
-      {message && <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">{message}</p>}
-      {action && <div className="mt-6">{action}</div>}
+      <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
+      {message && <p className="mt-1.5 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">{message}</p>}
+      {action && <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>
   );
 }
@@ -37,14 +83,43 @@ export function SkeletonRows({ rows = 4 }: { rows?: number }) {
   return (
     <div className="space-y-3" aria-busy="true" aria-label="Loading">
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="card flex items-center gap-4 py-4">
+        <div key={i} className="card flex items-center gap-4 py-4 sm:py-4" style={{ opacity: 1 - i * 0.12 }}>
           <div className="skeleton h-10 w-10 rounded-full" />
           <div className="flex-1 space-y-2">
             <div className="skeleton h-3.5 w-1/3" />
             <div className="skeleton h-3 w-1/2" />
           </div>
+          <div className="skeleton hidden h-7 w-16 rounded-lg sm:block" />
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Inline problem banner with an optional retry action. */
+export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+      <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
+      <p className="flex-1">{message}</p>
+      {onRetry && (
+        <button type="button" onClick={onRetry} className="font-semibold underline-offset-4 hover:underline">
+          Try again
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Card section heading: small label with an optional icon and a right-aligned slot. */
+export function SectionHeading({ id, icon, children, aside }: { id?: string; icon?: IconName; children: ReactNode; aside?: ReactNode }) {
+  return (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <h2 id={id} className="section-title flex items-center gap-2">
+        {icon && <Icon name={icon} className="h-4 w-4 text-teal-600 dark:text-teal-400" />}
+        {children}
+      </h2>
+      {aside}
     </div>
   );
 }
@@ -135,8 +210,10 @@ export function initials(name: string): string {
 
 export function OfflineNotice({ message }: { message: string }) {
   return (
-    <div className="card flex items-center gap-3 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-      <Icon name="wifiOff" className="h-5 w-5 flex-shrink-0" />
+    <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50">
+        <Icon name="wifiOff" className="h-4 w-4" />
+      </span>
       <p className="text-sm">{message}</p>
     </div>
   );

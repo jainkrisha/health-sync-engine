@@ -12,7 +12,7 @@ import { useSyncEngine } from '../../hooks/useSync';
 import { syncEngine } from '../../sync/syncEngine';
 import { useToast } from '../../components/Toast';
 import { Icon } from '../../components/Icon';
-import { ClockView, EmptyState, OfflineNotice, PageHeader, SkeletonRows, Spinner, formatDateTime, relativeTime, shortId } from '../../components/ui';
+import { ClockView, EmptyState, ErrorNotice, OfflineNotice, PageHeader, SkeletonRows, Spinner, formatDateTime, relativeTime, shortId } from '../../components/ui';
 
 type Tab = 'pending_review' | 'resolved';
 
@@ -37,9 +37,10 @@ function ValuePanel({
   tone: 'a' | 'b';
 }) {
   return (
-    <div className={`rounded-lg border p-4 ${tone === 'a' ? 'border-sky-200 bg-sky-50/60 dark:border-sky-900 dark:bg-sky-950/30' : 'border-violet-200 bg-violet-50/50 dark:border-violet-900 dark:bg-violet-950/20'}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{title}</p>
-      <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{describe(value)}</p>
+    <div className={`relative overflow-hidden rounded-xl border p-4 pl-5 ${tone === 'a' ? 'border-medical-200 bg-medical-50/50 dark:border-medical-900/70 dark:bg-medical-950/20' : 'border-violet-200 bg-violet-50/40 dark:border-violet-900/70 dark:bg-violet-950/20'}`}>
+      <span className={`absolute inset-y-0 left-0 w-1 ${tone === 'a' ? 'bg-medical-500' : 'bg-violet-500'}`} aria-hidden="true" />
+      <p className="eyebrow">{title}</p>
+      <p className="mt-1.5 text-lg font-bold tracking-tight text-slate-900 dark:text-white">{describe(value)}</p>
       <dl className="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
         <div className="flex gap-2"><dt className="w-16 text-slate-400">Device</dt><dd className="font-mono">{clientId ? shortId(clientId) : 'unknown'}</dd></div>
         <div className="flex gap-2"><dt className="w-16 text-slate-400">Edited</dt><dd>{timestamp ? formatDateTime(timestamp) : '—'}</dd></div>
@@ -83,12 +84,12 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
   return (
     <li className="relative">
       <span className={`absolute -left-[33px] top-5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-slate-50 dark:ring-slate-950 ${pending ? 'bg-orange-500' : 'bg-teal-500'}`} aria-hidden="true" />
-      <article className="card p-0">
+      <article className={`card overflow-hidden p-0 transition-shadow sm:p-0 ${open ? 'shadow-card-lg' : 'hover:shadow-card-hover'} ${pending ? 'border-l-4 border-l-orange-400 dark:border-l-orange-500' : ''}`}>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
-          className="flex w-full items-start gap-4 p-5 text-left"
+          className="flex w-full items-start gap-4 p-5 text-left transition-colors hover:bg-slate-50/60 sm:px-6 dark:hover:bg-slate-800/30"
         >
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -101,11 +102,11 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
             </p>
             <p className="mt-0.5 text-xs text-slate-400">Detected {relativeTime(conflict.createdAt)}</p>
           </div>
-          <Icon name="chevronDown" className={`mt-1 h-5 w-5 flex-shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <Icon name="chevronDown" className={`mt-1 h-5 w-5 flex-shrink-0 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
         </button>
 
         {open && (
-          <div className="space-y-4 border-t border-slate-100 p-5 dark:border-slate-800 fade-in">
+          <div className="fade-in space-y-5 border-t border-slate-100 p-5 sm:px-6 dark:border-slate-800">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               The two edits are <strong>{order === 'concurrent' ? 'concurrent' : order}</strong>: neither device had seen the other's change when it was made, so the dose was not merged automatically.
             </p>
@@ -121,7 +122,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
                   <input id={`note-${conflict.id}`} className="form-input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Confirmed with Dr. Shah by phone" />
                 </div>
                 {custom && (
-                  <div className="grid gap-3 rounded-lg border border-slate-200 p-4 dark:border-slate-700 sm:grid-cols-2">
+                  <div className="grid animate-fade-in gap-3 rounded-xl border border-teal-200 bg-teal-50/40 p-4 sm:grid-cols-2 dark:border-teal-900/60 dark:bg-teal-950/20">
                     <div>
                       <label htmlFor={`dose-${conflict.id}`} className="form-label">Corrected dosage</label>
                       <input id={`dose-${conflict.id}`} className="form-input" value={dosage} onChange={(e) => setDosage(e.target.value)} />
@@ -132,7 +133,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
                     </div>
                   </div>
                 )}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
                   <button className="btn-secondary" disabled={busy !== null} onClick={() => void resolve('current')}>
                     {busy === 'current' ? <Spinner /> : <Icon name="check" className="h-4 w-4" />} Keep value A
                   </button>
@@ -148,15 +149,18 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
                       <Icon name="edit" className="h-4 w-4" /> Enter a corrected dose
                     </button>
                   )}
-                  <Link to={`/patients/${conflict.patientId}`} className="btn-ghost ml-auto">Open patient</Link>
+                  <Link to={`/patients/${conflict.patientId}`} className="btn-ghost w-full sm:ml-auto sm:w-auto">Open patient <Icon name="arrowRight" className="h-3.5 w-3.5" /></Link>
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg bg-teal-50 p-4 text-sm text-teal-900 dark:bg-teal-950/30 dark:text-teal-200">
+              <div className="flex gap-3 rounded-xl bg-teal-50 p-4 text-sm text-teal-900 ring-1 ring-inset ring-teal-600/10 dark:bg-teal-950/30 dark:text-teal-200">
+                <Icon name="checkCircle" className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <div>
                 Resolved {formatDateTime(conflict.resolvedAt)} by <strong>{conflict.resolvedByName}</strong>:{' '}
                 {conflict.resolution === 'custom' ? 'corrected to' : conflict.resolution === 'current' ? 'kept value A,' : 'kept value B,'}{' '}
                 <strong>{conflict.resolvedValue ? describe(conflict.resolvedValue) : ''}</strong>
                 {conflict.note && <p className="mt-1 text-xs opacity-80">Note: {conflict.note}</p>}
+                </div>
               </div>
             )}
           </div>
@@ -198,18 +202,15 @@ export default function ConflictDashboard() {
         }
       />
 
-      <div className="mb-6 inline-flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800" role="tablist">
+      <div className="segmented mb-6" role="tablist" aria-label="Conflict status">
         {(['pending_review', 'resolved'] as const).map((t) => (
-          <button
-            key={t}
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === t ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
-          >
+          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className="segmented-item">
             {t === 'pending_review' ? 'Awaiting review' : 'Resolved'}
+            {t === tab && data && (
+              <span className={`ml-2 rounded-full px-1.5 text-xs tabular-nums ${t === 'pending_review' && conflicts.length ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                {conflicts.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -219,15 +220,18 @@ export default function ConflictDashboard() {
       ) : loading && !data ? (
         <SkeletonRows rows={3} />
       ) : error ? (
-        <p className="form-error" role="alert">{error}</p>
+        <ErrorNotice message={`Could not load conflicts: ${error}`} onRetry={() => void reload()} />
       ) : conflicts.length === 0 ? (
-        <EmptyState
-          icon="check"
-          title={tab === 'pending_review' ? 'No conflicts waiting' : 'Nothing resolved yet'}
-          message={tab === 'pending_review' ? 'When two devices change the same medication dose while offline, it will appear here.' : undefined}
-        />
+        <div className="card">
+          <EmptyState
+            icon={tab === 'pending_review' ? 'checkCircle' : 'clock'}
+            tone={tab === 'pending_review' ? 'teal' : 'slate'}
+            title={tab === 'pending_review' ? 'No conflicts waiting' : 'Nothing resolved yet'}
+            message={tab === 'pending_review' ? 'When two devices change the same medication dose while offline, it will appear here.' : 'Decisions made by reviewers will be listed here.'}
+          />
+        </div>
       ) : (
-        <ol className="relative space-y-5 border-l-2 border-slate-200 pl-6 dark:border-slate-800" aria-label="Conflicts, newest first">
+        <ol className="stagger relative ml-2 space-y-5 border-l-2 border-slate-200 pl-6 dark:border-slate-800" aria-label="Conflicts, newest first">
           {conflicts.map((c) => (
             <ConflictCard
               key={c.id}

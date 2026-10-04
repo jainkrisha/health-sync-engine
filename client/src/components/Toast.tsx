@@ -18,6 +18,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
+import { Icon, type IconName } from './Icon'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -73,11 +74,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {/* Toast stack — fixed bottom-right */}
+      {/* Toast stack — bottom centre on phones (above the tab bar), bottom-right on larger screens */}
       <div
         aria-live="polite"
         aria-label="Notifications"
-        className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"
+        className="pointer-events-none fixed inset-x-4 bottom-20 z-toast flex flex-col items-center gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:items-end lg:bottom-6"
       >
         {toasts.map(t => (
           <ToastItem key={t.id} item={t} onDismiss={dismiss} />
@@ -90,44 +91,30 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 // ─── Individual toast bubble ──────────────────────────────────────────────────
 
 function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
-  const styles: Record<ToastType, string> = {
-    success: 'bg-teal-600 text-white',
-    error:   'bg-status-danger text-white',
-    warning: 'bg-status-warning text-white',
-    info:    'bg-medical-600 text-white',
+  const styles: Record<ToastType, { bar: string; icon: string; name: IconName }> = {
+    success: { bar: 'bg-teal-500', icon: 'text-teal-600 dark:text-teal-400', name: 'checkCircle' },
+    error: { bar: 'bg-rose-500', icon: 'text-rose-600 dark:text-rose-400', name: 'xCircle' },
+    warning: { bar: 'bg-amber-500', icon: 'text-amber-600 dark:text-amber-400', name: 'alert' },
+    info: { bar: 'bg-medical-500', icon: 'text-medical-600 dark:text-medical-400', name: 'info' },
   }
-
-  const icons: Record<ToastType, string> = {
-    success: '✓',
-    error:   '✕',
-    warning: '⚠',
-    info:    'i',
-  }
+  const s = styles[item.type]
 
   return (
     <div
-      role="status"
-      className={`
-        pointer-events-auto flex items-center gap-3 min-w-[240px] max-w-sm
-        rounded-lg px-4 py-3 shadow-card-lg text-sm font-medium
-        animate-[slideUp_0.2s_ease-out]
-        ${styles[item.type]}
-      `}
+      role={item.type === 'error' ? 'alert' : 'status'}
+      className="pointer-events-auto relative flex w-full max-w-sm animate-slide-up items-start gap-3 overflow-hidden rounded-xl border border-slate-200
+                 bg-white py-3 pl-4 pr-2 text-sm text-slate-800 shadow-pop sm:min-w-[280px]
+                 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
     >
-      <span
-        className="flex h-5 w-5 flex-shrink-0 items-center justify-center
-                   rounded-full bg-white/20 text-xs font-bold"
-      >
-        {icons[item.type]}
-      </span>
-      <span className="flex-1">{item.message}</span>
+      <span className={`absolute inset-y-0 left-0 w-1 ${s.bar}`} aria-hidden="true" />
+      <Icon name={s.name} className={`mt-0.5 h-5 w-5 flex-shrink-0 ${s.icon}`} />
+      <span className="flex-1 py-0.5 font-medium leading-5">{item.message}</span>
       <button
         onClick={() => onDismiss(item.id)}
         aria-label="Dismiss notification"
-        className="ml-auto flex-shrink-0 rounded p-0.5 opacity-70 hover:opacity-100
-                   hover:bg-white/20 transition-opacity"
+        className="btn-icon -my-1 h-8 w-8 flex-shrink-0"
       >
-        ✕
+        <Icon name="x" className="h-4 w-4" />
       </button>
     </div>
   )

@@ -14,12 +14,14 @@ import { useToast } from '../../components/Toast';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Icon } from '../../components/Icon';
 import { AuditList } from '../../components/AuditList';
+import { plural } from '@shared/text';
 import {
   ClockView,
   EmptyState,
+  ErrorNotice,
   PageHeader,
+  SectionHeading,
   SkeletonRows,
-  Spinner,
   ageFrom,
   formatDate,
   formatDateTime,
@@ -28,12 +30,38 @@ import {
 
 const SEVERITY_STYLE = { severe: 'badge-danger', moderate: 'badge-warning', mild: 'badge-teal', unknown: 'badge-slate' } as const;
 
+const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
+
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</dt>
-      <dd className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">{value || '—'}</dd>
+    <div className="min-w-0">
+      <dt className="eyebrow">{label}</dt>
+      <dd className="mt-1.5 truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">{value || '—'}</dd>
     </div>
+  );
+}
+
+const SECTIONS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'clinical', label: 'Allergies & meds' },
+  { id: 'vitals', label: 'Vitals' },
+  { id: 'sync', label: 'Sync & history' },
+] as const;
+
+/** In-page jump links for this long record; sticks under the header while scrolling. */
+function SectionNav() {
+  return (
+    <nav aria-label="Sections of this record" className="sticky top-[4.75rem] z-10 mb-6">
+      <ul className="segmented max-w-full gap-0.5 overflow-x-auto bg-white/85 shadow-card backdrop-blur-md dark:bg-slate-900/85">
+        {SECTIONS.map((s) => (
+          <li key={s.id}>
+            <a href={`#${s.id}`} className="segmented-item block whitespace-nowrap text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800">
+              {s.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 
@@ -63,10 +91,17 @@ function History({ patientId }: { patientId: string }) {
     };
   }, [patientId, connected]);
 
-  if (!connected && !entries) return <p className="text-sm text-slate-500 dark:text-slate-400">Connect to load the merge history from the server.</p>;
-  if (error) return <p className="form-error">{error}</p>;
-  if (!entries) return <Spinner className="h-5 w-5 text-teal-600" />;
-  if (entries.length === 0) return <p className="text-sm text-slate-500">No synced history yet.</p>;
+  if (!connected && !entries) return <EmptyState compact tone="slate" icon="wifiOff" title="You're offline" message="Connect to load the merge history from the server." />;
+  if (error) return <ErrorNotice message={`Could not load history: ${error}`} />;
+  if (!entries)
+    return (
+      <div className="space-y-4" aria-busy="true" aria-label="Loading history">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-2"><div className="skeleton h-3 w-2/5" /><div className="skeleton h-3.5 w-4/5" /></div>
+        ))}
+      </div>
+    );
+  if (entries.length === 0) return <EmptyState compact tone="slate" icon="git" title="No synced history yet" message="Merge decisions appear here after this record syncs." />;
   return <AuditList entries={entries} showPatient={false} />;
 }
 
@@ -83,12 +118,15 @@ export default function PatientDetail() {
   if (loading) return <SkeletonRows rows={3} />;
   if (!patient || !doc || patient.deleted) {
     return (
-      <EmptyState
-        icon="patients"
-        title="Patient not found"
-        message="This record is not on this device. It may have been archived, or it has not synced here yet."
-        action={<Link to="/patients" className="btn-primary">Back to patients</Link>}
-      />
+      <div className="card">
+        <EmptyState
+          icon="patients"
+          tone="slate"
+          title="Patient not found"
+          message="This record is not on this device. It may have been archived, or it has not synced here yet."
+          action={<Link to="/patients" className="btn-primary">Back to patients</Link>}
+        />
+      </div>
     );
   }
 
@@ -120,14 +158,19 @@ export default function PatientDetail() {
   const pending = pendingIds.has(patient.id);
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="pb-10">
       <PageHeader
+        back={{ to: '/patients', label: 'Patients' }}
         title={patient.name}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            {[ageFrom(patient.dateOfBirth), patient.gender !== 'unknown' ? patient.gender : '', `Blood ${patient.bloodType}`].filter(Boolean).join(' · ')}
+            <span>{[ageFrom(patient.dateOfBirth), patient.gender !== 'unknown' ? capitalize(patient.gender) : '', `Blood ${patient.bloodType}`].filter(Boolean).join(' · ')}</span>
             {patient.hasOpenConflicts && <span className="badge-conflict"><Icon name="alert" className="h-3 w-3" /> Medication under review</span>}
-            {pending ? <span className="badge-warning">Changes not synced yet</span> : <span className="badge-teal">Synced</span>}
+            {pending ? (
+              <span className="badge-warning"><Icon name="clock" className="h-3 w-3" /> Changes not synced yet</span>
+            ) : (
+              <span className="badge-teal"><Icon name="check" className="h-3 w-3" /> Synced</span>
+            )}
           </span>
         }
         actions={
@@ -136,7 +179,7 @@ export default function PatientDetail() {
               <Link to={`/patients/${patient.id}/edit`} className="btn-primary">
                 <Icon name="edit" className="h-4 w-4" /> Edit
               </Link>
-              <button className="btn-secondary text-rose-600 dark:text-rose-400" onClick={() => setConfirmArchive(true)}>
+              <button className="btn-danger-outline" onClick={() => setConfirmArchive(true)}>
                 <Icon name="trash" className="h-4 w-4" /> Archive
               </button>
             </>
@@ -144,12 +187,15 @@ export default function PatientDetail() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <SectionNav />
+
+      <div className="space-y-6">
+      <div id="overview" className="grid scroll-mt-32 gap-6 lg:grid-cols-3">
         <section className="card lg:col-span-2" aria-labelledby="overview-h">
-          <h2 id="overview-h" className="section-title mb-4">Overview</h2>
-          <dl className="grid grid-cols-2 gap-5 sm:grid-cols-3">
+          <SectionHeading id="overview-h" icon="user">Overview</SectionHeading>
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-6 sm:grid-cols-3">
             <Field label="Date of birth" value={formatDate(patient.dateOfBirth)} />
-            <Field label="Gender" value={patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)} />
+            <Field label="Gender" value={capitalize(patient.gender)} />
             <Field label="Blood type" value={patient.bloodType} />
             <Field label="Contact" value={patient.contactNumber} />
             <Field label="Registered" value={formatDate(patient.createdAt)} />
@@ -158,47 +204,51 @@ export default function PatientDetail() {
         </section>
 
         <section className="card" aria-labelledby="latest-h">
-          <h2 id="latest-h" className="section-title mb-4 flex items-center gap-2"><Icon name="activity" className="h-4 w-4" /> Latest vitals</h2>
+          <SectionHeading id="latest-h" icon="activity">Latest vitals</SectionHeading>
           {latest ? (
             <>
-              <ul className="space-y-1.5 text-sm font-medium text-slate-800 dark:text-slate-100">
-                {vitalsSummary(latest).map((s) => <li key={s}>{s}</li>)}
+              <ul className="grid grid-cols-2 gap-2">
+                {vitalsSummary(latest).map((s) => (
+                  <li key={s} className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold tabular-nums text-slate-800 ring-1 ring-inset ring-slate-200/70 dark:bg-slate-800/60 dark:text-slate-100 dark:ring-slate-700/60">
+                    {s}
+                  </li>
+                ))}
               </ul>
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{formatDateTime(latest.recordedAt)} by {latest.recordedBy || 'unknown'}</p>
             </>
           ) : (
-            <p className="text-sm text-slate-500">No readings yet.</p>
+            <EmptyState compact tone="slate" icon="activity" title="No readings yet" />
           )}
         </section>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div id="clinical" className="grid scroll-mt-32 gap-6 lg:grid-cols-2">
         <AllergiesCard patient={patient} />
         <MedicationsCard patient={patient} canReview={perms.canReviewConflicts} />
       </div>
 
-      <section className="card" aria-labelledby="vitals-h">
-        <h2 id="vitals-h" className="section-title mb-4">Vitals history</h2>
+      <section id="vitals" className="card scroll-mt-32" aria-labelledby="vitals-h">
+        <SectionHeading id="vitals-h" icon="heart" aside={<span className="text-xs text-slate-400">{plural(patient.vitals.length, 'reading')}</span>}>Vitals history</SectionHeading>
         {patient.vitals.length === 0 ? (
-          <p className="text-sm text-slate-500">No readings recorded.</p>
+          <EmptyState compact tone="slate" icon="heart" title="No readings recorded" message="Add a reading from the edit form; every reading is kept." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px]">
+          <div className="-mx-5 overflow-x-auto sm:-mx-6">
+            <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800">
-                  {['Recorded', 'Heart rate', 'BP', 'Temp', 'Resp.', 'SpO₂', 'By'].map((h) => <th key={h} className="table-head">{h}</th>)}
+                <tr className="border-b border-slate-200/80 dark:border-slate-800">
+                  {['Recorded', 'Heart rate', 'BP', 'Temp', 'Resp.', 'SpO₂', 'By'].map((h) => <th key={h} className="table-head whitespace-nowrap first:pl-5 sm:first:pl-6">{h}</th>)}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {patient.vitals.map((v) => (
-                  <tr key={v.id}>
-                    <td className="table-cell whitespace-nowrap">{formatDateTime(v.recordedAt)}</td>
+                  <tr key={v.id} className="tabular-nums transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <td className="table-cell whitespace-nowrap pl-5 sm:pl-6">{formatDateTime(v.recordedAt)}</td>
                     <td className="table-cell">{v.heartRate ?? '—'}</td>
                     <td className="table-cell">{v.bloodPressure ?? '—'}</td>
                     <td className="table-cell">{v.temperature ?? '—'}</td>
                     <td className="table-cell">{v.respiratoryRate ?? '—'}</td>
                     <td className="table-cell">{v.oxygenSaturation ?? '—'}</td>
-                    <td className="table-cell">{v.recordedBy || '—'}</td>
+                    <td className="table-cell whitespace-nowrap">{v.recordedBy || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -207,32 +257,33 @@ export default function PatientDetail() {
         )}
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div id="sync" className="grid scroll-mt-32 gap-6 lg:grid-cols-3">
         <section className="card" aria-labelledby="sync-h">
-          <h2 id="sync-h" className="section-title mb-4 flex items-center gap-2"><Icon name="git" className="h-4 w-4" /> Sync details</h2>
+          <SectionHeading id="sync-h" icon="git">Sync details</SectionHeading>
           <dl className="space-y-3 text-sm">
             <div>
-              <dt className="text-xs text-slate-500 dark:text-slate-400">Version vector (device:counter)</dt>
+              <dt className="eyebrow">Version vector (device:counter)</dt>
               <dd className="mt-1"><ClockView clock={doc.clock} highlight={getClientId()} /></dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500 dark:text-slate-400">Status</dt>
-              <dd className="mt-1">{pending ? 'Local edits waiting to sync' : 'Matches the last copy from the server'}</dd>
+              <dt className="eyebrow">Status</dt>
+              <dd className="mt-1 font-medium text-slate-800 dark:text-slate-200">{pending ? 'Local edits waiting to sync' : 'Matches the last copy from the server'}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500 dark:text-slate-400">Storage</dt>
-              <dd className="mt-1 flex items-center gap-1.5"><Icon name="lock" className="h-3.5 w-3.5" /> AES-256-GCM encrypted on this device</dd>
+              <dt className="eyebrow">Storage</dt>
+              <dd className="mt-1 flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200"><Icon name="lock" className="h-3.5 w-3.5" /> AES-256-GCM encrypted on this device</dd>
             </div>
           </dl>
         </section>
         <section className="card lg:col-span-2" aria-labelledby="history-h">
-          <h2 id="history-h" className="section-title mb-4">Merge history</h2>
+          <SectionHeading id="history-h" icon="merge">Merge history</SectionHeading>
           {perms.canViewHistory ? (
             <History patientId={patient.id} />
           ) : (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Clinical reviewers, auditors and admins can see how each change to this record was merged.</p>
+            <EmptyState compact tone="slate" icon="lock" title="Restricted" message="Clinical reviewers, auditors and admins can see how each change to this record was merged." />
           )}
         </section>
+      </div>
       </div>
 
       <ConfirmDialog
@@ -251,18 +302,18 @@ export default function PatientDetail() {
 function AllergiesCard({ patient }: { patient: Patient }) {
   return (
     <section className="card" aria-labelledby="allergies-h">
-      <h2 id="allergies-h" className="section-title mb-4">Allergies</h2>
+      <SectionHeading id="allergies-h" icon="alert" aside={<span className="text-xs text-slate-400">Kept across devices</span>}>Allergies</SectionHeading>
       {patient.allergies.length === 0 ? (
-        <p className="text-sm text-slate-500">No known allergies.</p>
+        <EmptyState compact tone="slate" icon="check" title="No known allergies" />
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+        <ul className="-my-2.5 divide-y divide-slate-100 dark:divide-slate-800">
           {patient.allergies.map((a) => (
             <li key={a.allergen} className="flex items-start justify-between gap-3 py-2.5">
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">{a.allergen}</p>
                 {a.reaction && <p className="text-xs text-slate-500 dark:text-slate-400">{a.reaction}</p>}
               </div>
-              <span className={SEVERITY_STYLE[a.severity]}>{a.severity}</span>
+              <span className={`${SEVERITY_STYLE[a.severity]} capitalize`}>{a.severity}</span>
             </li>
           ))}
         </ul>
@@ -274,11 +325,11 @@ function AllergiesCard({ patient }: { patient: Patient }) {
 function MedicationsCard({ patient, canReview }: { patient: Patient; canReview: boolean }) {
   return (
     <section className="card" aria-labelledby="meds-h">
-      <h2 id="meds-h" className="section-title mb-4 flex items-center gap-2"><Icon name="pill" className="h-4 w-4" /> Medications</h2>
+      <SectionHeading id="meds-h" icon="pill" aside={<span className="text-xs text-slate-400">Dose changes reviewed</span>}>Medications</SectionHeading>
       {patient.medications.length === 0 ? (
-        <p className="text-sm text-slate-500">No current medications.</p>
+        <EmptyState compact tone="slate" icon="pill" title="No current medications" />
       ) : (
-        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+        <ul className="-my-2.5 divide-y divide-slate-100 dark:divide-slate-800">
           {patient.medications.map((m) => (
             <li key={m.name} className="py-2.5">
               <div className="flex items-start justify-between gap-3">
@@ -291,7 +342,7 @@ function MedicationsCard({ patient, canReview }: { patient: Patient; canReview: 
                 </div>
                 {m.openConflictIds.length > 0 &&
                   (canReview ? (
-                    <Link to="/conflicts" className="badge-conflict hover:underline">Review dose</Link>
+                    <Link to="/conflicts" className="badge-conflict transition-colors hover:bg-orange-100 dark:hover:bg-orange-900/50">Review dose <Icon name="arrowRight" className="h-3 w-3" /></Link>
                   ) : (
                     <span className="badge-conflict">Under review</span>
                   ))}
