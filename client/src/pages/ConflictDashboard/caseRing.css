@@ -1,0 +1,167 @@
+/* Review-case ring, in the ID-card palette: warm charcoal stage, cream tiles, burnt orange. */
+.case-ring {
+  --charcoal: #15130f;
+  --cream: #ece7da;
+  --ink: #1d2733;
+  --navy: #2b3d55;
+  --orange: #e0663a;
+  position: relative;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 20px 20px 18px;
+  color: var(--cream);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 55%, #2a241d 0%, #1b1813 52%, #110f0c 100%);
+  box-shadow: 0 30px 60px -30px rgba(17, 15, 12, 0.8);
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+}
+.case-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: radial-gradient(rgba(255, 240, 220, 0.7) 0.5px, transparent 0.6px);
+  background-size: 3px 3px;
+}
+.case-ring-head { position: relative; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.case-ring-kicker { font: 600 10px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 2.4px; color: rgba(236, 231, 218, 0.55); }
+.case-ring-title { margin-top: 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.case-ring-speed {
+  display: flex; align-items: baseline; gap: 4px;
+  padding: 6px 10px; border-radius: 8px;
+  background: #11100d; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(236, 231, 218, 0.08);
+  font: 500 10px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 1.5px; color: rgba(240, 160, 99, 0.6);
+}
+.case-ring-speed b { min-width: 2.6ch; text-align: right; font-size: 18px; font-weight: 500; color: #f0a063; text-shadow: 0 0 6px rgba(240, 140, 80, 0.55); }
+
+.case-ring-stage {
+  position: relative;
+  height: 360px;
+  perspective: 1100px;
+  perspective-origin: 50% 38%;
+}
+.case-ring-ring {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.case-ring-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 70%;
+  height: 60px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(224, 102, 58, 0.18), rgba(0, 0, 0, 0) 70%);
+  filter: blur(6px);
+}
+
+/* A thick tile, like an app icon standing on its edge. */
+.case-tile {
+  position: absolute;
+  left: -66px;
+  top: -84px;
+  width: 132px;
+  height: 168px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+.case-tile-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 11px;
+  border-radius: 22px;
+  text-align: left;
+  color: var(--ink);
+  background: linear-gradient(165deg, #f6f2e8 0%, #e6dfcf 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -6px 10px rgba(29, 39, 51, 0.12),
+    0 0 0 1px rgba(29, 39, 51, 0.12),
+    0 3px 0 #c9c1ae,
+    0 6px 0 #b4ab97,
+    0 18px 26px -8px rgba(0, 0, 0, 0.7);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s;
+}
+.case-tile.is-pending .case-tile-face {
+  background: linear-gradient(165deg, #f08a5c 0%, #d9582d 100%);
+  color: #fff8f0;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -6px 10px rgba(80, 20, 0, 0.25),
+    0 0 0 1px rgba(80, 20, 0, 0.25),
+    0 3px 0 #b6491f,
+    0 6px 0 #933914,
+    0 18px 30px -8px rgba(224, 102, 58, 0.55);
+}
+.case-tile:hover .case-tile-face,
+.case-tile:focus-visible .case-tile-face { transform: translateY(-6px) scale(1.04); }
+.case-tile:focus-visible { outline: none; }
+.case-tile:focus-visible .case-tile-face { box-shadow: 0 0 0 3px #f0a63a, 0 18px 30px -8px rgba(0, 0, 0, 0.7); }
+
+.case-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.case-tile-chip { padding: 2px 5px; border-radius: 4px; background: var(--navy); color: var(--cream); font: 700 8px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 1px; }
+.case-tile.is-pending .case-tile-chip { background: #fff8f0; color: #b6491f; }
+.case-tile-time { font: 500 8px/1 'Geist Mono', ui-monospace, monospace; opacity: 0.7; }
+.case-tile-initials { margin-top: 10px; font-size: 34px; font-weight: 800; letter-spacing: -1.4px; line-height: 1; }
+.case-tile-name { margin-top: 6px; font-size: 12px; font-weight: 700; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.case-tile-med { font: 600 9.5px/1.3 'Geist Mono', ui-monospace, monospace; letter-spacing: 0.5px; opacity: 0.75; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.case-tile-vs { margin-top: auto; display: flex; align-items: baseline; gap: 4px; font: 600 10px/1 'Geist Mono', ui-monospace, monospace; }
+.case-tile-vs b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46px; }
+.case-tile-vs i { font-style: normal; opacity: 0.6; font-size: 9px; }
+
+/* Dock */
+.case-ring-dock {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 4px auto 0;
+  padding: 7px 9px;
+  border-radius: 14px;
+  background: rgba(236, 231, 218, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(236, 231, 218, 0.12), 0 10px 24px -12px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+}
+.case-dock-chip {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(165deg, #f6f2e8, #e2dbca);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 2px 0 #b4ab97;
+  transition: transform 0.15s;
+}
+.case-dock-chip.is-pending { background: linear-gradient(165deg, #f08a5c, #d9582d); color: #fff8f0; box-shadow: 0 2px 0 #933914; }
+.case-dock-chip:hover { transform: translateY(-3px) scale(1.08); }
+.case-dock-chip:focus-visible { outline: 2px solid #f0a63a; outline-offset: 2px; }
+.case-ring-hint { position: relative; z-index: 2; margin-top: 10px; text-align: center; font: 500 10px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: 1.5px; color: rgba(236, 231, 218, 0.45); text-transform: uppercase; }
+
+@media (max-width: 640px) {
+  .case-ring-stage { height: 300px; perspective: 800px; }
+  .case-tile { transform-origin: center; }
+}
+
+/* Highlight the case jumped to in the list. */
+.case-flash { animation: caseFlash 1.6s ease-out; }
+@keyframes caseFlash {
+  0%, 30% { box-shadow: 0 0 0 3px #e0663a, 0 20px 40px -20px rgba(224, 102, 58, 0.6); }
+  100% { box-shadow: none; }
+}
