@@ -149,7 +149,7 @@ export default function PatientDetail() {
           <h2 id="overview-h" className="section-title mb-4">Overview</h2>
           <dl className="grid grid-cols-2 gap-5 sm:grid-cols-3">
             <Field label="Date of birth" value={formatDate(patient.dateOfBirth)} />
-            <Field label="Gender" value={patient.gender} />
+            <Field label="Gender" value={patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)} />
             <Field label="Blood type" value={patient.bloodType} />
             <Field label="Contact" value={patient.contactNumber} />
             <Field label="Registered" value={formatDate(patient.createdAt)} />

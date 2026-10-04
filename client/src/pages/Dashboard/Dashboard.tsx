@@ -18,21 +18,31 @@ import { StatCard } from '../../components/Card';
 import { Icon } from '../../components/Icon';
 import { EmptyState, PageHeader, initials, relativeTime } from '../../components/ui';
 
+// Day keys use the device's local calendar date. (toISOString() would shift them
+// to UTC, putting today's changes under yesterday east of Greenwich, e.g. in IST.)
+function dayKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function last7Days(): string[] {
   const days: string[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
-    d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
-    days.push(d.toISOString().slice(0, 10));
+    days.push(dayKey(d));
   }
   return days;
 }
 
 function localDay(iso: string): string {
-  const d = new Date(iso);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
+  return dayKey(new Date(iso));
+}
+
+// "Dr. Priya (PHC Wagholi)" -> "Dr. Priya"; "Admin User" -> "Admin".
+function greetingName(name: string | undefined): string {
+  const words = (name ?? '').replace(/\(.*?\)/g, '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return 'there';
+  return /^(dr|mr|mrs|ms)\.?$/i.test(words[0]) && words[1] ? `${words[0]} ${words[1]}` : words[0];
 }
 
 function useOutboxWeek() {
@@ -106,7 +116,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Hello, ${user?.name.split(' ')[0] ?? 'there'}`}
+        title={`Hello, ${greetingName(user?.name)}`}
         subtitle={
           user && portalForRole(user.role) === 'district'
             ? `${user.facility}: every PHC's records, sync activity and conflict resolution at a glance.`

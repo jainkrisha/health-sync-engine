@@ -14,7 +14,8 @@ auditRouter.get('/', async (req, res) => {
   if (req.query.from) range.$gte = new Date(String(req.query.from)).toISOString();
   if (req.query.to) {
     const to = new Date(String(req.query.to));
-    to.setUTCHours(23, 59, 59, 999);
+    // A bare date (YYYY-MM-DD) means the whole UTC day; a full timestamp is used as is.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(req.query.to))) to.setUTCHours(23, 59, 59, 999);
     range.$lte = to.toISOString();
   }
   if (Object.keys(range).length) filter.timestamp = range;

@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import { ALLERGY_SEVERITIES, BLOOD_TYPES, GENDERS } from '@shared/types';
+import { todayLocal } from '@shared/text';
 
 export { BLOOD_TYPES, GENDERS, ALLERGY_SEVERITIES };
 
@@ -23,7 +24,8 @@ export const patientSchema = z
       .string()
       .min(1, 'Date of birth is required')
       .refine((v) => !Number.isNaN(Date.parse(v)), { message: 'Invalid date' })
-      .refine((v) => new Date(v) <= new Date(), { message: 'Date of birth cannot be in the future' }),
+      // Compare calendar dates in the device's time zone, so a baby born today is accepted.
+      .refine((v) => v.slice(0, 10) <= todayLocal(), { message: 'Date of birth cannot be in the future' }),
     gender: z.enum(GENDERS),
     bloodType: z.enum(BLOOD_TYPES, { message: 'Please select a blood type' }),
     contactNumber: z

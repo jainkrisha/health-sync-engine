@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Patient } from '@shared/types';
+import { plural } from '@shared/text';
 import { usePatients } from '../../hooks/usePatients';
 import { usePendingIds } from '../../hooks/usePendingIds';
 import { usePermissions } from '../../context/RBAC';
@@ -185,7 +186,7 @@ export default function PatientList() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-slate-900 dark:text-white">{p.name}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {p.bloodType} · {p.allergies.length} allergies · {p.medications.length} meds · {relativeTime(p.updatedAt)}
+                        {p.bloodType} · {plural(p.allergies.length, 'allergy', 'allergies')} · {plural(p.medications.length, 'med')} · {relativeTime(p.updatedAt)}
                       </p>
                     </div>
                     <Icon name="chevronRight" className="h-4 w-4 text-slate-400" />

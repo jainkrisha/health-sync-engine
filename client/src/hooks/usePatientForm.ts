@@ -20,6 +20,7 @@ import {
 } from '@shared/diff';
 import { materialize } from '@shared/materialize';
 import type { Patient } from '@shared/types';
+import { plural } from '@shared/text';
 import { emptyVitals, patientSchema, type PatientFormValues } from '../schemas/patientSchema';
 import { commitLocalEdit, getPatientDoc } from '../db/patientRepo';
 import { useToast } from '../components/Toast';
@@ -140,7 +141,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}) {
           const base = snapshot ?? inputFromDoc(current);
           return buildUpdateMutations(current, rebaseInput(base, edited, inputFromDoc(current)), ctx);
         });
-        toast({ message: mutations.length ? `Saved ${mutations.length} change(s). They will sync automatically.` : 'No changes to save', type: mutations.length ? 'success' : 'info' });
+        toast({ message: mutations.length ? `Saved ${plural(mutations.length, 'change')}. They will sync automatically.` : 'No changes to save', type: mutations.length ? 'success' : 'info' });
         navigate(`/patients/${id}`);
       } else {
         const newId = crypto.randomUUID();
