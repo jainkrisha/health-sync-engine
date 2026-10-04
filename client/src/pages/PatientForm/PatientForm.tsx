@@ -6,6 +6,7 @@ import { Select } from '../../components/Select';
 import { Card } from '../../components/Card';
 import { Icon } from '../../components/Icon';
 import { PageHeader, Spinner } from '../../components/ui';
+import { todayLocal } from '@shared/text';
 import { normaliseKey } from '@shared/mergeEngine';
 
 export interface PatientFormProps {
@@ -56,7 +57,7 @@ export function PatientForm({ mode }: PatientFormProps) {
           <h2 className="section-title mb-4">Basic information</h2>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <Input label="Full name" required placeholder="e.g. Asha Patil" error={errors.name?.message} containerClassName="md:col-span-2" {...register('name')} />
-            <Input label="Date of birth" required type="date" max={new Date().toISOString().slice(0, 10)} error={errors.dateOfBirth?.message} {...register('dateOfBirth')} />
+            <Input label="Date of birth" required type="date" max={todayLocal()} error={errors.dateOfBirth?.message} {...register('dateOfBirth')} />
             <Select label="Gender" options={GENDERS.map((g) => ({ value: g, label: cap(g) }))} placeholder="" error={errors.gender?.message} {...register('gender')} />
             <Select label="Blood type" options={BLOOD_TYPES} placeholder="" error={errors.bloodType?.message} {...register('bloodType')} />
             <Input label="Contact number" type="tel" placeholder="e.g. 98200 12345" error={errors.contactNumber?.message} {...register('contactNumber')} />

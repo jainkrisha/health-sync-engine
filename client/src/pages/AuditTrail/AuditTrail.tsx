@@ -25,8 +25,9 @@ export default function AuditTrail() {
   const query = useMemo(() => {
     const p = new URLSearchParams({ limit: '500' });
     if (patientId) p.set('patientId', patientId);
-    if (from) p.set('from', from);
-    if (to) p.set('to', to);
+    // Send the bounds of the user's local days, not UTC days.
+    if (from) p.set('from', new Date(`${from}T00:00:00`).toISOString());
+    if (to) p.set('to', new Date(`${to}T23:59:59.999`).toISOString());
     if (type !== 'all') p.set('type', type);
     if (concurrentOnly) p.set('concurrentOnly', 'true');
     return `/audit-log?${p.toString()}`;

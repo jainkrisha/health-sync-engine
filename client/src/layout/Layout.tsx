@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { portalForRole } from '@shared/types';
+import { plural } from '@shared/text';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/RBAC';
 import { useTheme } from '../context/ThemeContext';
@@ -141,7 +142,7 @@ export function Layout() {
       <ConfirmDialog
         isOpen={confirmLogout}
         title="Unsynced changes on this device"
-        message={`${pendingCount} change(s) have not reached the server yet. They stay safely on this device and will sync after the next login. Log out anyway?`}
+        message={`${plural(pendingCount, 'change')} ${pendingCount === 1 ? 'has' : 'have'} not reached the server yet. They stay safely on this device and will sync after the next login. Log out anyway?`}
         confirmText="Log out"
         onCancel={() => setConfirmLogout(false)}
         onConfirm={() => {

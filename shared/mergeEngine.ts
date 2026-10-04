@@ -21,6 +21,7 @@
  * | vitals                                       | grow-only set of readings              |
  */
 
+import { plural } from './text';
 import { compare, merge, type VectorClock } from './vectorClock';
 import type {
   AllergyElement,
@@ -503,7 +504,7 @@ export function applyMutation(
       outcome: current ? 'merged' : 'applied',
       report: current
         ? `Patient record "${p.name}" already existed, creation merged field by field.`
-        : `Patient record "${p.name}" created with ${p.allergies.length} allergies, ${p.medications.length} medications and ${p.vitals.length} vital readings.`,
+        : `Patient record "${p.name}" created with ${plural(p.allergies.length, 'allergy', 'allergies')}, ${plural(p.medications.length, 'medication')} and ${plural(p.vitals.length, 'vital reading')}.`,
       finalValue: { name: p.name },
       concurrent: false,
     });
