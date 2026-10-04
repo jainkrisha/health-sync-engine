@@ -261,3 +261,8 @@
 .book .page .page-title { font-family: 'Geist', 'Inter', sans-serif; font-weight: 800; color: #1d2733; letter-spacing: -0.02em; }
 .book .page .page-num { color: rgba(29, 39, 51, 0.5); }
 .book .page a { color: #bb4f29; }
+
+/* Clicking a page turns it: the right-hand page forward, the left-hand page back. */
+.leaf-face.turnable { cursor: pointer; }
+.leaf-face.front.turnable:hover .page { box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.06), inset -18px 0 24px -20px rgba(120, 90, 50, 0.45); }
+.leaf-face.back.turnable:hover .page { box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.06), inset 18px 0 24px -20px rgba(120, 90, 50, 0.45); }

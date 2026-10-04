@@ -196,8 +196,9 @@ export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Con
         const vy = delta * vs;
         const x = hx * (1 - state.orientation) + vx * state.orientation;
         const y = hy * (1 - state.orientation) + vy * state.orientation;
-        const z = focus * 95 - distance * 78;
-        const scale = 0.57 + side * 0.16 + focus * 0.38;
+        const z = focus * 140 - distance * 78;
+        // the case in front bulges forward, clearly bigger than its neighbours
+        const scale = 0.55 + side * 0.14 + Math.pow(focus, 2.2) * 0.62;
         const rx = -state.tiltY * focus * 5 + delta * 2.2 * state.orientation;
         const ry = state.tiltX * focus * 7 - delta * 8.5 * (1 - state.orientation);
         const rz = delta * 2.25 * (1 - state.orientation) - delta * 1.4 * state.orientation;
