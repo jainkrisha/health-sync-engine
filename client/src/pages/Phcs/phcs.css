@@ -234,3 +234,30 @@
 @media (prefers-reduced-motion: reduce) {
   .leaf, .book, .phc-book { transition: none; animation: none; }
 }
+
+/* The 3D shelf (an iframe) fills the page under the header. */
+.phc-shelf-frame {
+  position: relative;
+  height: calc(100vh - 13rem);
+  min-height: 520px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #e2d8c6;
+  box-shadow: inset 0 0 0 1px rgba(29, 39, 51, 0.08), 0 30px 60px -36px rgba(27, 24, 20, 0.5);
+}
+@media (max-width: 1023px) {
+  .phc-shelf-frame { height: calc(100vh - 15rem); }
+}
+
+/* Open-register pages: always dark ink on paper, whatever the app theme, in the UI typeface. */
+.book .page,
+.book .page h3,
+.book .page p,
+.book .page li,
+.book .page b,
+.book .page span { color: #1d2733; }
+.book .page { font-family: 'Geist', 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.55; }
+.book .page .page-kicker { color: #bb4f29; font-family: 'Geist Mono', ui-monospace, monospace; }
+.book .page .page-title { font-family: 'Geist', 'Inter', sans-serif; font-weight: 800; color: #1d2733; letter-spacing: -0.02em; }
+.book .page .page-num { color: rgba(29, 39, 51, 0.5); }
+.book .page a { color: #bb4f29; }

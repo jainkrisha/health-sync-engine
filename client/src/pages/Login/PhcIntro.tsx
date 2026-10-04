@@ -1,19 +1,20 @@
 /**
- * PhcIntro — short illustrated opening before the ID passes drop in.
- * Two-tone scene in the ID-card palette: a doctor at a PHC desk with a nurse
- * beside her; the camera pushes in to the tablet on the desk, a patient record
- * builds on its screen and syncs out, then the scene clears for the passes.
- * Plays once per browser session; Skip (or Escape) ends it at any time.
+ * PhcIntro — illustrated opening before the ID passes drop in, driven by the
+ * scroll wheel. Two-tone scene in the ID-card palette: a doctor at a PHC desk
+ * with a nurse beside her. Scrolling pushes the camera in to the tablet on the
+ * desk, a patient record builds on its screen and syncs out, and scrolling on
+ * past the end clears the scene for the passes. Plays once per browser
+ * session; Skip (or Escape) ends it at any time.
  */
 import { useEffect, useRef, useState } from 'react';
 
 const SEEN_KEY = 'hs-intro-seen';
-const DURATION_MS = 6200;
+const SCROLL_LENGTH_VH = 420;
 
 const CAPTIONS = [
-  { at: 0.3, n: '01', title: 'Recorded at the PHC', text: 'Every visit is entered on the spot, at the desk or the bedside.' },
-  { at: 2.3, n: '02', title: 'Saved on the device', text: 'Encrypted on the tablet first, so nothing waits for the network.' },
-  { at: 3.9, n: '03', title: 'Merged when back online', text: 'Edits sync field by field. Allergies are kept; dose clashes go to a reviewer.' },
+  { n: '01', title: 'Recorded at the PHC', text: 'Every visit is entered on the spot, at the desk or the bedside.' },
+  { n: '02', title: 'Saved on the device', text: 'Encrypted on the tablet first, so nothing waits for the network.' },
+  { n: '03', title: 'Merged when back online', text: 'Edits sync field by field. Allergies are kept; dose clashes go to a reviewer.' },
 ];
 
 export function shouldPlayIntro(): boolean {
@@ -25,9 +26,24 @@ export function shouldPlayIntro(): boolean {
   return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const clamp01 = (t: number) => Math.min(1, Math.max(0, t));
+
+/** Camera zoom for a scroll position: hold the room, push in to the tablet, then through it. */
+function cameraScale(p: number): number {
+  if (p < 0.22) return 1.08 - 0.06 * (p / 0.22);
+  if (p < 0.58) return 1.02 + (4.1 - 1.02) * easeInOut((p - 0.22) / 0.36);
+  if (p < 0.84) return 4.1 + 0.4 * ((p - 0.58) / 0.26);
+  return 4.5 + (11 - 4.5) * Math.pow((p - 0.84) / 0.16, 2);
+}
+
 export function PhcIntro({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
+  const [step, setStep] = useState(0); // which caption / screen line is showing
   const finishRef = useRef<() => void>(() => undefined);
+  const camRef = useRef<SVGGElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const spacerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -35,27 +51,65 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
     } catch {
       // ignore
     }
+    window.scrollTo(0, 0);
     let finished = false;
     const finish = () => {
       if (finished) return;
       finished = true;
       setLeaving(true);
-      setTimeout(onDone, 520);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        onDone();
+      }, 520);
     };
-    const t = setTimeout(finish, DURATION_MS);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && finish();
-    document.addEventListener('keydown', onKey);
     finishRef.current = finish;
+
+    let target = 0;
+    let cur = 0;
+    let raf = 0;
+    let lastStep = -1;
+    const read = () => {
+      const span = (spacerRef.current?.offsetHeight ?? 0) - window.innerHeight;
+      target = span > 0 ? clamp01(window.scrollY / span) : 0;
+    };
+    const frame = () => {
+      cur += (target - cur) * 0.12;
+      if (Math.abs(target - cur) < 0.0005) cur = target;
+      if (camRef.current) camRef.current.style.transform = `scale(${cameraScale(cur)})`;
+      if (rootRef.current) rootRef.current.style.setProperty('--p', cur.toFixed(4));
+      // 0-2: captions; 3+: lines on the tablet screen; 8: sync pulses
+      const s = cur < 0.3 ? 0 : cur < 0.62 ? 1 : 2;
+      const lines = cur < 0.5 ? 0 : Math.min(5, Math.floor((cur - 0.5) / 0.05) + 1);
+      const code = s * 10 + lines;
+      if (code !== lastStep) {
+        lastStep = code;
+        setStep(code);
+      }
+      if (cur > 0.985) finish();
+      raf = requestAnimationFrame(frame);
+    };
+    read();
+    raf = requestAnimationFrame(frame);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && finish();
+    window.addEventListener('scroll', read, { passive: true });
+    window.addEventListener('resize', read);
+    document.addEventListener('keydown', onKey);
     return () => {
-      clearTimeout(t);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', read);
+      window.removeEventListener('resize', read);
       document.removeEventListener('keydown', onKey);
     };
   }, [onDone]);
 
   const skip = () => finishRef.current();
+  const caption = Math.floor(step / 10);
+  const lines = step % 10;
 
   return (
-    <div className={`phc-intro ${leaving ? 'is-leaving' : ''}`} role="presentation">
+    <>
+    <div ref={spacerRef} style={{ height: `${SCROLL_LENGTH_VH}vh` }} aria-hidden="true" />
+    <div ref={rootRef} className={`phc-intro ${leaving ? 'is-leaving' : ''}`} role="presentation">
       <svg className="phc-intro-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <clipPath id="pi-window">
@@ -69,7 +123,7 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
           </pattern>
         </defs>
 
-        <g className="pi-cam">
+        <g className="pi-cam" ref={camRef}>
           {/* Back wall and floor */}
           <rect width="1600" height="900" fill="#ece7da" />
           <polygon points="0,720 1600,720 1600,900 0,900" fill="#2b3d55" />
@@ -171,17 +225,17 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
               <rect x="742" y="586" width="156" height="14" fill="#2b3d55" />
               <rect x="747" y="590" width="6" height="6" rx="1.5" fill="#e0663a" />
               <text x="757" y="596" fontSize="5.5" fontWeight="700" fill="#ece7da" fontFamily="Geist Mono, monospace" letterSpacing="0.6">HEALTHSYNC</text>
-              <g className="pi-l1">
+              <g className={`pi-l1 ${lines > 0 ? 'is-on' : ''}`}>
                 <text x="748" y="613" fontSize="10" fontWeight="800" fill="#1d2733" fontFamily="Geist, Inter, sans-serif">Asha Patil</text>
                 <text x="748" y="621" fontSize="5" fill="#4f6378" fontFamily="Geist Mono, monospace">42 YRS · F · B+ · PHC WAGHOLI</text>
               </g>
-              <g className="pi-l2">
+              <g className={`pi-l2 ${lines > 1 ? 'is-on' : ''}`}>
                 <rect x="748" y="627" width="30" height="8" rx="2" fill="#e0663a" />
                 <text x="751" y="633" fontSize="4.6" fontWeight="700" fill="#fff8f0" fontFamily="Geist Mono, monospace">PENICILLIN</text>
                 <rect x="781" y="627" width="22" height="8" rx="2" fill="#f0a63a" />
                 <text x="784" y="633" fontSize="4.6" fontWeight="700" fill="#1d2733" fontFamily="Geist Mono, monospace">LATEX</text>
               </g>
-              <g className="pi-l3">
+              <g className={`pi-l3 ${lines > 2 ? 'is-on' : ''}`}>
                 {[['HR', '82'], ['BP', '132/86'], ['SPO2', '98']].map(([k, v], i) => (
                   <g key={k}>
                     <rect x={748 + i * 48} y="641" width="44" height="18" rx="2" fill="#e2dccb" />
@@ -190,11 +244,11 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
                   </g>
                 ))}
               </g>
-              <g className="pi-l4">
+              <g className={`pi-l4 ${lines > 3 ? 'is-on' : ''}`}>
                 <rect x="748" y="664" width="144" height="18" rx="3" fill="#1d2733" />
                 <text x="754" y="675.5" fontSize="5.5" fontWeight="600" fill="#f0a063" fontFamily="Geist Mono, monospace">METFORMIN · 500 MG · BD</text>
               </g>
-              <g className="pi-sync">
+              <g className={`pi-sync ${lines > 4 ? 'is-on' : ''}`}>
                 <circle cx="880" cy="613" r="7" fill="#e0663a" />
                 <path d="M876.5 613 a3.5 3.5 0 1 1 1 2.6 M876.5 613 l-1.6 -1.6 M876.5 613 l1.8 -1.4" stroke="#fff8f0" strokeWidth="1.2" fill="none" strokeLinecap="round" />
               </g>
@@ -202,7 +256,7 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
           </g>
 
           {/* Sync pulses rising from the tablet */}
-          <g className="pi-pulses" fill="none" stroke="#e0663a" strokeWidth="2.5">
+          <g className={`pi-pulses ${lines >= 5 ? 'is-on' : ''}`} fill="none" stroke="#e0663a" strokeWidth="2.5">
             <circle cx="820" cy="636" r="40" />
             <circle cx="820" cy="636" r="40" />
             <circle cx="820" cy="636" r="40" />
@@ -211,8 +265,8 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
       </svg>
 
       <div className="phc-intro-captions">
-        {CAPTIONS.map((c) => (
-          <div key={c.n} className="phc-intro-caption" style={{ animationDelay: `${c.at}s` }}>
+        {CAPTIONS.map((c, i) => (
+          <div key={c.n} className={`phc-intro-caption ${caption === i ? 'is-on' : ''}`} aria-hidden={caption !== i}>
             <span className="phc-intro-n">{c.n}</span>
             <p className="phc-intro-title">{c.title}</p>
             <p className="phc-intro-text">{c.text}</p>
@@ -220,9 +274,16 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
         ))}
       </div>
 
+      <div className="phc-intro-cue" aria-hidden="true">
+        <span>Scroll to begin</span>
+        <span className="phc-intro-track"><i /></span>
+      </div>
+      <div className="phc-intro-progress" aria-hidden="true"><i /></div>
+
       <button type="button" className="phc-intro-skip" onClick={skip}>
         Skip intro
       </button>
     </div>
+    </>
   );
 }

@@ -19,6 +19,8 @@ async function device(browser: Browser, user: { username: string; role: string }
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('/');
+  // The illustrated intro is scroll-driven; skip it to reach the passes.
+  await page.getByRole('button', { name: 'Skip intro' }).click();
   // Health workers sign in on the PHC pass; everyone else on the district (Admin) pass.
   const portal = user.role === 'health_worker' ? 'phc' : 'district';
   const pass = page.getByRole('region', { name: portal === 'phc' ? 'PHC sign-in pass' : 'Admin sign-in pass' });
@@ -108,7 +110,7 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
 
   // A clinical reviewer resolves it with a corrected dose.
   const reviewer = await device(browser, users.reviewer);
-  await reviewer.getByRole('link', { name: 'Conflict Review' }).click();
+  await reviewer.getByRole('link', { name: /^Conflict Review/ }).click();
   const card = reviewer.locator('article').filter({ hasText: patientName });
   await expect(card.getByText('850 mg · Twice daily').first()).toBeVisible();
   await expect(card.getByText('1000 mg · Twice daily').first()).toBeVisible();
@@ -143,8 +145,8 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
 
   // The auditor sees the manual decision in the read-only trail.
   const auditor = await device(browser, users.auditor);
-  await auditor.getByRole('link', { name: 'Audit Trail' }).click();
+  await auditor.getByRole('link', { name: /^Audit Trail/ }).click();
   await auditor.getByLabel('Resolution').selectOption('manual');
   await expect(auditor.getByText(/Confirmed with the doctor/).first()).toBeVisible();
-  await expect(auditor.getByRole('link', { name: 'Conflict Review' })).toHaveCount(0);
+  await expect(auditor.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);
 });

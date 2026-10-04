@@ -17,7 +17,7 @@ import { onDataChanged } from '../../lib/events';
 import { StatCard } from '../../components/Card';
 import { Icon } from '../../components/Icon';
 import { EmptyState, PageHeader, SectionHeading, initials, relativeTime } from '../../components/ui';
-import HospitalTour from './tour/HospitalTour';
+import DistrictLanding from './landing/DistrictLanding';
 
 // Day keys use the device's local calendar date. (toISOString() would shift them
 // to UTC, putting today's changes under yesterday east of Greenwich, e.g. in IST.)
@@ -116,6 +116,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {user && portalForRole(user.role) === 'district' && <DistrictLanding stats={stats.data ?? null} />}
       <PageHeader
         title={`Hello, ${greetingName(user?.name)}`}
         subtitle={
@@ -132,7 +133,7 @@ export default function Dashboard() {
         }
       />
 
-      {user && portalForRole(user.role) === 'district' && <HospitalTour stats={stats.data ?? null} />}
+      
 
       {loading ? (
         <DashboardSkeleton />

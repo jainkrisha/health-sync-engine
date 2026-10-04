@@ -213,10 +213,11 @@ function IdPass({ portal, delay, from }: { portal: Portal; delay: number; from: 
                   <div className="pass-card">
                     {header}
                     <form onSubmit={loginForm.handleSubmit(onLogin)} noValidate className="px-4 pb-3 pt-3" aria-label={info.signIn}>
-                      <p className="pass-mono text-[8.5px] font-semibold tracking-[1.6px] text-[rgba(29,39,51,0.55)]">
-                        DISTRICT HEALTH NETWORK · ACCESS PASS
+                      <p className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-[2.4px] text-[var(--orange-2)]">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--orange)]" aria-hidden="true" />
+                        LOGIN AS
                       </p>
-                      <p className="mt-1 text-[42px] font-extrabold leading-[0.95] tracking-[-1.5px] text-[var(--ink)]" style={{ fontFamily: 'Geist, Inter, sans-serif' }}>
+                      <p className="mt-0.5 text-[42px] font-extrabold leading-[0.95] tracking-[-1.5px] text-[var(--ink)]" style={{ fontFamily: 'Geist, Inter, sans-serif' }}>
                         {info.title}
                       </p>
                       <div className="mt-2.5 flex items-end gap-3">
@@ -417,7 +418,7 @@ export function Login() {
         </div>
 
         {!introDone ? null : wide ? (
-          <div className="relative mx-auto grid w-full max-w-[860px] grid-cols-2 gap-10 px-6 pb-16" style={{ ['--strap-len' as string]: '172px' }}>
+          <div className="pass-pair relative mx-auto grid w-full max-w-[1040px] grid-cols-2 gap-x-28 px-6 pb-16" style={{ ['--strap-len' as string]: '172px' }}>
             <IdPass portal="phc" delay={0.15} from="left" />
             <IdPass portal="district" delay={0.45} from="right" />
           </div>
