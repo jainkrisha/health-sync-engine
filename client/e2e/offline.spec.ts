@@ -20,6 +20,9 @@ test('records can be created and read with no network, then sync', async ({ brow
   });
   test.skip(!hasSw, 'Service worker only runs in the production build (npm run build && npm run preview)');
 
+  // The illustrated intro is scroll-driven; skip it to reach the passes.
+  await page.getByRole('button', { name: 'Skip intro' }).click();
+
   const pass = page.getByRole('region', { name: 'PHC sign-in pass' });
   await pass.locator('#pass-phc-user').fill(user.username);
   await pass.locator('#pass-phc-pass').fill(user.password);

@@ -359,66 +359,55 @@ export default function PhcLibrary() {
   const { connected } = useSyncEngine();
   const { data, loading, error, reload } = useApi<{ phcs: PhcSummary[] }>(connected ? '/phcs' : null, connected);
   const [open, setOpen] = useState<PhcSummary | null>(null);
-  const phcs = data?.phcs ?? [];
-
-  // As many books per shelf as fit the width (book 168px + 34px gap).
-  const shelfRef = useRef<HTMLDivElement>(null);
-  const [perRow, setPerRow] = useState(5);
+  const phcs = useMemo(() => data?.phcs ?? [], [data]);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const phcsRef = useRef(phcs);
   useEffect(() => {
-    const el = shelfRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setPerRow(Math.max(1, Math.floor((el.clientWidth - 120 + 34) / (168 + 34)))));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [data]);
-  const rows: PhcSummary[][] = [];
-  for (let i = 0; i < phcs.length; i += perRow) rows.push(phcs.slice(i, i + perRow));
+    phcsRef.current = phcs;
+  });
+
+  // The 3D shelf runs in its own page; it asks for the PHC list and hands back the one picked.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== location.origin || e.source !== frameRef.current?.contentWindow) return;
+      const msg = e.data as { type?: string; name?: string };
+      if (msg.type === 'shelf-ready') {
+        frameRef.current?.contentWindow?.postMessage({ type: 'shelf-data', phcs: phcsRef.current }, location.origin);
+      } else if (msg.type === 'shelf-open') {
+        const p = phcsRef.current.find((x) => x.name === msg.name);
+        if (p) setOpen(p);
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+
+  const closeBook = () => {
+    setOpen(null);
+    frameRef.current?.contentWindow?.postMessage({ type: 'shelf-close' }, location.origin);
+  };
 
   return (
     <div>
-      <PageHeader title="PHC library" subtitle="Every Primary Health Centre in the district, as a register on the shelf. Pick one to open it." />
+      <PageHeader title="PHC library" subtitle="Every Primary Health Centre in the district, as a register on the shelf. Pick a book, then open its register." />
 
       {!connected ? (
         <OfflineNotice message="The PHC library is built from the district server. Connect to open it." />
       ) : error ? (
         <ErrorNotice message={`Could not load PHCs: ${error}`} onRetry={() => void reload()} />
       ) : loading && !data ? (
-        <div className="phc-library">
-          <div className="phc-shelf-row">
-            <div className="phc-shelf">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="skeleton h-[232px] w-[168px] rounded-md" />
-              ))}
-            </div>
-          </div>
-        </div>
+        <div className="phc-shelf-frame skeleton" aria-busy="true" aria-label="Loading the shelf" />
       ) : phcs.length === 0 ? (
         <div className="card">
           <EmptyState icon="clinic" title="No PHCs yet" message="PHCs appear here once a doctor signs up with a PHC name." />
         </div>
       ) : (
-        <div className="phc-library" ref={shelfRef}>
-          {rows.map((row, r) => (
-            <div key={r} className="phc-shelf-row">
-              <div className="phc-shelf stagger">
-                {row.map((p) => (
-                  <button key={p.name} type="button" className="phc-book" onClick={() => setOpen(p)} aria-label={`Open ${p.name}`}>
-                    <span className="phc-book-pages" />
-                    <span className="phc-book-cover">
-                      <CoverArt phc={p} />
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-          <p className="mt-6 text-center font-mono text-[11px] tracking-[1.5px] text-[#7a5a3a] dark:text-[#bfae92]">
-            {plural(phcs.length, 'PHC').toUpperCase()} · SCROLL INSIDE A BOOK TO TURN ITS PAGES
-          </p>
+        <div className="phc-shelf-frame">
+          <iframe ref={frameRef} src="/bookshelf.html" title={`PHC library shelf: ${plural(phcs.length, 'PHC')}`} className="h-full w-full border-0" />
         </div>
       )}
 
-      {open && <OpenBook phc={open} onClose={() => setOpen(null)} />}
+      {open && <OpenBook phc={open} onClose={closeBook} />}
     </div>
   );
 }

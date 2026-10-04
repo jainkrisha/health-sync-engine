@@ -9,6 +9,8 @@ const run = Date.now().toString(36);
 
 test('PHC and Admin passes at sign-in', async ({ page }) => {
   await page.goto('/');
+  // The illustrated intro is scroll-driven; skip it to reach the passes.
+  await page.getByRole('button', { name: 'Skip intro' }).click();
   const phc = page.getByRole('region', { name: 'PHC sign-in pass' });
   const admin = page.getByRole('region', { name: 'Admin sign-in pass' });
 
@@ -21,7 +23,7 @@ test('PHC and Admin passes at sign-in', async ({ page }) => {
   await phc.getByRole('button', { name: 'Create PHC account' }).click();
   await expect(page).toHaveURL(/dashboard/);
   await expect(page.getByText('PHC Hadapsar').first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Conflict Review' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);
   await page.getByRole('button', { name: /Sign out|Log out/ }).first().click();
 
   // The same PHC account is refused on the Admin pass.
@@ -39,6 +41,6 @@ test('PHC and Admin passes at sign-in', async ({ page }) => {
   await admin.getByRole('button', { name: 'Create district account' }).click();
   await expect(page).toHaveURL(/dashboard/);
   await expect(page.getByText('District Hospital').first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Conflict Review' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Audit Trail' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Conflict Review/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Audit Trail/ })).toBeVisible();
 });

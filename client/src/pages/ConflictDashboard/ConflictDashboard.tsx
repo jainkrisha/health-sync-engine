@@ -3,7 +3,8 @@
  * The server never auto-merges these; a clinical reviewer picks a value here.
  */
 import { useEffect, useState } from 'react';
-import { CaseRing } from './CaseRing';
+import { createPortal } from 'react-dom';
+import { CaseWave } from './CaseWave';
 import { Link } from 'react-router-dom';
 import type { Conflict, ConflictChoice, MedicationCritical } from '@shared/types';
 import { compare } from '@shared/vectorClock';
@@ -190,26 +191,25 @@ export default function ConflictDashboard() {
   );
 
   const conflicts = data?.conflicts ?? [];
-  // The ring also shows recently settled cases, so it is never a lonely tile.
-  const settled = useApi<{ conflicts: Conflict[] }>(connected ? '/conflicts?status=resolved' : null, connected);
-  const ringPending = tab === 'pending_review' ? conflicts : [];
+  // The wave shows the cases on the current tab; with nothing waiting it shows settled ones.
+  const settled = useApi<{ conflicts: Conflict[] }>(connected && tab === 'pending_review' ? '/conflicts?status=resolved' : null, connected);
+  const waveCases = conflicts.length ? conflicts : (settled.data?.conflicts ?? []);
+  const [openCase, setOpenCase] = useState<Conflict | null>(null);
+  const removeResolved = (updated: Conflict) =>
+    setData((prev) => (prev ? { conflicts: prev.conflicts.filter((x) => x.id !== updated.id || tab === 'resolved') } : prev));
 
-  const jumpTo = (c: Conflict) => {
-    const go = () => {
-      const el = document.getElementById(`conflict-${c.id}`);
-      if (!el) return;
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      const card = el.querySelector('article');
-      card?.classList.remove('case-flash');
-      void (card as HTMLElement | null)?.offsetWidth;
-      card?.classList.add('case-flash');
+  // Escape closes the opened case.
+  useEffect(() => {
+    if (!openCase) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpenCase(null);
+    document.addEventListener('keydown', onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
     };
-    const want = c.status === 'pending_review' ? 'pending_review' : 'resolved';
-    if (want !== tab) {
-      setTab(want);
-      setTimeout(go, 450);
-    } else go();
-  };
+  }, [openCase]);
 
   return (
     <div>
@@ -223,9 +223,30 @@ export default function ConflictDashboard() {
         }
       />
 
-      {connected && (ringPending.length > 0 || (settled.data?.conflicts.length ?? 0) > 0) && (
-        <CaseRing pending={ringPending} resolved={settled.data?.conflicts ?? []} onSelect={jumpTo} />
-      )}
+      {connected && waveCases.length > 0 && <CaseWave cases={waveCases} onOpen={setOpenCase} />}
+
+      {openCase &&
+        createPortal(
+          <div className="case-modal" role="dialog" aria-modal="true" aria-label={`Case: ${openCase.patientName}`} onClick={(e) => e.target === e.currentTarget && setOpenCase(null)}>
+            <div className="case-modal-panel">
+              <div className="mb-3 flex justify-end">
+                <button type="button" className="btn bg-white/90 text-slate-800 shadow-card hover:bg-white" onClick={() => setOpenCase(null)} autoFocus>
+                  <Icon name="x" className="h-4 w-4" /> Close
+                </button>
+              </div>
+              <ul className="list-none">
+                <ConflictCard
+                  conflict={openCase}
+                  onResolved={(updated) => {
+                    removeResolved(updated);
+                    setOpenCase(null);
+                  }}
+                />
+              </ul>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <div className="segmented mb-6" role="tablist" aria-label="Conflict status">
         {(['pending_review', 'resolved'] as const).map((t) => (
@@ -261,9 +282,7 @@ export default function ConflictDashboard() {
             <ConflictCard
               key={c.id}
               conflict={c}
-              onResolved={(updated) =>
-                setData((prev) => (prev ? { conflicts: prev.conflicts.filter((x) => x.id !== updated.id || tab === 'resolved') } : prev))
-              }
+              onResolved={removeResolved}
             />
           ))}
         </ol>

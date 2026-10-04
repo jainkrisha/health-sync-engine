@@ -76,6 +76,76 @@ const patients: PatientInput[] = [
     medications: [],
     newVitals: { heartRate: 96, temperature: 38.4, respiratoryRate: 22 },
   },
+  {
+    name: 'Sunil Gaikwad',
+    dateOfBirth: '1969-04-18',
+    gender: 'male',
+    bloodType: 'B-',
+    contactNumber: '9822213344',
+    allergies: [{ allergen: 'Codeine', severity: 'moderate', reaction: 'Nausea' }],
+    medications: [{ name: 'Atenolol', dosage: '25 mg', frequency: 'Once daily', startDate: '2026-03-02', endDate: '' }],
+    newVitals: { heartRate: 74, bloodPressure: '150/94', temperature: 36.7 },
+  },
+  {
+    name: 'Meera Kulkarni',
+    dateOfBirth: '1990-09-30',
+    gender: 'female',
+    bloodType: 'O-',
+    contactNumber: '9850076543',
+    allergies: [],
+    medications: [{ name: 'Levothyroxine', dosage: '50 mcg', frequency: 'Once daily', startDate: '2026-02-11', endDate: '' }],
+    newVitals: { heartRate: 68, bloodPressure: '118/76', temperature: 36.5 },
+  },
+  {
+    name: 'Prakash Shinde',
+    dateOfBirth: '1955-12-08',
+    gender: 'male',
+    bloodType: 'A+',
+    contactNumber: '9763322110',
+    allergies: [{ allergen: 'Aspirin', severity: 'severe', reaction: 'Wheezing' }],
+    medications: [{ name: 'Insulin glargine', dosage: '18 units', frequency: 'At night', startDate: '2026-05-20', endDate: '' }],
+    newVitals: { heartRate: 80, bloodPressure: '138/88', temperature: 36.9, oxygenSaturation: 96 },
+  },
+  {
+    name: 'Lata Pawar',
+    dateOfBirth: '1978-06-25',
+    gender: 'female',
+    bloodType: 'B+',
+    contactNumber: '9921456789',
+    allergies: [{ allergen: 'Dust', severity: 'mild', reaction: 'Sneezing' }],
+    medications: [{ name: 'Salbutamol inhaler', dosage: '2 puffs', frequency: 'As needed', startDate: '2026-04-01', endDate: '' }],
+    newVitals: { heartRate: 84, respiratoryRate: 20, oxygenSaturation: 95 },
+  },
+  {
+    name: 'Ganesh Bhosale',
+    dateOfBirth: '1986-01-14',
+    gender: 'male',
+    bloodType: 'O+',
+    contactNumber: '9604455667',
+    allergies: [],
+    medications: [{ name: 'Amoxicillin', dosage: '500 mg', frequency: 'Three times daily', startDate: '2026-09-28', endDate: '2026-10-05' }],
+    newVitals: { heartRate: 92, temperature: 38.1 },
+  },
+  {
+    name: 'Rukhsana Pathan',
+    dateOfBirth: '1963-03-03',
+    gender: 'female',
+    bloodType: 'AB-',
+    contactNumber: '9890011223',
+    allergies: [{ allergen: 'Shellfish', severity: 'severe', reaction: 'Swelling' }],
+    medications: [{ name: 'Losartan', dosage: '50 mg', frequency: 'Once daily', startDate: '2026-01-20', endDate: '' }],
+    newVitals: { heartRate: 76, bloodPressure: '146/92' },
+  },
+];
+
+/** Concurrent dose edits from two PHC tablets, each of which becomes a review case. */
+const doseClashes: { patient: number; a: string; b: string }[] = [
+  { patient: 4, a: '50 mg', b: '25 mg' },
+  { patient: 5, a: '75 mcg', b: '62.5 mcg' },
+  { patient: 6, a: '22 units', b: '16 units' },
+  { patient: 7, a: '4 puffs', b: '1 puff' },
+  { patient: 9, a: '100 mg', b: '25 mg' },
+  { patient: 8, a: '875 mg', b: '250 mg' },
 ];
 
 function ctx(clientId: string, user: AuthUser, offsetMinutes: number): MutationContext {
@@ -126,14 +196,23 @@ async function main() {
   const deviceA = 'seed-tablet-a';
   const deviceB = 'seed-tablet-b';
 
+  // One tablet per PHC; new patients are spread across them.
+  const tablets = [
+    { clientId: deviceA, user: worker1, name: 'PHC Wagholi tablet' },
+    { clientId: deviceB, user: worker2, name: 'PHC Lonikand tablet' },
+    { clientId: 'seed-tablet-c', user: created.worker3, name: 'PHC Hadapsar tablet' },
+    { clientId: 'seed-tablet-d', user: created.worker4, name: 'PHC Uruli Kanchan tablet' },
+    { clientId: 'seed-tablet-e', user: created.worker5, name: 'PHC Khed tablet' },
+  ];
   const ids: string[] = [];
   for (const [i, p] of patients.entries()) {
     const id = randomUUID();
     ids.push(id);
-    await processMutations([buildCreateMutation(id, p, ctx(deviceA, worker1, 600 - i * 10))], {
-      user: worker1,
-      clientId: deviceA,
-      deviceName: 'PHC Wagholi tablet',
+    const t = i < 4 ? tablets[0] : tablets[(i - 4) % tablets.length];
+    await processMutations([buildCreateMutation(id, p, ctx(t.clientId, t.user, 600 - i * 10))], {
+      user: t.user,
+      clientId: t.clientId,
+      deviceName: t.name,
     });
   }
 
@@ -162,7 +241,19 @@ async function main() {
   await processMutations(fromA, { user: worker1, clientId: deviceA, deviceName: 'PHC Wagholi tablet' });
   await processMutations(fromB, { user: worker2, clientId: deviceB, deviceName: 'PHC Lonikand tablet' });
 
-  console.log(`Seeded ${demoUsers.length} users and ${patients.length} patients (1 pending medication conflict).`);
+  // More review cases: two tablets change the same dose while both are offline.
+  for (const [k, clash] of doseClashes.entries()) {
+    const doc = (await loadDoc(ids[clash.patient]))!;
+    const b0 = inputOf(doc);
+    const one = tablets[(k + 1) % tablets.length];
+    const two = tablets[(k + 3) % tablets.length];
+    const editA = buildUpdateMutations(doc, { ...b0, medications: [{ ...b0.medications[0], dosage: clash.a }] }, ctx(one.clientId, one.user, 80 - k * 7));
+    const editB = buildUpdateMutations(doc, { ...b0, medications: [{ ...b0.medications[0], dosage: clash.b }] }, ctx(two.clientId, two.user, 70 - k * 7));
+    await processMutations(editA, { user: one.user, clientId: one.clientId, deviceName: one.name });
+    await processMutations(editB, { user: two.user, clientId: two.clientId, deviceName: two.name });
+  }
+
+  console.log(`Seeded ${demoUsers.length} users and ${patients.length} patients (${1 + doseClashes.length} pending medication conflicts).`);
   console.log(`Demo logins (password "${DEMO_PASSWORD}"): ${demoUsers.map((u) => `${u.username} [${u.role}]`).join(', ')}`);
   await disconnectDb();
 }

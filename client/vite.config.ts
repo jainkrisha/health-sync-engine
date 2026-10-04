@@ -21,6 +21,13 @@ export default defineConfig({
   preview: { proxy },
   build: {
     chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      // The PHC library's 3D shelf runs as its own page inside an iframe.
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        bookshelf: fileURLToPath(new URL('./bookshelf.html', import.meta.url)),
+      },
+    },
   },
   plugins: [
     react(),

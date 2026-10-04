@@ -410,15 +410,7 @@
 .pi-cam {
   transform-box: view-box;
   transform-origin: 820px 636px;
-  animation: piCam 6.2s cubic-bezier(0.65, 0, 0.35, 1) both;
-}
-@keyframes piCam {
-  0% { transform: scale(1.08) translate(10px, 6px); }
-  10% { transform: scale(1.02) translate(0, 0); }
-  34% { transform: scale(1.06) translate(-6px, 0); }
-  57% { transform: scale(4.1); }
-  78% { transform: scale(4.5); }
-  100% { transform: scale(11); }
+  will-change: transform;
 }
 .pi-arm { animation: piArm 1.6s ease-in-out 0.6s 2 alternate both; transform-box: fill-box; transform-origin: 100% 0; }
 @keyframes piArm { from { transform: rotate(0); } to { transform: rotate(-4deg); } }
@@ -427,22 +419,17 @@
 .pi-sun { animation: piSun 4s ease-in-out infinite alternate; }
 @keyframes piSun { from { opacity: 0.85; } to { opacity: 1; } }
 
-.pi-screen > g { opacity: 0; animation: piLine 0.45s ease-out both; }
-.pi-l1 { animation-delay: 3.3s !important; }
-.pi-l2 { animation-delay: 3.6s !important; }
-.pi-l3 { animation-delay: 3.9s !important; }
-.pi-l4 { animation-delay: 4.2s !important; }
-.pi-sync { animation-delay: 4.5s !important; }
-@keyframes piLine { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+.pi-screen > g { opacity: 0; transform: translateY(3px); transition: opacity 0.45s ease-out, transform 0.45s ease-out; }
+.pi-screen > g.is-on { opacity: 1; transform: none; }
 
 .pi-pulses circle {
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
-  animation: piPulse 1.4s ease-out 4.5s 2 forwards;
 }
-.pi-pulses circle:nth-child(2) { animation-delay: 4.85s; }
-.pi-pulses circle:nth-child(3) { animation-delay: 5.2s; }
+.pi-pulses.is-on circle { animation: piPulse 1.6s ease-out infinite; }
+.pi-pulses.is-on circle:nth-child(2) { animation-delay: 0.45s; }
+.pi-pulses.is-on circle:nth-child(3) { animation-delay: 0.9s; }
 @keyframes piPulse {
   0% { opacity: 0.9; transform: scale(0.6); }
   100% { opacity: 0; transform: scale(2.6); }
@@ -464,14 +451,28 @@
   box-shadow: 0 0 0 1px rgba(29, 39, 51, 0.12), 0 14px 30px -14px rgba(29, 39, 51, 0.5);
   color: #1d2733;
   opacity: 0;
-  animation: piCaption 1.8s ease both;
+  transform: translateY(10px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
-.phc-intro-caption:last-child { animation-duration: 2.4s; }
-@keyframes piCaption {
-  0% { opacity: 0; transform: translateY(10px); }
-  15%, 82% { opacity: 1; transform: none; }
-  100% { opacity: 0; transform: translateY(-6px); }
+.phc-intro-caption.is-on { opacity: 1; transform: none; }
+.phc-intro-cue {
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 600 10px/1 'Geist Mono', ui-monospace, monospace;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: #3a4b5e;
+  opacity: calc(1 - var(--p, 0) * 6);
 }
+.phc-intro-track { position: relative; width: 54px; height: 1px; overflow: hidden; background: rgba(29, 39, 51, 0.2); }
+.phc-intro-track i { position: absolute; inset: 0; background: #e0663a; transform-origin: left; animation: piCue 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+@keyframes piCue { 0% { transform: scaleX(0); } 45% { transform: scaleX(1); } 100% { transform: scaleX(1) translateX(100%); } }
+.phc-intro-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(29, 39, 51, 0.1); }
+.phc-intro-progress i { display: block; height: 100%; background: #e0663a; transform-origin: left; transform: scaleX(var(--p, 0)); }
 .phc-intro-n {
   display: inline-block;
   padding: 2px 6px;
@@ -496,3 +497,38 @@
 }
 .phc-intro-skip:hover { background: #1d2733; }
 .phc-intro-skip:focus-visible { outline: 2px solid #e0663a; outline-offset: 2px; }
+
+/* Browsers draw their own reveal/clear buttons on password fields (Edge, IE);
+   the pass already has one, so hide theirs. */
+.pass-lcd input::-ms-reveal,
+.pass-lcd input::-ms-clear { display: none; }
+
+/* Hover lifts and lights a pass; focusing it (typing) zooms it forward and
+   dims the other one, so the pass being used is unmistakable. */
+.pass-sleeve {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s, filter 0.45s, opacity 0.45s;
+}
+.pass-col:hover .pass-sleeve {
+  transform: scale(1.04);
+  box-shadow:
+    0 0 0 2px rgba(224, 102, 58, 0.75),
+    0 0 36px 4px rgba(224, 102, 58, 0.35),
+    0 40px 70px -24px rgba(0, 0, 0, 0.85);
+}
+.pass-col:focus-within { z-index: 5; }
+.pass-col:focus-within .pass-sleeve {
+  transform: scale(1.12) translateY(10px);
+  box-shadow:
+    0 0 0 2px rgba(224, 102, 58, 0.95),
+    0 0 50px 8px rgba(224, 102, 58, 0.42),
+    0 50px 90px -24px rgba(0, 0, 0, 0.9);
+}
+.pass-pair:has(.pass-col:hover) .pass-col:not(:hover) .pass-sleeve,
+.pass-pair:has(.pass-col:focus-within) .pass-col:not(:focus-within) .pass-sleeve {
+  opacity: 0.55;
+  filter: saturate(0.6) blur(0.5px);
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pass-sleeve { transition: none; }
+}

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PHC library shelf</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@400..700&display=swap" rel="stylesheet">
+<style>
+<style>
+  :root{
+    --bg:#e2d8c6;
+    --ink:#1b1814;
+    --ink-soft:rgba(27,24,20,.62);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:Geist,Inter,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+  }
+  canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block;
+    touch-action:none;user-select:none;-webkit-user-select:none;
+    touch-action:none;user-select:none;-webkit-user-select:none;
+    opacity:0;transition:opacity 1s linear}
+  canvas#gl.on{opacity:1}
+
+  /* ---------- header ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;height:60px;z-index:20;
+    display:flex;align-items:center;padding:0 20px;gap:28px;
+    font-size:16px;font-weight:500;
+  }
+  .brand{display:flex;align-items:center;gap:11px}
+  .mark{width:26px;height:26px;border-radius:50%;background:var(--ink);display:grid;place-items:center}
+  .mark svg{width:15px;height:15px;fill:#efe7da}
+  .brandname{font-family:"EB Garamond",Georgia,serif;font-size:23px;font-weight:500;
+    letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+  header .right{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .pill{background:var(--ink);color:#f6efe1;padding:11px 20px;border-radius:999px;
+    text-decoration:none;white-space:nowrap}
+  .pill:hover{background:#33291f}
+
+  /* ---------- the opening: every element on its own beat ---------- */
+  .rise{opacity:0;transform:translateY(13px);
+    transition:opacity .74s var(--ease) var(--d,0ms),transform .74s var(--ease) var(--d,0ms)}
+  .rise.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .rise{transform:none;transition:opacity .3s linear var(--d,0ms)}
+  }
+
+  /* ---------- focused volume panel ---------- */
+  .wash{position:fixed;left:0;top:0;z-index:14;height:100vh;
+    width:min(664px,62vw);pointer-events:none;display:block}
+  body.mobile .wash{display:none}
+  .detail{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:15;
+    width:min(560px,50vw);padding:92px 120px 92px 54px;opacity:0;pointer-events:none;
+    transition:opacity .45s var(--ease) .14s}
+  .detail .meta,.detail h2,.detail p,.detail .acts{max-width:326px}
+  .detail.on{opacity:1}
+  .detail .acts button{pointer-events:auto}
+  .detail .meta{font-size:13px;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 13px}
+  .detail h2{font-family:Geist,Inter,sans-serif;font-weight:800;letter-spacing:-.02em;
+    font-size:46px;line-height:1.06;margin:0 0 18px;letter-spacing:-.005em}
+  .detail p{font:400 16px/1.62 Geist,Inter,sans-serif;margin:0 0 32px;color:rgba(27,24,20,.84)}
+  .detail .acts{display:flex;gap:10px}
+  .detail .acts button{
+    font:600 14.5px/1 Geist,Inter,sans-serif;color:var(--ink);background:#fdf8ef;border:0;
+    border-radius:999px;padding:15px 24px;cursor:pointer;
+    transition:transform .22s var(--ease),box-shadow .22s var(--ease),background .22s;
+    box-shadow:0 1px 1px rgba(52,34,16,.18),
+               0 3px 6px rgba(52,34,16,.14),
+               0 10px 20px -6px rgba(52,34,16,.26),
+               0 26px 44px -18px rgba(52,34,16,.34),
+               inset 0 1px 0 rgba(255,255,255,.85)}
+  .detail .acts button:hover{background:#fffcf5;transform:translateY(-2px);
+    box-shadow:0 1px 1px rgba(52,34,16,.18),
+               0 5px 10px rgba(52,34,16,.16),
+               0 16px 28px -8px rgba(52,34,16,.28),
+               0 36px 60px -22px rgba(52,34,16,.38),
+               inset 0 1px 0 rgba(255,255,255,.9)}
+  .detail .acts button:active{transform:translateY(0);
+    box-shadow:0 1px 2px rgba(52,34,16,.22),0 4px 10px -2px rgba(52,34,16,.24),
+               inset 0 1px 0 rgba(255,255,255,.7)}
+
+  .hint{position:fixed;z-index:16;left:0;top:0;transform:translate(10px,10px);
+    background:#fdf8ef;color:var(--ink);border-radius:999px;padding:8px 13px;
+    font:500 13.5px/1 Inter,sans-serif;box-shadow:0 2px 14px rgba(50,35,20,.2);
+    pointer-events:none;opacity:0;transition:opacity .5s}
+  .hint.on{opacity:1}
+
+  /* ---------- catalogue rail ---------- */
+  footer{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:30px 0 22px;
+    background:linear-gradient(to top,rgba(226,216,198,.95) 46%,rgba(226,216,198,.62) 76%,rgba(226,216,198,0));
+    border-top:1px solid rgba(36,26,18,.16);opacity:0;transition:opacity .7s var(--ease) .34s}
+  footer.on{opacity:1}
+  body.reading footer{opacity:.3}
+  .tl{display:flex;justify-content:space-between;align-items:center;
+    gap:clamp(9px,1.2vw,22px);padding:0 clamp(14px,2.5vw,44px);
+    overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%)}
+  .tl::-webkit-scrollbar{display:none}
+  .tl>*{flex:0 1 auto;min-width:0}
+  .tli{background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;
+    flex:0 0 auto;display:flex;align-items:center;gap:11px}
+  .tlmark{flex:0 0 auto;width:30px;height:40px;border-radius:2px 4px 4px 2px;display:grid;place-items:center;color:#efe9dd;font:600 10px/1 "Geist Mono",monospace;box-shadow:inset 3px 0 0 rgba(0,0,0,.25);opacity:.75;
+    transition:opacity .4s var(--ease),transform .4s var(--ease)}
+  .tli:hover .tlmark{opacity:.95;transform:translateY(-1px) scale(1.06)}
+  .tltxt{display:block;min-width:0;white-space:nowrap}
+  .tli p{margin:0;font-size:12.5px;line-height:1.24;color:var(--ink-soft);transition:color .45s}
+  .tli p.studio{margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tli h2{margin:0;font-size:14px;font-weight:400;line-height:1.22;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .tli:hover p{color:var(--ink)}
+
+  /* ---------- mobile: the stack you flick through ---------- */
+  .mbar{position:fixed;left:0;right:0;bottom:0;z-index:18;display:none;
+    align-items:flex-end;justify-content:space-between;gap:12px;padding:16px 16px 22px;
+    opacity:0;transition:opacity .6s var(--ease)}
+  .mbar.on{opacity:1}
+  .mbar-txt p{margin:0 0 4px;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .mbar-txt h2{margin:0;font-family:Geist,Inter,sans-serif;font-size:22px;font-weight:800;line-height:1.12}
+  .mbar-acts{display:flex;gap:8px;flex:0 0 auto}
+  .mbar-acts button{font:500 14.5px/1 Inter,sans-serif;border:0;border-radius:999px;
+    padding:15px 21px;
+    box-shadow:0 1px 1px rgba(52,34,16,.18),0 4px 9px rgba(52,34,16,.16),
+               0 14px 26px -8px rgba(52,34,16,.30),inset 0 1px 0 rgba(255,255,255,.6);cursor:pointer;background:rgba(253,247,236,.9);color:var(--ink)}
+  .mbar-acts button.solid{background:var(--ink);color:#f2ece1}
+  .menubtn{position:fixed;right:14px;top:10px;z-index:22;width:34px;height:34px;border:0;
+    background:none;display:none;flex-direction:column;justify-content:center;gap:6px;cursor:pointer}
+  .menubtn span{display:block;height:1.8px;background:var(--ink);border-radius:2px}
+  .menu{position:fixed;inset:0;z-index:21;background:rgba(232,223,207,.97);backdrop-filter:blur(14px);
+    padding:66px 20px 24px;display:flex;flex-direction:column;overflow:auto}
+  .menu[hidden]{display:none}
+  .menu button{background:none;border:0;text-align:left;padding:13px 4px;cursor:pointer;
+    border-bottom:1px solid rgba(36,26,18,.14);color:var(--ink);
+    font-family:Geist,Inter,sans-serif;font-weight:700;font-size:19px}
+  .menu button span{display:block;margin-bottom:4px;font-family:Inter,sans-serif;font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+
+  body.mobile footer{display:none}
+  body.mobile .mbar{display:flex;padding-top:52px;
+    background:linear-gradient(to top,rgba(226,216,198,.97) 34%,rgba(226,216,198,.72) 68%,rgba(226,216,198,0))}
+  body.mobile .menubtn{display:flex}
+  body.mobile header{padding:0 14px;gap:10px}
+  body.mobile header .right{margin-right:42px}
+  body.mobile .detail{display:none}
+  .mbar{background:linear-gradient(to top, rgba(226,216,198,.96), rgba(226,216,198,0))}
+
+  /* ---------- loader ---------- */
+  .loader{position:fixed;inset:0;z-index:30;display:grid;place-items:center;
+    background:var(--bg);transition:opacity .6s linear;pointer-events:none}
+  .loader.gone{opacity:0}
+  .bar{width:92px;height:2px;background:rgba(29,24,21,.2);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0;transform-origin:left;transform:scaleX(0);background:var(--ink);
+    transition:transform .3s linear}
+</style>
+
+  .detail .acts button#detail-look{background:#e0663a;color:#fff8f0;box-shadow:0 1px 1px rgba(110,40,15,.3),0 8px 18px -6px rgba(224,102,58,.65),inset 0 1px 0 rgba(255,255,255,.3)}
+  .detail .acts button#detail-look:hover{background:#bb4f29}
+  .mbar-acts button.solid{background:#e0663a;color:#fff8f0}
+  .bar i{background:#e0663a}
+
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<canvas class="wash" id="wash" aria-hidden="true"></canvas>
+<div class="detail" id="detail">
+  <p class="meta" id="detail-meta"></p>
+  <h2 id="detail-title"></h2>
+  <p id="detail-desc"></p>
+  <div class="acts">
+    <button id="detail-look">Open register</button>
+    <button id="detail-close">Back to shelf</button>
+  </div>
+</div>
+
+<div class="hint" id="hint">Drag to turn · tap to flip</div>
+
+<footer><div class="tl" id="tl"></div></footer>
+
+<div class="mbar" id="mbar">
+  <div class="mbar-txt"><p id="mbar-meta"></p><h2 id="mbar-title"></h2></div>
+  <div class="mbar-acts">
+    <button id="mbar-details">Details</button>
+    <button class="solid" id="mbar-look">Open register</button>
+  </div>
+</div>
+<button class="menubtn" id="menubtn" aria-label="All PHCs"><span></span><span></span></button>
+<nav class="menu" id="menu" hidden></nav>
+
+<div class="loader" id="loader"><div class="bar"><i id="barfill"></i></div></div>
+
+<script type="module" src="/src/bookshelf/shelf.js"></script>
+</body>
+</html>
