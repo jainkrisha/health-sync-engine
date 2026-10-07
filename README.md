@@ -5,6 +5,7 @@
 Needs [Docker Desktop](https://www.docker.com/products/docker-desktop/) running.
 
 ```bash
+cp .env.example .env                             # copy, then set a real JWT_SECRET
 docker compose up --build -d                     # start MongoDB, server, app
 docker compose exec server node dist/seed.js     # demo data (once)
 ```
@@ -102,7 +103,7 @@ Demo logins after seeding (password `password123`):
 | `JWT_SECRET` | dev-only default (required in production) | Token signing |
 | `JWT_EXPIRES_IN` | `7d` | Session length (devices can work offline until it expires) |
 | `CLIENT_ORIGIN` | `http://localhost:5173,http://localhost:4173` | Allowed browser origins |
-| `ALLOW_OPEN_REGISTRATION` | `true` | Allow self-registration with any role (demo); set `false` for real use |
+| `ALLOW_OPEN_REGISTRATION` | `false` | Allow self-registration with any role (set `true` for open demo). Demo users are created by the seed script, not self-registration. |
 
 ## Tests
 

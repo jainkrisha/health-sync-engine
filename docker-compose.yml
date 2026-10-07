@@ -27,10 +27,10 @@ services:
     environment:
       PORT: 4000
       MONGO_URI: mongodb://mongo:27017/healthsync
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:8080}
-      ALLOW_OPEN_REGISTRATION: ${ALLOW_OPEN_REGISTRATION:-true}
+      ALLOW_OPEN_REGISTRATION: ${ALLOW_OPEN_REGISTRATION:-false}
     ports:
       - "4000:4000"
 
