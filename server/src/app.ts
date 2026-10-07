@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -21,9 +22,15 @@ export function createApp() {
   app.use(express.json({ limit: '5mb' }));
 
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true, time: new Date().toISOString() });
-  });
+  const up = mongoose.connection.readyState === 1;
 
+  res
+    .status(up ? 200 : 503)
+    .json({
+      ok: up,
+      time: new Date().toISOString(),
+    });
+  });
   app.use('/api/auth', authRouter);
   app.use('/api/patients', requireAuth, patientsRouter);
   app.use('/api/sync', requireAuth, syncRouter);

@@ -4,6 +4,8 @@
 # Then open http://localhost:8080 (add ?device=B in a second tab to simulate another device).
 services:
   mongo:
+    ports:
+      - "127.0.0.1:27017:27017"
     image: mongo:7
     restart: unless-stopped
     volumes:
