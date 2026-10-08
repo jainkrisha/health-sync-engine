@@ -7,6 +7,8 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { Conflict } from '@shared/types';
 import { relativeTime } from '../../components/ui';
+import { useI18n } from '../../i18n/useI18n';
+import { t } from '../../i18n/i18n';
 import './caseWave.css';
 
 const CARD_COLORS = ['#2b3d55', '#34485f', '#3c5f50', '#2f4257', '#3a4b5e', '#283a4f', '#423d35', '#31455a'];
@@ -25,10 +27,11 @@ function initialsOf(name: string) {
 
 function dose(c: Conflict, side: 'current' | 'incoming') {
   const v = side === 'current' ? c.currentValue : c.incomingValue;
-  return v.active ? v.dosage || '—' : 'Stopped';
+  return v.active ? v.dosage || '—' : t('Stopped');
 }
 
 export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Conflict) => void }) {
+  const { tp } = useI18n();
   const stageRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const openRef = useRef(onOpen);
@@ -229,13 +232,13 @@ export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Con
   const waiting = cases.filter((c) => c.status === 'pending_review').length;
 
   return (
-    <section className="case-wave" aria-label="Review cases">
+    <section className="case-wave" aria-label={t('Review cases')}>
       <div className="case-wave-head">
         <div>
-          <p className="case-wave-kicker">Merges to be reviewed</p>
-          <p className="case-wave-title">{waiting ? `${waiting} case${waiting === 1 ? '' : 's'} waiting` : 'All cases settled'}</p>
+          <p className="case-wave-kicker">{t('Merges to be reviewed')}</p>
+          <p className="case-wave-title">{waiting ? tp(waiting, '{count} case waiting', '{count} cases waiting') : t('All cases settled')}</p>
         </div>
-        <p className="case-wave-help">Move across the cards · scroll to step · pick the front card to open it</p>
+        <p className="case-wave-help">{t('Move across the cards · scroll to step · pick the front card to open it')}</p>
       </div>
       <div className="case-wave-stage" ref={stageRef}>
         <div className="case-wave-deck">
@@ -248,15 +251,15 @@ export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Con
               type="button"
               className="case-wave-card"
               style={{ ['--card-color' as string]: CARD_COLORS[i % CARD_COLORS.length] }}
-              aria-label={`${c.status === 'pending_review' ? 'Review' : 'Settled'}: ${c.patientName}, ${c.label}, ${dose(c, 'current')} versus ${dose(c, 'incoming')}`}
+              aria-label={`${c.status === 'pending_review' ? t('Review') : t('Settled')}: ${c.patientName}, ${c.label}, ${dose(c, 'current')} ${t('vs')} ${dose(c, 'incoming')}`}
               tabIndex={echo ? -1 : 0}
             >
               <span className="case-wave-face">
-                <span className="case-wave-chip">{c.status === 'pending_review' ? 'Review' : 'Settled'}</span>
+                <span className="case-wave-chip">{c.status === 'pending_review' ? t('Review') : t('Settled')}</span>
                 <span className="case-wave-initials">{initialsOf(c.patientName)}</span>
                 <span className="case-wave-dose">
                   <b>{dose(c, 'current')}</b>
-                  <i>vs</i>
+                  <i>{t('vs')}</i>
                   <b>{dose(c, 'incoming')}</b>
                 </span>
               </span>
@@ -265,7 +268,7 @@ export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Con
                 <span className="case-wave-role">
                   {c.label} · {relativeTime(c.createdAt)}
                 </span>
-                <span className="case-wave-open" aria-hidden="true">Open case</span>
+                <span className="case-wave-open" aria-hidden="true">{t('Open case')}</span>
               </span>
             </button>
           ))}

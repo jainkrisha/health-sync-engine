@@ -20,7 +20,7 @@ import {
 } from '@shared/diff';
 import { materialize } from '@shared/materialize';
 import type { Patient } from '@shared/types';
-import { plural } from '@shared/text';
+import { t, tp } from '../i18n/i18n';
 import { emptyVitals, patientSchema, type PatientFormValues } from '../schemas/patientSchema';
 import { commitLocalEdit, getPatientDoc } from '../db/patientRepo';
 import { useToast } from '../components/Toast';
@@ -103,7 +103,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}) {
         const doc = await getPatientDoc(id);
         if (!active) return;
         if (!doc || doc.deleted.value) {
-          toast({ message: 'Patient not found on this device', type: 'error' });
+          toast({ message: t('Patient not found on this device'), type: 'error' });
           navigate('/patients');
           return;
         }
@@ -113,7 +113,7 @@ export function usePatientForm(options: UsePatientFormOptions = {}) {
         reset(toFormValues(opened));
       } catch (err) {
         if (!active) return;
-        toast({ message: `Failed to load patient: ${err instanceof Error ? err.message : 'unknown error'}`, type: 'error' });
+        toast({ message: `${t('Failed to load patient:')} ${err instanceof Error ? t(err.message) : t('unknown error')}`, type: 'error' });
         navigate('/patients');
       } finally {
         if (active) setIsLoading(false);
@@ -141,16 +141,21 @@ export function usePatientForm(options: UsePatientFormOptions = {}) {
           const base = snapshot ?? inputFromDoc(current);
           return buildUpdateMutations(current, rebaseInput(base, edited, inputFromDoc(current)), ctx);
         });
-        toast({ message: mutations.length ? `Saved ${plural(mutations.length, 'change')}. They will sync automatically.` : 'No changes to save', type: mutations.length ? 'success' : 'info' });
+        toast({
+          message: mutations.length
+            ? tp(mutations.length, 'Saved {count} change. They will sync automatically.', 'Saved {count} changes. They will sync automatically.')
+            : t('No changes to save'),
+          type: mutations.length ? 'success' : 'info',
+        });
         navigate(`/patients/${id}`);
       } else {
         const newId = crypto.randomUUID();
         await commitLocalEdit(newId, () => [buildCreateMutation(newId, edited, ctx)]);
-        toast({ message: 'Patient saved on this device', type: 'success' });
+        toast({ message: t('Patient saved on this device'), type: 'success' });
         navigate(`/patients/${newId}`);
       }
     } catch (err) {
-      toast({ message: `Failed to save: ${err instanceof Error ? err.message : 'unknown error'}`, type: 'error' });
+      toast({ message: `${t('Failed to save:')} ${err instanceof Error ? t(err.message) : t('unknown error')}`, type: 'error' });
     }
   };
 

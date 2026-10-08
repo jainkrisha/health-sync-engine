@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useI18n } from '../i18n/useI18n';
 import { Icon, type IconName } from '../components/Icon';
 import './navWheel.css';
 
@@ -24,6 +25,7 @@ const STEP_COOLDOWN_MS = 130;
 export function NavWheel({ items }: { items: WheelItem[] }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const closeTimer = useRef(0);
@@ -116,11 +118,11 @@ export function NavWheel({ items }: { items: WheelItem[] }) {
         onPointerEnter={show}
         onFocus={show}
         onClick={show}
-        aria-label="Open the menu"
+        aria-label={t('Open the menu')}
         aria-expanded={open}
       >
         <Icon name={current?.icon ?? 'menu'} className="h-4 w-4" />
-        <span>MENU</span>
+        <span>{t('MENU')}</span>
       </button>
 
       <div className={`nav-wheel ${open ? 'is-open' : ''}`} aria-hidden={!open}>
@@ -128,7 +130,7 @@ export function NavWheel({ items }: { items: WheelItem[] }) {
         <nav
           ref={panelRef}
           className="nav-wheel-panel"
-          aria-label="Main navigation"
+          aria-label={t('Main navigation')}
           onPointerEnter={() => window.clearTimeout(closeTimer.current)}
           onPointerLeave={hideSoon}
         >
@@ -179,7 +181,7 @@ export function NavWheel({ items }: { items: WheelItem[] }) {
               );
             })}
           </div>
-          <p className="nav-wheel-hint">Scroll to turn · click to open · Esc to close</p>
+          <p className="nav-wheel-hint">{t('Scroll to turn · click to open · Esc to close')}</p>
         </nav>
       </div>
     </>

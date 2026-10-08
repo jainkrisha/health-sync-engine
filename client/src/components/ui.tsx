@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { formatClock, type VectorClock } from '@shared/vectorClock';
 import { ROLE_LABELS, type Role } from '@shared/types';
 import { Icon, type IconName } from './Icon';
+import { useI18n } from '../i18n/useI18n';
+import { dateLocale, t } from '../i18n/i18n';
 
 export function PageHeader({
   title,
@@ -19,12 +21,13 @@ export function PageHeader({
   back?: { to: string; label: string };
   eyebrow?: ReactNode;
 }) {
+  useI18n();
   return (
     <header className="mb-6 border-b border-slate-200/80 pb-5 sm:mb-8 sm:pb-6 dark:border-slate-800">
       {back && (
         <Link
           to={back.to}
-          aria-label={`Back to ${back.label}`}
+          aria-label={t('Back to {label}', { label: back.label })}
           className="group mb-3 inline-flex items-center gap-1 rounded-md text-sm font-medium text-slate-500 transition-colors hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300"
         >
           <Icon name="chevronRight" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
@@ -81,7 +84,7 @@ export function Spinner({ className = 'h-4 w-4' }: { className?: string }) {
 
 export function SkeletonRows({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="space-y-3" aria-busy="true" aria-label="Loading">
+    <div className="space-y-3" aria-busy="true" aria-label={t('Loading')}>
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="card flex items-center gap-4 py-4 sm:py-4" style={{ opacity: 1 - i * 0.12 }}>
           <div className="skeleton h-10 w-10 rounded-full" />
@@ -98,13 +101,14 @@ export function SkeletonRows({ rows = 4 }: { rows?: number }) {
 
 /** Inline problem banner with an optional retry action. */
 export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  useI18n();
   return (
     <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
       <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
-      <p className="flex-1">{message}</p>
+      <p className="flex-1">{t(message)}</p>
       {onRetry && (
         <button type="button" onClick={onRetry} className="font-semibold underline-offset-4 hover:underline">
-          Try again
+          {t('Try again')}
         </button>
       )}
     </div>
@@ -131,7 +135,8 @@ export function RoleBadge({ role }: { role: Role }) {
     health_worker: 'badge-slate',
     auditor: 'badge-slate',
   };
-  return <span className={style[role]}>{ROLE_LABELS[role]}</span>;
+  useI18n();
+  return <span className={style[role]}>{t(ROLE_LABELS[role])}</span>;
 }
 
 /** Readable vector clock: one chip per device counter. */
@@ -163,27 +168,27 @@ export function shortId(id: string): string {
 }
 
 export function relativeTime(iso: string | null | undefined): string {
-  if (!iso) return 'never';
+  if (!iso) return t('never');
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('just now');
+  if (mins < 60) return t('{count}m ago', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('{count}h ago', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  if (days < 7) return days === 1 ? t('{count} day ago', { count: days }) : t('{count} days ago', { count: days });
+  return new Date(iso).toLocaleDateString(dateLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  return new Date(iso).toLocaleString(dateLocale(), { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) return '—';
   const d = new Date(value.length === 10 ? `${value}T00:00:00` : value);
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString(undefined, { dateStyle: 'medium' });
+  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString(dateLocale(), { dateStyle: 'medium' });
 }
 
 export function ageFrom(dob: string): string {
@@ -194,7 +199,7 @@ export function ageFrom(dob: string): string {
   let age = now.getFullYear() - birth.getFullYear();
   const m = now.getMonth() - birth.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
-  return `${age} yrs`;
+  return t('{count} yrs', { count: age });
 }
 
 export function initials(name: string): string {

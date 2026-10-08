@@ -1,6 +1,7 @@
 /** Scroll helpers for long pages: a thin progress bar under the header and a back-to-top button. */
 import { useEffect, useState } from 'react';
 import { Icon } from '../components/Icon';
+import { useI18n } from '../i18n/useI18n';
 
 function useScroll() {
   const [state, setState] = useState({ y: 0, progress: 0 });
@@ -40,13 +41,14 @@ export function ScrollProgress() {
 
 export function BackToTop() {
   const { y } = useScroll();
+  const { t } = useI18n();
   const visible = y > 600;
   return (
     <button
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-      aria-label="Back to top"
-      data-tip="Back to top"
+      aria-label={t('Back to top')}
+      data-tip={t('Back to top')}
       data-tip-pos="top"
       tabIndex={visible ? 0 : -1}
       className={`fixed bottom-24 right-4 z-header flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-card-lg

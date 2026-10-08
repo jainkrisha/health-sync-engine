@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { portalForRole } from '@shared/types';
-import { plural } from '@shared/text';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../context/RBAC';
 import { useTheme } from '../context/ThemeContext';
@@ -14,6 +13,9 @@ import { SyncStatus } from './SyncStatus';
 import { ScrollProgress, BackToTop } from './ScrollAids';
 import { deviceLabel } from '../lib/deviceProfile';
 import { NavWheel, type WheelItem } from './NavWheel';
+import { useI18n } from '../i18n/useI18n';
+import { LanguageSwitch } from '../i18n/LanguageSwitch';
+import { LANG_NAMES, tFacility } from '../i18n/i18n';
 
 interface NavItem {
   to: string;
@@ -28,6 +30,7 @@ export function Layout() {
   const { user, logout } = useAuth();
   const perms = usePermissions();
   const { theme, toggleTheme } = useTheme();
+  const { t, tp, lang, setLang } = useI18n();
   const { pendingCount } = useSyncEngine();
   const { patients } = usePatients();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,12 +59,12 @@ export function Layout() {
 
   const reviewCount = patients.filter((p) => p.hasOpenConflicts).length;
   const allNav: NavItem[] = [
-    { to: '/dashboard', label: 'Dashboard', short: 'Home', icon: 'dashboard', show: true },
-    { to: '/patients', label: 'Patients', short: 'Patients', icon: 'patients', show: true },
-    { to: '/phcs', label: 'PHC library', short: 'PHCs', icon: 'clinic', show: Boolean(user && portalForRole(user.role) === 'district') },
-    { to: '/conflicts', label: 'Conflict Review', short: 'Review', icon: 'alert', show: perms.canReviewConflicts, count: reviewCount },
-    { to: '/audit', label: 'Audit Trail', short: 'Audit', icon: 'shield', show: perms.canViewAudit },
-    { to: '/admin', label: 'Users & Devices', short: 'Users', icon: 'users', show: perms.isAdmin },
+    { to: '/dashboard', label: t('Dashboard'), short: t('Home'), icon: 'dashboard', show: true },
+    { to: '/patients', label: t('Patients'), short: t('Patients'), icon: 'patients', show: true },
+    { to: '/phcs', label: t('PHC library'), short: t('PHCs'), icon: 'clinic', show: Boolean(user && portalForRole(user.role) === 'district') },
+    { to: '/conflicts', label: t('Conflict Review'), short: t('Review'), icon: 'alert', show: perms.canReviewConflicts, count: reviewCount },
+    { to: '/audit', label: t('Audit Trail'), short: t('Audit'), icon: 'shield', show: perms.canViewAudit },
+    { to: '/admin', label: t('Users & Devices'), short: t('Users'), icon: 'users', show: perms.isAdmin },
   ];
   const nav = allNav.filter((n) => n.show);
 
@@ -69,17 +72,17 @@ export function Layout() {
 
   // Desktop: the card wheel. Each card says what is behind it in one line.
   const LINES: Record<string, { line: string; color: string }> = {
-    '/dashboard': { line: "Today's numbers, sync activity and recent patients", color: '#2b3d55' },
-    '/patients': { line: 'Every record on this device, searchable', color: '#9a4022' },
-    '/patients/new': { line: 'Register a new patient, saved here first', color: '#c4612f' },
-    '/phcs': { line: 'Each PHC as a register on the shelf', color: '#4a7562' },
-    '/conflicts': { line: 'Dose clashes waiting for a clinician', color: '#7a3b3b' },
-    '/audit': { line: 'Every merge decision, append-only', color: '#5c4a24' },
-    '/admin': { line: 'Roles, accounts and syncing devices', color: '#3a4b5e' },
+    '/dashboard': { line: t("Today's numbers, sync activity and recent patients"), color: '#2b3d55' },
+    '/patients': { line: t('Every record on this device, searchable'), color: '#9a4022' },
+    '/patients/new': { line: t('Register a new patient, saved here first'), color: '#c4612f' },
+    '/phcs': { line: t('Each PHC as a register on the shelf'), color: '#4a7562' },
+    '/conflicts': { line: t('Dose clashes waiting for a clinician'), color: '#7a3b3b' },
+    '/audit': { line: t('Every merge decision, append-only'), color: '#5c4a24' },
+    '/admin': { line: t('Roles, accounts and syncing devices'), color: '#3a4b5e' },
   };
   const wheelItems: WheelItem[] = [
     ...nav.slice(0, 2),
-    ...(perms.canEditPatients ? [{ to: '/patients/new', label: 'Add patient', short: 'Add', icon: 'plus' as IconName, show: true }] : []),
+    ...(perms.canEditPatients ? [{ to: '/patients/new', label: t('Add patient'), short: t('Add'), icon: 'plus' as IconName, show: true }] : []),
     ...nav.slice(2),
   ].map((n) => ({ to: n.to, label: n.label, icon: n.icon, count: n.count, line: LINES[n.to].line, color: LINES[n.to].color }));
   const current = nav.find((n) => location.pathname.startsWith(n.to));
@@ -95,7 +98,7 @@ export function Layout() {
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
       <a href="#main" className="btn-primary sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-toast">
-        Skip to content
+        {t('Skip to content')}
       </a>
 
       {menuOpen && (
@@ -107,23 +110,23 @@ export function Layout() {
         className={`fixed inset-y-0 left-0 z-drawer flex w-72 flex-col bg-slate-900 text-slate-300 shadow-pop transition-transform duration-300 ease-out lg:hidden ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
-        aria-label="Main navigation"
+        aria-label={t('Main navigation')}
       >
         <div className="flex items-center gap-3 px-5 pb-5 pt-6">
           <img src="/logo.svg" alt="" className="h-9 w-9 rounded-xl" />
           <div className="min-w-0">
             <span className="block text-[17px] font-bold tracking-tight text-white">HealthSync</span>
             <span className="block truncate text-[11px] font-medium text-slate-400">
-              {district ? 'District central system' : 'PHC'} · {deviceLabel}
+              {district ? t('District central system') : t('PHC')} · {t(deviceLabel)}
             </span>
           </div>
-          <button className="btn-icon ml-auto text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Close menu">
+          <button className="btn-icon ml-auto text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" onClick={() => setMenuOpen(false)} aria-label={t('Close menu')}>
             <Icon name="x" className="h-5 w-5" />
           </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-4">
-          <p className="eyebrow mb-2 px-3 text-slate-500 dark:text-slate-500">Workspace</p>
+          <p className="eyebrow mb-2 px-3 text-slate-500 dark:text-slate-500">{t('Workspace')}</p>
           <ul className="space-y-1">
             {nav.map((n) => (
               <li key={n.to}>
@@ -156,23 +159,27 @@ export function Layout() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">{user.name}</p>
-                <p className="truncate text-xs text-slate-400">{user.facility}</p>
+                <p className="truncate text-xs text-slate-400">{tFacility(user.facility)}</p>
               </div>
             </div>
           )}
           {user && <div className="mt-2.5"><RoleBadge role={user.role} /></div>}
+          <LanguageSwitch
+            className="mt-3 grid grid-cols-2 gap-2"
+            buttonClassName="btn-ghost btn-sm justify-center text-slate-300 hover:bg-slate-700/70 hover:text-white aria-pressed:bg-slate-700/70 aria-pressed:text-white"
+          />
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               onClick={toggleTheme}
               className="btn-ghost btn-sm justify-center text-slate-300 hover:bg-slate-700/70 hover:text-white"
-              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-label={theme === 'dark' ? t('Switch to light mode') : t('Switch to dark mode')}
             >
               <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
-              {theme === 'dark' ? 'Light' : 'Dark'}
+              {theme === 'dark' ? t('Light') : t('Dark')}
             </button>
             <button onClick={handleLogout} className="btn-ghost btn-sm justify-center text-slate-300 hover:bg-slate-700/70 hover:text-white">
               <Icon name="logout" className="h-4 w-4" />
-              Log out
+              {t('Log out')}
             </button>
           </div>
         </div>
@@ -181,17 +188,27 @@ export function Layout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-header border-b border-slate-200/80 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-900/80">
           <div className="flex min-h-16 items-center gap-2 px-4 py-2 sm:px-6 lg:px-8">
-            <button className="btn-icon -ml-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-expanded={menuOpen}>
+            <button className="btn-icon -ml-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label={t('Open menu')} aria-expanded={menuOpen}>
               <Icon name="menu" className="h-5 w-5" />
             </button>
             <img src="/logo.svg" alt="" className="h-7 w-7 rounded-lg lg:h-8 lg:w-8" />
             <span className="hidden flex-col leading-tight lg:flex">
               <span className="text-[15px] font-bold tracking-tight text-slate-900 dark:text-white">HealthSync</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">{district ? 'District central system' : 'PHC'} · {deviceLabel}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">{district ? t('District central system') : t('PHC')} · {t(deviceLabel)}</span>
             </span>
             <span className="hidden h-6 w-px bg-slate-200 lg:mx-3 lg:block dark:bg-slate-700" aria-hidden="true" />
             <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900 dark:text-white">{current?.label ?? 'HealthSync'}</span>
             <div className="ml-auto flex flex-shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')}
+                className="btn-icon text-xs font-bold"
+                lang={lang === 'hi' ? 'en' : 'hi'}
+                aria-label={t('Switch to {language}', { language: LANG_NAMES[lang === 'hi' ? 'en' : 'hi'] })}
+                data-tip={LANG_NAMES[lang === 'hi' ? 'en' : 'hi']}
+              >
+                {lang === 'hi' ? 'EN' : 'हि'}
+              </button>
               <SyncStatus />
               {user && (
                 <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 lg:flex dark:border-slate-700">
@@ -200,18 +217,18 @@ export function Layout() {
                   </span>
                   <span className="hidden min-w-0 flex-col leading-tight xl:flex">
                     <span className="max-w-[11rem] truncate text-xs font-semibold text-slate-900 dark:text-white">{user.name}</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400">{user.facility}</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">{tFacility(user.facility)}</span>
                   </span>
                   <button
                     type="button"
                     onClick={toggleTheme}
                     className="btn-icon"
-                    aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    data-tip={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                    aria-label={theme === 'dark' ? t('Switch to light mode') : t('Switch to dark mode')}
+                    data-tip={theme === 'dark' ? t('Light mode') : t('Dark mode')}
                   >
                     <Icon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={handleLogout} className="btn-icon" aria-label="Log out" data-tip="Log out" data-tip-pos="left">
+                  <button type="button" onClick={handleLogout} className="btn-icon" aria-label={t('Log out')} data-tip={t('Log out')} data-tip-pos="left">
                     <Icon name="logout" className="h-4 w-4" />
                   </button>
                 </div>
@@ -231,7 +248,7 @@ export function Layout() {
       {/* Mobile tab bar */}
       <nav
         className="fixed inset-x-0 bottom-0 z-header border-t border-slate-200 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden dark:border-slate-800 dark:bg-slate-900/90"
-        aria-label="Quick navigation"
+        aria-label={t('Quick navigation')}
       >
         <ul className="mx-auto flex max-w-md items-stretch justify-around px-2">
           {tabs.map((n) => (
@@ -259,12 +276,12 @@ export function Layout() {
               <NavLink
                 to="/patients/new"
                 className="my-1.5 flex flex-col items-center gap-1 rounded-xl px-3 py-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300"
-                aria-label="Add patient"
+                aria-label={t('Add patient')}
               >
                 <span className="flex h-7 w-10 items-center justify-center rounded-lg bg-teal-600 text-white shadow-teal-glow transition-transform active:scale-95">
                   <Icon name="plus" className="h-4 w-4" />
                 </span>
-                Add
+                {t('Add')}
               </NavLink>
             </li>
           )}
@@ -275,9 +292,9 @@ export function Layout() {
               className="relative flex w-full flex-col items-center gap-1 py-2.5 text-[11px] font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
               <Icon name="menu" className="h-5 w-5" />
-              More
+              {t('More')}
               {!!reviewCount && perms.canReviewConflicts && !tabs.some((t) => t.to === '/conflicts') && (
-                <span className="absolute right-1/2 top-1.5 h-2 w-2 translate-x-4 rounded-full bg-orange-500" aria-label={`${reviewCount} to review`} />
+                <span className="absolute right-1/2 top-1.5 h-2 w-2 translate-x-4 rounded-full bg-orange-500" aria-label={t('{count} to review', { count: reviewCount })} />
               )}
             </button>
           </li>
@@ -290,9 +307,13 @@ export function Layout() {
 
       <ConfirmDialog
         isOpen={confirmLogout}
-        title="Unsynced changes on this device"
-        message={`${plural(pendingCount, 'change')} ${pendingCount === 1 ? 'has' : 'have'} not reached the server yet. They stay safely on this device and will sync after the next login. Log out anyway?`}
-        confirmText="Log out"
+        title={t('Unsynced changes on this device')}
+        message={tp(
+          pendingCount,
+          '{count} change has not reached the server yet. They stay safely on this device and will sync after the next login. Log out anyway?',
+          '{count} changes have not reached the server yet. They stay safely on this device and will sync after the next login. Log out anyway?',
+        )}
+        confirmText={t('Log out')}
         onCancel={() => setConfirmLogout(false)}
         onConfirm={() => {
           setConfirmLogout(false);

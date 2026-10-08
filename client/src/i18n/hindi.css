@@ -1,0 +1,11 @@
+/*
+ * Hindi only. Letter-spacing pulls Devanagari syllables apart, so tracked labels
+ * (uppercase eyebrows, mono tags on the ID passes) are set without it, and
+ * vertical labels are turned sideways instead of stacking their letters.
+ */
+html[lang='hi'] body * {
+  letter-spacing: normal !important;
+}
+html[lang='hi'] .nav-wheel-tab span {
+  text-orientation: sideways;
+}

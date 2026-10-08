@@ -7,6 +7,7 @@
  * session; Skip (or Escape) ends it at any time.
  */
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '../../i18n/useI18n';
 
 const SEEN_KEY = 'hs-intro-seen';
 const SCROLL_LENGTH_VH = 420;
@@ -38,6 +39,7 @@ function cameraScale(p: number): number {
 }
 
 export function PhcIntro({ onDone }: { onDone: () => void }) {
+  const { t } = useI18n();
   const [leaving, setLeaving] = useState(false);
   const [step, setStep] = useState(0); // which caption / screen line is showing
   const finishRef = useRef<() => void>(() => undefined);
@@ -268,20 +270,20 @@ export function PhcIntro({ onDone }: { onDone: () => void }) {
         {CAPTIONS.map((c, i) => (
           <div key={c.n} className={`phc-intro-caption ${caption === i ? 'is-on' : ''}`} aria-hidden={caption !== i}>
             <span className="phc-intro-n">{c.n}</span>
-            <p className="phc-intro-title">{c.title}</p>
-            <p className="phc-intro-text">{c.text}</p>
+            <p className="phc-intro-title">{t(c.title)}</p>
+            <p className="phc-intro-text">{t(c.text)}</p>
           </div>
         ))}
       </div>
 
       <div className="phc-intro-cue" aria-hidden="true">
-        <span>Scroll to begin</span>
+        <span>{t('Scroll to begin')}</span>
         <span className="phc-intro-track"><i /></span>
       </div>
       <div className="phc-intro-progress" aria-hidden="true"><i /></div>
 
       <button type="button" className="phc-intro-skip" onClick={skip}>
-        Skip intro
+        {t('Skip intro')}
       </button>
     </div>
     </>

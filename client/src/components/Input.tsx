@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Icon } from './Icon';
+import { t } from '../i18n/i18n';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -53,7 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p className="form-error mt-0" role="alert" id={`${inputId}-error`}>
             <Icon name="alert" className="h-3.5 w-3.5 flex-shrink-0" />
-            <span>{error}</span>
+            <span>{t(error)}</span>
           </p>
         ) : helperText ? (
           <p className="form-help mt-0">{helperText}</p>
