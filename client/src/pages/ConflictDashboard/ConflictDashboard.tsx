@@ -42,9 +42,8 @@ function ValuePanel({
 }) {
   useI18n();
   return (
-    <div className={`relative overflow-hidden rounded-xl border p-4 pl-5 ${tone === 'a' ? 'border-medical-200 bg-medical-50/50 dark:border-medical-900/70 dark:bg-medical-950/20' : 'border-amber-200 bg-amber-50/50 dark:border-amber-900/60 dark:bg-amber-950/20'}`}>
-      <span className={`absolute inset-y-0 left-0 w-1 ${tone === 'a' ? 'bg-medical-500' : 'bg-amber-500'}`} aria-hidden="true" />
-      <p className="eyebrow">{title}</p>
+    <div className={`rounded-xl border border-t-[3px] border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 ${tone === 'a' ? 'border-t-medical-500 dark:border-t-medical-400' : 'border-t-[#b86f52] dark:border-t-[#c98468]'}`}>
+      <p className={`eyebrow ${tone === 'a' ? 'text-medical-600 dark:text-medical-300' : 'text-[#9a5a42] dark:text-[#dba58f]'}`}>{title}</p>
       <p className="mt-1.5 text-lg font-bold tracking-tight text-slate-900 dark:text-white">{describe(value)}</p>
       <dl className="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
         <div className="flex gap-2"><dt className="w-16 text-slate-400">{t('Device')}</dt><dd className="font-mono">{clientId ? shortId(clientId) : t('unknown')}</dd></div>
@@ -90,7 +89,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
   return (
     <li className="relative scroll-mt-28" id={`conflict-${conflict.id}`}>
       <span className={`absolute -left-[33px] top-5 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-slate-50 dark:ring-slate-950 ${pending ? 'bg-orange-500' : 'bg-sage-500'}`} aria-hidden="true" />
-      <article className={`card overflow-hidden p-0 transition-shadow sm:p-0 ${open ? 'shadow-card-lg' : 'hover:shadow-card-hover'} ${pending ? 'border-l-4 border-l-orange-400 dark:border-l-orange-500' : ''}`}>
+      <article className={`card overflow-hidden p-0 transition-shadow sm:p-0 ${open ? 'shadow-card-lg' : 'hover:shadow-card-hover'}`}>
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -116,9 +115,13 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {t('The two edits are')} <strong>{t(order)}</strong>: {t("neither device had seen the other's change when it was made, so the dose was not merged automatically.")}
             </p>
-            <div className="grid gap-4 md:grid-cols-2">
+            {/* The two values side by side on the navy conflict card, as on the audit trail. */}
+            <div className="relative grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2 dark:border-[#4f6378] dark:bg-gradient-to-b dark:from-medical-700 dark:to-medical-900">
               <ValuePanel title={t('Value A (kept on the record for now)')} value={conflict.currentValue} clientId={conflict.currentClientId} timestamp={conflict.currentTimestamp} clock={conflict.currentClock} tone="a" />
               <ValuePanel title={t('Value B (incoming edit)')} value={conflict.incomingValue} clientId={conflict.incomingClientId} timestamp={conflict.incomingTimestamp} clock={conflict.incomingClock} tone="b" />
+              <span className="absolute left-1/2 top-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-amber-600 text-[11px] font-bold uppercase text-white ring-4 ring-slate-50 md:grid dark:bg-amber-300 dark:text-slate-900 dark:ring-[#24344a]" aria-hidden="true">
+                {t('vs')}
+              </span>
             </div>
 
             {pending ? (

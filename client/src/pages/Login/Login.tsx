@@ -270,14 +270,13 @@ function IdPass({ portal, delay, from }: { portal: Portal; delay: number; from: 
                           <button
                             type="button"
                             onClick={() => setShowPassword((s) => !s)}
-                            className="mr-1 flex h-8 w-8 items-center justify-center rounded text-[#f0a063]/70 transition-colors hover:text-[#f0a063] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e0663a]"
+                            className="flex h-8 w-8 items-center justify-center rounded text-[rgba(29,39,51,0.5)] transition-colors hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e0663a]"
                             aria-label={showPassword ? t('Hide characters') : t('Show characters')}
                             aria-pressed={showPassword}
                             tabIndex={side === 'front' ? 0 : -1}
                           >
                             <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-4 w-4" />
                           </button>
-                          <span className="mr-2.5 h-2 w-2 flex-shrink-0 rounded-full bg-[#e0663a] shadow-[0_0_6px_rgba(224,102,58,0.9)]" aria-hidden="true" />
                         </div>
                         <FieldError message={lErr.password?.message} />
                       </div>
