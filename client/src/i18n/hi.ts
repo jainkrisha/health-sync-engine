@@ -20,7 +20,7 @@ export const hi: Record<string, string> = {
   Add: 'जोड़ें',
   More: 'और',
   Edit: 'बदलें',
-  'Edit {name}': '{name} बदलें',
+  'Edit {name}': '{name} का रिकॉर्ड बदलें',
   Archive: 'संग्रहित करें',
   Close: 'बंद करें',
   Cancel: 'रद्द करें',
