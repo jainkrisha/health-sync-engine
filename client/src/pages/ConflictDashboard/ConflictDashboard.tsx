@@ -42,7 +42,7 @@ function ValuePanel({
 }) {
   useI18n();
   return (
-    <div className={`rounded-xl border border-t-[3px] border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 ${tone === 'a' ? 'border-t-medical-500 dark:border-t-medical-400' : 'border-t-[#b86f52] dark:border-t-[#c98468]'}`}>
+    <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
       <p className={`eyebrow ${tone === 'a' ? 'text-medical-600 dark:text-medical-300' : 'text-[#9a5a42] dark:text-[#dba58f]'}`}>{title}</p>
       <p className="mt-1.5 text-lg font-bold tracking-tight text-slate-900 dark:text-white">{describe(value)}</p>
       <dl className="mt-3 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
