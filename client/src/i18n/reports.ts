@@ -7,6 +7,7 @@
  * that matches none of these shapes is shown in English.
  */
 import { getLang, t } from './i18n';
+import { tValue } from './clinical';
 
 const REASONS: Record<string, string> = {
   'newer write': 'नया बदलाव',
@@ -24,8 +25,8 @@ const R = `(${Object.keys(REASONS).map(esc).join('|')})`;
 function value(v: string): string {
   if (v === '(empty)') return '(खाली)';
   const stopped = /^stopped \((.*)\)$/.exec(v);
-  if (stopped) return `बंद (${stopped[1] === 'no dose' ? 'कोई खुराक नहीं' : stopped[1]})`;
-  return v;
+  if (stopped) return `बंद (${stopped[1] === 'no dose' ? 'कोई खुराक नहीं' : tValue(stopped[1])})`;
+  return v.startsWith('"') ? v : tValue(v);
 }
 const reason = (r: string) => REASONS[r] ?? r;
 const field = (f: string) => t(f);

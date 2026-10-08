@@ -15,6 +15,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Icon } from '../../components/Icon';
 import { AuditList } from '../../components/AuditList';
 import { useI18n } from '../../i18n/useI18n';
+import { tValue } from '../../i18n/clinical';
 import {
   ClockView,
   EmptyState,
@@ -316,7 +317,7 @@ function AllergiesCard({ patient }: { patient: Patient }) {
             <li key={a.allergen} className="flex items-start justify-between gap-3 py-2.5">
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">{a.allergen}</p>
-                {a.reaction && <p className="text-xs text-slate-500 dark:text-slate-400">{a.reaction}</p>}
+                {a.reaction && <p className="text-xs text-slate-500 dark:text-slate-400">{tValue(a.reaction)}</p>}
               </div>
               <span className={`${SEVERITY_STYLE[a.severity]} capitalize`}>{t(a.severity)}</span>
             </li>
@@ -342,7 +343,7 @@ function MedicationsCard({ patient, canReview }: { patient: Patient; canReview: 
                 <div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">{m.name}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {[m.dosage, m.frequency].filter(Boolean).join(' · ') || t('No dose recorded')}
+                    {[m.dosage, m.frequency].filter(Boolean).map(tValue).join(' · ') || t('No dose recorded')}
                     {(m.startDate || m.endDate) && ` · ${formatDate(m.startDate)} → ${m.endDate ? formatDate(m.endDate) : t('ongoing')}`}
                   </p>
                 </div>

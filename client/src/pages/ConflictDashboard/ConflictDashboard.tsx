@@ -17,12 +17,13 @@ import { Icon } from '../../components/Icon';
 import { ClockView, EmptyState, ErrorNotice, OfflineNotice, PageHeader, SkeletonRows, Spinner, formatDateTime, relativeTime, shortId } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
 import { t } from '../../i18n/i18n';
+import { tValue } from '../../i18n/clinical';
 
 type Tab = 'pending_review' | 'resolved';
 
 function describe(v: MedicationCritical): string {
   if (!v.active) return t('Stopped');
-  return [v.dosage, v.frequency].filter(Boolean).join(' · ') || t('(no dose)');
+  return [v.dosage, v.frequency].filter(Boolean).map(tValue).join(' · ') || t('(no dose)');
 }
 
 function ValuePanel({

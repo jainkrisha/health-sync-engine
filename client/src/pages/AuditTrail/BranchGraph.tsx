@@ -25,6 +25,7 @@ import { OUTCOME_LABEL, OUTCOME_STYLE, RULE_LABEL } from '../../components/audit
 import { useI18n } from '../../i18n/useI18n';
 import { t } from '../../i18n/i18n';
 import { translateReport } from '../../i18n/reports';
+import { tValue } from '../../i18n/clinical';
 import './branchGraph.css';
 
 const LANE_COLORS = ['#b86f52', '#4f7cb0', '#3a8f7a', '#8a8273', '#7d7c45', '#5f8a94'];
@@ -54,7 +55,7 @@ function summary(c: HistoryCommit): string {
     const p = c.payload as MedicationPayload;
     if (p.op === 'setCritical')
       return p.active
-        ? t('Set {name} to {dose}', { name: p.name, dose: `${p.dosage}${p.frequency ? `, ${p.frequency}` : ''}` })
+        ? t('Set {name} to {dose}', { name: p.name, dose: `${tValue(p.dosage)}${p.frequency ? `, ${tValue(p.frequency)}` : ''}` })
         : t('Stopped {name}', { name: p.name });
     return t('Updated {name} dates', { name: p.name });
   }
@@ -73,7 +74,7 @@ function summary(c: HistoryCommit): string {
 }
 
 const dose = (v: MedicationCritical | undefined) =>
-  !v ? '—' : v.active ? v.dosage || '—' : t('Stopped');
+  !v ? '—' : v.active ? tValue(v.dosage) || '—' : t('Stopped');
 
 export function BranchGraph({ history }: { history: PatientHistory }) {
   const graph = useMemo(() => buildCommitGraph(history), [history]);
@@ -440,7 +441,7 @@ function MergeRow({
             </span>
             <span className="bg-side-value">{dose(s.value)}</span>
             <span className="bg-side-sub">
-              {s.value?.active ? s.value.frequency : t('medicine stopped')} ·{' '}
+              {s.value?.active ? tValue(s.value.frequency) : t('medicine stopped')} ·{' '}
               {s.commit?.userName ?? '—'} · {s.tag}
             </span>
           </div>
@@ -463,7 +464,7 @@ function MergeRow({
           <b>
             {dose(conflict.resolvedValue)}
             {conflict.resolvedValue?.active && conflict.resolvedValue.frequency
-              ? `, ${conflict.resolvedValue.frequency}`
+              ? `, ${tValue(conflict.resolvedValue.frequency)}`
               : ''}
           </b>
           {conflict.resolvedAt && <> · {relativeTime(conflict.resolvedAt)}</>}

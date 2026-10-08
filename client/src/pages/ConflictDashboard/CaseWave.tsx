@@ -9,6 +9,7 @@ import type { Conflict } from '@shared/types';
 import { relativeTime } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
 import { t } from '../../i18n/i18n';
+import { tValue } from '../../i18n/clinical';
 import './caseWave.css';
 
 const CARD_COLORS = ['#2b3d55', '#34485f', '#3c5f50', '#2f4257', '#3a4b5e', '#283a4f', '#423d35', '#31455a'];
@@ -27,7 +28,7 @@ function initialsOf(name: string) {
 
 function dose(c: Conflict, side: 'current' | 'incoming') {
   const v = side === 'current' ? c.currentValue : c.incomingValue;
-  return v.active ? v.dosage || '—' : t('Stopped');
+  return v.active ? tValue(v.dosage) || '—' : t('Stopped');
 }
 
 export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Conflict) => void }) {
