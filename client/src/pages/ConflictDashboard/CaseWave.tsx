@@ -9,7 +9,7 @@ import type { Conflict } from '@shared/types';
 import { relativeTime } from '../../components/ui';
 import './caseWave.css';
 
-const CARD_COLORS = ['#2b3d55', '#7a3b2a', '#3c5f50', '#4f3a2a', '#3a4b5e', '#6b2f1f', '#423d35', '#5c4a24'];
+const CARD_COLORS = ['#2b3d55', '#34485f', '#3c5f50', '#2f4257', '#3a4b5e', '#283a4f', '#423d35', '#31455a'];
 const STEP_COOLDOWN_MS = 320; // one case per scroll gesture, never a blur
 
 function initialsOf(name: string) {

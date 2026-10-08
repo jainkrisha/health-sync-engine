@@ -301,12 +301,12 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
                 <svg viewBox="0 0 300 80" preserveAspectRatio="none" aria-hidden="true">
                   <defs>
                     <linearGradient id="dl-spark-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor="#e0663a" stopOpacity="0.45" />
-                      <stop offset="1" stopColor="#e0663a" stopOpacity="0" />
+                      <stop offset="0" stopColor="#5faf98" stopOpacity="0.45" />
+                      <stop offset="1" stopColor="#5faf98" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   <path d={`${sparkLine} L300,80 L0,80 Z`} fill="url(#dl-spark-fill)" />
-                  <path d={sparkLine} fill="none" stroke="#f0a063" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  <path d={sparkLine} fill="none" stroke="#8cc7b5" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                 </svg>
                 <div className="dl-spark-days">
                   {numbers.byDay.map((d) => (
@@ -331,7 +331,7 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
                   cy="60"
                   r="50"
                   fill="none"
-                  stroke="#e0663a"
+                  stroke="#5faf98"
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray={`${(numbers.rate / 100) * 314.16} 314.16`}

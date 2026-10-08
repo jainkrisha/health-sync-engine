@@ -31,7 +31,7 @@
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(224, 102, 58, 0.06), transparent 24rem),
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(143, 163, 187, 0.06), transparent 24rem),
     #1b1814;
   perspective: 1100px;
   touch-action: pan-y;
@@ -85,11 +85,11 @@
   content: '';
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(240, 160, 99, calc(0.05 + var(--focus) * 0.3));
+  border: 1px solid rgba(201, 214, 230, calc(0.05 + var(--focus) * 0.3));
   border-radius: inherit;
   pointer-events: none;
 }
-.case-wave-card:focus-visible::after { border-color: #f0a063; box-shadow: 0 0 0 3px rgba(224, 102, 58, 0.3); }
+.case-wave-card:focus-visible::after { border-color: #8cc7b5; box-shadow: 0 0 0 3px rgba(58, 143, 122, 0.3); }
 
 /* The "portrait" of a case: who, and the two doses that clash. */
 .case-wave-face {
@@ -115,14 +115,14 @@
   left: 7px;
   padding: 2px 5px;
   border-radius: 4px;
-  background: #e0663a;
-  color: #fff8f0;
+  background: #e6b95e;
+  color: #1b1814;
   font: 700 7.5px/1 'Geist Mono', ui-monospace, monospace;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 .case-wave-initials { font-size: clamp(30px, 2.6vw, 40px); font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
-.case-wave-dose { display: flex; align-items: baseline; gap: 4px; font: 600 10px/1 'Geist Mono', ui-monospace, monospace; color: #f5c3ab; }
+.case-wave-dose { display: flex; align-items: baseline; gap: 4px; font: 600 10px/1 'Geist Mono', ui-monospace, monospace; color: #c9d6e6; }
 .case-wave-dose i { font-style: normal; font-size: 8px; color: rgba(236, 231, 218, 0.55); }
 
 .case-wave-identity {
@@ -164,7 +164,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.case-wave-card[aria-current='true'] .case-wave-open { color: #fff8f0; background: #e0663a; border-color: transparent; }
+.case-wave-card[aria-current='true'] .case-wave-open { color: #f7f4ee; background: #2a7564; border-color: transparent; }
 
 @media (max-width: 680px) {
   .case-wave-stage { height: 520px; }
@@ -197,7 +197,6 @@
 /* The selected case: an orange rim and glow so it reads as picked. */
 .case-wave-card[aria-current='true'] {
   box-shadow:
-    0 0 0 2px rgba(224, 102, 58, 0.85),
-    0 0 40px 2px rgba(224, 102, 58, 0.35),
+    0 0 0 1px #4f6378,
     0 30px 60px rgba(0, 0, 0, 0.55);
 }

@@ -44,7 +44,7 @@ function PatientBadges({ p, pending }: { p: Patient; pending: boolean }) {
 function Avatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   return (
     <span
-      className={`flex flex-shrink-0 items-center justify-center rounded-xl bg-teal-50 font-bold text-teal-700 ring-1 ring-inset ring-teal-600/10 dark:bg-teal-900/40 dark:text-teal-300 ${
+      className={`flex flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 ${
         size === 'lg' ? 'h-10 w-10 text-sm' : 'h-9 w-9 text-xs'
       }`}
     >

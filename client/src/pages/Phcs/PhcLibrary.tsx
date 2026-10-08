@@ -17,7 +17,7 @@ import './phcs.css';
 
 const COVERS: [string, string][] = [
   ['#2b3d55', '#1d2733'],
-  ['#c4612f', '#8e4220'],
+  ['#b0705a', '#7d4a39'],
   ['#3f6f63', '#274a41'],
   ['#b0843a', '#7d5a22'],
   ['#4f6378', '#2f3f50'],
@@ -106,7 +106,7 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
                 <span className="block truncate text-[13px] font-semibold">{s.name}</span>
                 <span className="block font-mono text-[11px] text-[rgba(29,39,51,0.6)]">{s.username}</span>
               </span>
-              <span className="rounded bg-[#e0663a] px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-wider text-[#fff8f0]">{ROLE_LABELS[s.role].toUpperCase()}</span>
+              <span className="font-mono text-[9px] font-bold tracking-wider text-[#423d35]">{ROLE_LABELS[s.role].toUpperCase()}</span>
             </li>
           ))}
         </ul>
@@ -148,9 +148,9 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
           <ul className="divide-y divide-dashed divide-[rgba(29,39,51,0.2)]">
             {phc.recentPatients.map((p) => (
               <li key={p.id}>
-                <Link to={`/patients/${p.id}`} className="flex items-center gap-2 py-2 text-[13px] font-semibold hover:text-[#c4542c]">
+                <Link to={`/patients/${p.id}`} className="flex items-center gap-2 py-2 text-[13px] font-semibold hover:text-[#22665a]">
                   <span className="flex-1 truncate">{p.name}</span>
-                  {p.needsReview && <span className="rounded bg-[#f6ddd3] px-1.5 text-[10px] font-bold text-[#8a2a1a]">REVIEW</span>}
+                  {p.needsReview && <span className="text-[10px] font-bold text-[#8a5a0b]">REVIEW</span>}
                   <span className="text-[11px] font-normal text-[rgba(29,39,51,0.55)]">{relativeTime(p.updatedAt)}</span>
                 </Link>
               </li>
@@ -188,13 +188,13 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
         <>
           <ul className="space-y-2">
             {phc.openConflicts.map((c, i) => (
-              <li key={i} className="rounded-lg border border-[#e9b4a4] bg-[#f6ddd3] px-3 py-2 text-[13px]">
+              <li key={i} className="rounded-lg border border-[#e6d3a3] bg-[#f8f0dc] px-3 py-2 text-[13px]">
                 <b>{c.patientName}</b> · {c.label}
                 <span className="block text-[11px] text-[rgba(29,39,51,0.6)]">raised {relativeTime(c.createdAt)}</span>
               </li>
             ))}
           </ul>
-          <Link to="/conflicts" className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-[#c4542c] hover:underline">
+          <Link to="/conflicts" className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-[#22665a] hover:underline">
             Open conflict review <Icon name="arrowRight" className="h-3.5 w-3.5" />
           </Link>
         </>

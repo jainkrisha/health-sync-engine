@@ -7,9 +7,9 @@
 .hs-loader {
   --s: 1;
   --bg: #15130f;
-  --accent: #f0a063;
-  --accent-dim: rgba(240, 140, 80, 0.22);
-  --line: rgba(240, 166, 99, 0.46);
+  --accent: #8cc7b5;
+  --accent-dim: rgba(140, 199, 181, 0.22);
+  --line: rgba(140, 199, 181, 0.46);
   --ink-hi: #ece7da;
 
   position: fixed;
@@ -32,7 +32,7 @@
   inset: 0;
   pointer-events: none;
   background: radial-gradient(ellipse 60% 44% at 50% 52%,
-    rgba(224, 102, 58, 0.17) 0%, rgba(196, 84, 44, 0.08) 38%, rgba(142, 66, 32, 0.025) 66%, transparent 100%);
+    rgba(58, 143, 122, 0.17) 0%, rgba(42, 117, 100, 0.08) 38%, rgba(29, 83, 73, 0.025) 66%, transparent 100%);
 }
 
 /* ── stage ── */
@@ -50,7 +50,7 @@
   font-family: 'Geist', 'Inter', system-ui, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
   color: #ece7da;
 }
-.hs-loader .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 6px 18px -6px rgba(196, 84, 44, 0.7); }
+.hs-loader .brand img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 6px 18px -6px rgba(42, 117, 100, 0.7); }
 
 /* ── readout plate ── */
 .hs-loader .plate {
@@ -60,7 +60,7 @@
 }
 .hs-loader .plate::after {
   content: ''; position: absolute; inset: 1.2px;
-  background: linear-gradient(180deg, #2a1d14, #1a120c);
+  background: linear-gradient(180deg, #16241f, #0f1714);
   clip-path: polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px);
 }
 .hs-loader .plate.hit { animation: hsPlateHit 0.5s ease-out; }
@@ -79,7 +79,7 @@
   left: 530px; top: 284.9px; width: 140px; height: 0;
   text-align: center; line-height: 1; white-space: pre;
   color: var(--accent);
-  text-shadow: 0 0 4px rgba(240, 140, 80, 0.6), 0 0 14px rgba(224, 102, 58, 0.55), 0 0 36px rgba(196, 84, 44, 0.4);
+  text-shadow: 0 0 4px rgba(140, 199, 181, 0.6), 0 0 14px rgba(58, 143, 122, 0.55), 0 0 36px rgba(42, 117, 100, 0.4);
   animation: hsNeon 4.3s steps(1, end) infinite;
 }
 .hs-loader .readout b { font-size: 47px; font-weight: 280; letter-spacing: 2.4px; }
@@ -99,8 +99,8 @@
   width: calc(var(--lit-w, 0px) + 250px); height: 250px;
   transform: translate(-125px, -128px);
   background: radial-gradient(ellipse 50% 50% at center,
-    rgba(240, 140, 80, 0.26) 0%, rgba(224, 102, 58, 0.17) 22%,
-    rgba(196, 84, 44, 0.082) 45%, rgba(142, 66, 32, 0.024) 70%, transparent 100%);
+    rgba(140, 199, 181, 0.26) 0%, rgba(58, 143, 122, 0.17) 22%,
+    rgba(42, 117, 100, 0.082) 45%, rgba(29, 83, 73, 0.024) 70%, transparent 100%);
   filter: blur(6px);
   transition: width 0.16s linear;
 }
@@ -114,26 +114,26 @@
 .hs-loader .tick { width: 5.4px; height: 32px; background: var(--accent-dim); transform: skewX(12deg); }
 .hs-loader .tick.mk { height: 44px; }
 .hs-loader .tick.on {
-  background: #e0663a;
-  box-shadow: 0 0 4px rgba(240, 166, 99, 0.6), 0 0 11px rgba(224, 102, 58, 0.32), 0 0 24px rgba(196, 84, 44, 0.16);
+  background: #3a8f7a;
+  box-shadow: 0 0 4px rgba(140, 199, 181, 0.6), 0 0 11px rgba(58, 143, 122, 0.32), 0 0 24px rgba(42, 117, 100, 0.16);
 }
 .hs-loader .tick.flash { animation: hsIgnite 0.32s ease-out; }
 @keyframes hsIgnite {
-  0% { background: #ece7da; box-shadow: 0 0 11px rgba(236, 231, 218, 1), 0 0 28px rgba(240, 140, 80, 0.85), 0 0 54px rgba(224, 102, 58, 0.45); }
-  100% { background: #e0663a; box-shadow: 0 0 4px rgba(240, 166, 99, 0.6), 0 0 11px rgba(224, 102, 58, 0.32), 0 0 24px rgba(196, 84, 44, 0.16); }
+  0% { background: #ece7da; box-shadow: 0 0 11px rgba(236, 231, 218, 1), 0 0 28px rgba(140, 199, 181, 0.85), 0 0 54px rgba(58, 143, 122, 0.45); }
+  100% { background: #3a8f7a; box-shadow: 0 0 4px rgba(140, 199, 181, 0.6), 0 0 11px rgba(58, 143, 122, 0.32), 0 0 24px rgba(42, 117, 100, 0.16); }
 }
 
 .hs-loader .barlabel {
   left: 298px; top: 396.4px; font-size: 20.4px; font-weight: 500; letter-spacing: 0.9px;
   line-height: 1; color: var(--ink-hi);
-  text-shadow: 0 0 3px rgba(236, 231, 218, 0.34), 0 0 11px rgba(240, 166, 99, 0.3), 0 0 26px rgba(224, 102, 58, 0.22);
+  text-shadow: 0 0 3px rgba(236, 231, 218, 0.34), 0 0 11px rgba(140, 199, 181, 0.3), 0 0 26px rgba(58, 143, 122, 0.22);
 }
 
 .hs-loader .status {
   left: 0; top: 507px; width: 1200px; text-align: center;
   font-size: 14px; font-weight: 500; line-height: 1; letter-spacing: 1.42px; text-indent: 1.42px;
   color: #c9bba3; white-space: pre;
-  text-shadow: 0 0 3px rgba(236, 231, 218, 0.3), 0 0 10px rgba(240, 166, 99, 0.22);
+  text-shadow: 0 0 3px rgba(236, 231, 218, 0.3), 0 0 10px rgba(140, 199, 181, 0.22);
 }
 .hs-loader .status .dots { letter-spacing: -1.9px; margin-left: -6px; }
 
@@ -152,7 +152,7 @@
 .hs-loader .marker .dia {
   left: -4px; top: -4px; width: 8px; height: 8px; opacity: 1;
   background: var(--accent); transform: rotate(45deg);
-  box-shadow: 0 0 6px rgba(240, 140, 80, 0.7);
+  box-shadow: 0 0 6px rgba(140, 199, 181, 0.7);
   animation: hsDiaPulse 3.2s ease-in-out infinite;
 }
 @keyframes hsDiaPulse {
@@ -171,8 +171,8 @@
 .hs-loader .rail { left: 0; top: 0; width: 1200px; height: 800px; }
 .hs-loader .rail.right { transform: scaleX(-1); }
 .hs-loader .rail > * { position: absolute; }
-.hs-loader .rail .wire { left: 104px; top: 433px; width: 92px; height: 1.4px; background: rgba(240, 166, 99, 0.24); }
-.hs-loader .rail .cap { top: 428px; height: 5px; background: #e0663a; box-shadow: 0 0 5px rgba(240, 140, 80, 0.6); }
+.hs-loader .rail .wire { left: 104px; top: 433px; width: 92px; height: 1.4px; background: rgba(140, 199, 181, 0.24); }
+.hs-loader .rail .cap { top: 428px; height: 5px; background: #3a8f7a; box-shadow: 0 0 5px rgba(140, 199, 181, 0.6); }
 .hs-loader .rail .cap.a { left: 104px; width: 10px; }
 .hs-loader .rail .cap.b { left: 181px; width: 15px; animation: hsCapPulse 2.4s ease-in-out infinite; }
 @keyframes hsCapPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -189,7 +189,7 @@
 .hs-loader .mod .ret::after { left: 13.6px; top: -3.5px; width: 1px; height: 35px; }
 .hs-loader .mod .dot {
   top: 12.5px; left: 15.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 6px rgba(240, 140, 80, 0.9); animation: hsDiaPulse 2.6s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(140, 199, 181, 0.9); animation: hsDiaPulse 2.6s ease-in-out infinite;
 }
 .hs-loader .mod .slab {
   top: 46px; width: 36px; height: 5px; background: #e8e1d0;

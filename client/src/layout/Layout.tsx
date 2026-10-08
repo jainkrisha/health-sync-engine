@@ -110,7 +110,7 @@ export function Layout() {
         aria-label="Main navigation"
       >
         <div className="flex items-center gap-3 px-5 pb-5 pt-6">
-          <img src="/favicon.svg" alt="" className="h-9 w-9 rounded-xl shadow-teal-glow" />
+          <img src="/logo.svg" alt="" className="h-9 w-9 rounded-xl" />
           <div className="min-w-0">
             <span className="block text-[17px] font-bold tracking-tight text-white">HealthSync</span>
             <span className="block truncate text-[11px] font-medium text-slate-400">
@@ -184,7 +184,7 @@ export function Layout() {
             <button className="btn-icon -ml-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-expanded={menuOpen}>
               <Icon name="menu" className="h-5 w-5" />
             </button>
-            <img src="/favicon.svg" alt="" className="h-7 w-7 rounded-lg lg:h-8 lg:w-8" />
+            <img src="/logo.svg" alt="" className="h-7 w-7 rounded-lg lg:h-8 lg:w-8" />
             <span className="hidden flex-col leading-tight lg:flex">
               <span className="text-[15px] font-bold tracking-tight text-slate-900 dark:text-white">HealthSync</span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">{district ? 'District central system' : 'PHC'} · {deviceLabel}</span>

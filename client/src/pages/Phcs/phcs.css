@@ -7,7 +7,7 @@
   --wood-light: #b98458;
   --ink: #1d2733;
   --cream: #f4efe3;
-  --orange: #e0663a;
+  --orange: #b86f52;
   position: relative;
   border-radius: 20px;
   overflow: hidden;
@@ -75,7 +75,7 @@
 .phc-book:focus-visible {
   transform: perspective(900px) rotateY(-4deg) translateY(-10px);
 }
-.phc-book:focus-visible { outline: none; filter: drop-shadow(0 0 0 #e0663a) drop-shadow(0 0 6px rgba(224, 102, 58, 0.7)); }
+.phc-book:focus-visible { outline: none; outline: 2px solid #2a7564; outline-offset: 3px; }
 .phc-book-pages {
   position: absolute;
   top: 4px;
@@ -257,10 +257,10 @@
 .book .page b,
 .book .page span { color: #1d2733; }
 .book .page { font-family: 'Geist', 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.55; }
-.book .page .page-kicker { color: #bb4f29; font-family: 'Geist Mono', ui-monospace, monospace; }
+.book .page .page-kicker { color: #22665a; font-family: 'Geist Mono', ui-monospace, monospace; }
 .book .page .page-title { font-family: 'Geist', 'Inter', sans-serif; font-weight: 800; color: #1d2733; letter-spacing: -0.02em; }
 .book .page .page-num { color: rgba(29, 39, 51, 0.5); }
-.book .page a { color: #bb4f29; }
+.book .page a { color: #22665a; }
 
 /* Clicking a page turns it: the right-hand page forward, the left-hand page back. */
 .leaf-face.turnable { cursor: pointer; }

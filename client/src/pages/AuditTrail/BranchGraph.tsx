@@ -24,7 +24,7 @@ import { ClockView, formatDateTime, relativeTime } from '../../components/ui';
 import { OUTCOME_LABEL, OUTCOME_STYLE, RULE_LABEL } from '../../components/auditLabels';
 import './branchGraph.css';
 
-const LANE_COLORS = ['#e0663a', '#4d6f96', '#6e9f86', '#c08a2e', '#9a5b78', '#5f8a94'];
+const LANE_COLORS = ['#b86f52', '#4f7cb0', '#3a8f7a', '#8a8273', '#7d7c45', '#5f8a94'];
 const REVIEW_COLOR = 'var(--bg-review)';
 const LANE_W = 22;
 const PAD = 14;
@@ -253,11 +253,11 @@ function NodeDot({
           cy={y}
           r={lit ? 9 : 8}
           fill="var(--bg-surface)"
-          stroke="#e0663a"
+          stroke="var(--bg-ember)"
           strokeWidth={2}
           strokeDasharray="3 2.5"
         />
-        <circle cx={x} cy={y} r={2.5} fill="#e0663a" />
+        <circle cx={x} cy={y} r={2.5} fill="var(--bg-ember)" />
       </g>
     );
   }
@@ -285,7 +285,7 @@ function NodeDot({
           cy={y}
           r={lit ? 10 : 9}
           fill="none"
-          stroke="#e0663a"
+          stroke="var(--bg-ember)"
           strokeWidth={2}
           opacity={0.9}
         />

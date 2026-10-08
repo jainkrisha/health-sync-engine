@@ -174,9 +174,9 @@ export default function Dashboard() {
                       cursor={{ fill: theme === 'dark' ? '#2a2620' : '#efe9dd' }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="synced" name="Synced" stackId="a" fill={theme === 'dark' ? '#8ea3bb' : '#3a4b5e'} radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="conflicts" name="Sent to review" stackId="a" fill="#e0663a" />
-                    <Bar dataKey="pending" name="Pending" stackId="a" fill="#f0a63a" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="synced" name="Synced" stackId="a" fill={theme === 'dark' ? '#9db9dc' : '#2f5f94'} radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="conflicts" name="Sent to review" stackId="a" fill={theme === 'dark' ? '#e6b95e' : '#c8901f'} />
+                    <Bar dataKey="pending" name="Pending" stackId="a" fill={theme === 'dark' ? '#a39a88' : '#7a7263'} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -254,7 +254,7 @@ export default function Dashboard() {
                 {patients.slice(0, 6).map((p) => (
                   <li key={p.id}>
                     <Link to={`/patients/${p.id}`} className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-xs font-bold text-teal-700 ring-1 ring-inset ring-teal-600/10 dark:bg-teal-900/40 dark:text-teal-300">{initials(p.name)}</span>
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">{initials(p.name)}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-semibold text-slate-800 group-hover:text-teal-700 dark:text-slate-100 dark:group-hover:text-teal-300">{p.name}</span>
                         <span className="block text-xs text-slate-400">Updated {relativeTime(p.updatedAt)}</span>

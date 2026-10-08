@@ -22,17 +22,17 @@ export function SyncStatus() {
 
   const tone =
     sync.status === 'idle' && !hasPending
-      ? 'bg-sage-50 text-sage-800 ring-sage-200 dark:bg-sage-950/60 dark:text-sage-200 dark:ring-sage-800'
+      ? 'text-sage-700 dark:text-sage-300'
       : sync.status === 'error'
-        ? 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900'
-        : 'bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700';
+        ? 'text-amber-700 dark:text-amber-300'
+        : 'text-slate-600 dark:text-slate-300';
 
   return (
     <div className="flex flex-nowrap items-center justify-end gap-1.5 sm:gap-2">
       <div
         role="status"
         aria-live="polite"
-        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-colors duration-300 ${tone}`}
+        className={`inline-flex items-center gap-2 px-1 py-1.5 text-xs font-semibold transition-colors duration-300 ${tone}`}
         title={sync.lastError ?? `Last synced ${relativeTime(sync.lastSyncedAt)}`}
       >
         {sync.status === 'syncing' || sync.status === 'connecting' ? (

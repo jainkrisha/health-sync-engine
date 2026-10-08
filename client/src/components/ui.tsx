@@ -126,10 +126,10 @@ export function SectionHeading({ id, icon, children, aside }: { id?: string; ico
 
 export function RoleBadge({ role }: { role: Role }) {
   const style: Record<Role, string> = {
-    admin: 'badge-violet',
-    clinical_reviewer: 'badge-blue',
-    health_worker: 'badge-teal',
-    auditor: 'badge-warning',
+    admin: 'badge-blue',
+    clinical_reviewer: 'badge-slate',
+    health_worker: 'badge-slate',
+    auditor: 'badge-slate',
   };
   return <span className={style[role]}>{ROLE_LABELS[role]}</span>;
 }

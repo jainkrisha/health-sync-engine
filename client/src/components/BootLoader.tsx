@@ -267,7 +267,7 @@ function LoaderRun({ onDone }: { onDone: () => void }) {
       <div className="scene">
         <div className="stage">
           <div className="brand">
-            <img src="/favicon.svg" alt="" />
+            <img src="/logo.svg" alt="" />
             HealthSync
           </div>
           <div className="haze"><i ref={hazeRef} /></div>
