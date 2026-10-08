@@ -1,11 +1,16 @@
 /*
  * Hindi only. Letter-spacing pulls Devanagari syllables apart, so tracked labels
- * (uppercase eyebrows, mono tags on the ID passes) are set without it, and
- * vertical labels are turned sideways instead of stacking their letters.
+ * (uppercase eyebrows, mono tags on the ID passes) are set without it.
  */
 html[lang='hi'] body * {
   letter-spacing: normal !important;
 }
 html[lang='hi'] .nav-wheel-tab span {
-  text-orientation: sideways;
+  font: 600 13px/1.2 Inter, system-ui, sans-serif;
+  /* Chrome cannot shape Devanagari in vertical writing, so the label is set
+     horizontally and turned; the margins give the turned word room. */
+  writing-mode: horizontal-tb;
+  white-space: nowrap;
+  transform: rotate(90deg);
+  margin: 6px -4px;
 }
