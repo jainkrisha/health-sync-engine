@@ -1,0 +1,39 @@
+/*
+ * Hindi only. Devanagari has no glyphs in the app's monospace font, so in mono
+ * labels the browser mixed a fallback face with the mono font's wide spaces and
+ * letter-spacing, which pulled words apart. In Hindi every label uses a
+ * proportional font, Devanagari (and the spaces between its words) comes from
+ * the device's own Hindi font, and letter-spacing is dropped. Elements that show
+ * ids and clocks keep the monospace font for their Latin characters.
+ */
+@font-face {
+  font-family: 'HS Devanagari';
+  src: local('Nirmala UI'), local('Noto Sans Devanagari'), local('Kohinoor Devanagari'), local('Devanagari Sangam MN'), local('Mangal');
+  unicode-range: U+0020, U+00A0, U+0900-097F, U+1CD0-1CFF, U+200C-200D, U+25CC, U+A8E0-A8FF;
+}
+@font-face {
+  font-family: 'HS Devanagari';
+  font-weight: 700;
+  src: local('Nirmala UI Bold'), local('NirmalaUI-Bold'), local('Noto Sans Devanagari Bold'), local('Kohinoor Devanagari Bold'), local('Devanagari Sangam MN Bold');
+  unicode-range: U+0020, U+00A0, U+0900-097F, U+1CD0-1CFF, U+200C-200D, U+25CC, U+A8E0-A8FF;
+}
+
+html[lang='hi'] body * {
+  font-family: 'HS Devanagari', Inter, system-ui, sans-serif !important;
+  letter-spacing: normal !important;
+}
+html[lang='hi'] body :is(.font-mono, code, kbd, .bg-hash, .readout, .readout *) {
+  font-family: 'HS Devanagari', 'Geist Mono', ui-monospace, monospace !important;
+}
+
+/* Chrome cannot shape Devanagari in vertical writing, so the side menu tab's
+   label is set horizontally and turned; the margins give the turned word room. */
+html[lang='hi'] .nav-wheel-tab span {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  writing-mode: horizontal-tb;
+  white-space: nowrap;
+  transform: rotate(90deg);
+  margin: 6px -4px;
+}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Icon, type IconName } from './Icon';
+import { useI18n } from '../i18n/useI18n';
 
 export interface ConfirmDialogProps {
   isOpen: boolean;
@@ -22,12 +23,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   onConfirm,
   onCancel,
   variant = 'warning',
 }) => {
+  const { t } = useI18n();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   // Callers pass inline handlers; read the latest one without re-running the effect.
@@ -97,10 +99,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
         <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/80 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-800/40">
           <button ref={cancelRef} type="button" onClick={onCancel} className="btn-secondary">
-            {cancelText}
+            {cancelText ?? t('Cancel')}
           </button>
           <button type="button" onClick={onConfirm} className={v.button}>
-            {confirmText}
+            {confirmText ?? t('Confirm')}
           </button>
         </div>
       </div>

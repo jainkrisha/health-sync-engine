@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Icon } from './Icon';
+import { t } from '../i18n/i18n';
 
 export interface SelectOption {
   value: string;
@@ -27,7 +28,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       containerClassName = '',
       className = '',
       id,
-      placeholder = 'Select an option',
+      placeholder = t('Select an option'),
       ...props
     },
     ref
@@ -75,7 +76,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {error ? (
           <p className="form-error mt-0" role="alert" id={`${selectId}-error`}>
             <Icon name="alert" className="h-3.5 w-3.5 flex-shrink-0" />
-            <span>{error}</span>
+            <span>{t(error)}</span>
           </p>
         ) : helperText ? (
           <p className="form-help mt-0">{helperText}</p>

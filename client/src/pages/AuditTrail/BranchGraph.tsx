@@ -22,9 +22,14 @@ import { FIELD_LABELS } from '@shared/mergeEngine';
 import { Icon } from '../../components/Icon';
 import { ClockView, formatDateTime, relativeTime } from '../../components/ui';
 import { OUTCOME_LABEL, OUTCOME_STYLE, RULE_LABEL } from '../../components/auditLabels';
+import { useI18n } from '../../i18n/useI18n';
+import { t } from '../../i18n/i18n';
+import { translateReport } from '../../i18n/reports';
+import { tValue } from '../../i18n/clinical';
 import './branchGraph.css';
+import { tName } from '../../i18n/names';
 
-const LANE_COLORS = ['#e0663a', '#4d6f96', '#6e9f86', '#c08a2e', '#9a5b78', '#5f8a94'];
+const LANE_COLORS = ['#b86f52', '#4f7cb0', '#3a8f7a', '#8a8273', '#7d7c45', '#5f8a94'];
 const REVIEW_COLOR = 'var(--bg-review)';
 const LANE_W = 22;
 const PAD = 14;
@@ -37,40 +42,40 @@ const hashOf = (id: string) => id.replace(/-/g, '').slice(0, 7);
 function summary(c: HistoryCommit): string {
   if (c.operation === 'create') {
     const p = c.payload as CreatePayload;
-    return `Created the record${p.name ? ` for ${p.name}` : ''}`;
+    return p.name ? t('Created the record for {name}', { name: tName(p.name) }) : t('Created the record');
   }
-  if (c.operation === 'delete') return 'Archived the record';
-  const label = FIELD_LABELS[c.field ?? ''] ?? c.field ?? 'Record';
+  if (c.operation === 'delete') return t('Archived the record');
+  const label = t(FIELD_LABELS[c.field ?? ''] ?? c.field ?? 'Record').toLowerCase();
   if (c.field === 'allergies') {
     const p = c.payload as AllergyPayload;
     return p.op === 'add'
-      ? `Added allergy ${p.allergen} (${p.severity})`
-      : `Removed allergy ${p.allergen}`;
+      ? t('Added allergy {name} ({severity})', { name: tName(p.allergen), severity: t(p.severity) })
+      : t('Removed allergy {name}', { name: tName(p.allergen) });
   }
   if (c.field === 'medications') {
     const p = c.payload as MedicationPayload;
     if (p.op === 'setCritical')
       return p.active
-        ? `Set ${p.name} to ${p.dosage}${p.frequency ? `, ${p.frequency}` : ''}`
-        : `Stopped ${p.name}`;
-    return `Updated ${p.name} dates`;
+        ? t('Set {name} to {dose}', { name: tName(p.name), dose: `${tValue(p.dosage)}${p.frequency ? `, ${tValue(p.frequency)}` : ''}` })
+        : t('Stopped {name}', { name: tName(p.name) });
+    return t('Updated {name} dates', { name: tName(p.name) });
   }
   if (c.field === 'vitals') {
     const r = (c.payload as VitalsPayload).reading ?? {};
     const parts = [
-      r.bloodPressure && `BP ${r.bloodPressure}`,
-      r.heartRate && `HR ${r.heartRate}`,
+      r.bloodPressure && `${t('BP')} ${r.bloodPressure}`,
+      r.heartRate && `${t('HR')} ${r.heartRate}`,
       r.temperature && `${r.temperature}°C`,
       r.oxygenSaturation && `SpO₂ ${r.oxygenSaturation}%`,
     ].filter(Boolean);
-    return `Recorded vitals${parts.length ? `: ${parts.join(', ')}` : ''}`;
+    return `${t('Recorded vitals')}${parts.length ? `: ${parts.join(', ')}` : ''}`;
   }
   const value = (c.payload as { value?: string }).value;
-  return value ? `Set ${label.toLowerCase()} to "${value}"` : `Changed ${label.toLowerCase()}`;
+  return value ? t('Set {field} to "{value}"', { field: label, value }) : t('Changed {field}', { field: label });
 }
 
 const dose = (v: MedicationCritical | undefined) =>
-  !v ? '—' : v.active ? v.dosage || '—' : 'Stopped';
+  !v ? '—' : v.active ? tValue(v.dosage) || '—' : t('Stopped');
 
 export function BranchGraph({ history }: { history: PatientHistory }) {
   const graph = useMemo(() => buildCommitGraph(history), [history]);
@@ -85,6 +90,7 @@ export function BranchGraph({ history }: { history: PatientHistory }) {
   const [ys, setYs] = useState<number[]>([]);
   const [height, setHeight] = useState(0);
   const [hover, setHover] = useState<string | null>(null);
+  useI18n();
 
   const color = (lane: number) =>
     graph.lanes[lane]?.review ? REVIEW_COLOR : LANE_COLORS[lane % LANE_COLORS.length];
@@ -151,23 +157,21 @@ export function BranchGraph({ history }: { history: PatientHistory }) {
 
   return (
     <div className="bg-wrap">
-      <ul className="bg-legend" aria-label="Branches">
+      <ul className="bg-legend" aria-label={t('Branches')}>
         {graph.lanes.map((lane, i) => (
           <li key={lane.key} style={{ ['--lane' as string]: color(i) }}>
             <span className="bg-legend-dot" aria-hidden="true" />
             <span className="bg-legend-name">
-              <Icon name={lane.review ? 'merge' : 'git'} className="h-3.5 w-3.5" /> {lane.label}
+              <Icon name={lane.review ? 'merge' : 'git'} className="h-3.5 w-3.5" /> {lane.review ? t(lane.label) : tName(lane.label)}
             </span>
             {lane.people.length > 0 && (
-              <span className="bg-legend-people">{lane.people.join(', ')}</span>
+              <span className="bg-legend-people">{lane.people.map(tName).join(', ')}</span>
             )}
           </li>
         ))}
       </ul>
       <p className="bg-help">
-        Each tablet is a branch. Edits made offline, without seeing each other, run side by side.
-        When two of them change the same dose, both sides merge into District review, where a person
-        decides.
+        {t('Each tablet is a branch. Edits made offline, without seeing each other, run side by side. When two of them change the same dose, both sides merge into District review, where a person decides.')}
       </p>
 
       <div className="bg-graph" style={{ ['--graph-w' as string]: `${width}px` }}>
@@ -253,11 +257,11 @@ function NodeDot({
           cy={y}
           r={lit ? 9 : 8}
           fill="var(--bg-surface)"
-          stroke="#e0663a"
+          stroke="var(--bg-ember)"
           strokeWidth={2}
           strokeDasharray="3 2.5"
         />
-        <circle cx={x} cy={y} r={2.5} fill="#e0663a" />
+        <circle cx={x} cy={y} r={2.5} fill="var(--bg-ember)" />
       </g>
     );
   }
@@ -285,7 +289,7 @@ function NodeDot({
           cy={y}
           r={lit ? 10 : 9}
           fill="none"
-          stroke="#e0663a"
+          stroke="var(--bg-ember)"
           strokeWidth={2}
           opacity={0.9}
         />
@@ -318,6 +322,7 @@ function CommitRow({
   onJump: (id: string) => void;
 }) {
   const shown = commit.decisions.filter((d) => d.outcome !== 'applied' || d.concurrent);
+  useI18n();
   return (
     <>
       <p className="bg-msg">{summary(commit)}</p>
@@ -326,21 +331,21 @@ function CommitRow({
           {hashOf(commit.id)}
         </code>
         <span className="bg-branch" style={{ ['--lane' as string]: laneColor }}>
-          <Icon name="git" className="h-3 w-3" /> {commit.deviceName}
+          <Icon name="git" className="h-3 w-3" /> {tName(commit.deviceName)}
         </span>
-        <span>{commit.userName}</span>
+        <span>{tName(commit.userName)}</span>
         <time
           dateTime={commit.timestamp}
-          title={`Edited ${formatDateTime(commit.timestamp)} · reached the server ${formatDateTime(commit.receivedAt)}`}
+          title={t('Edited {edited} · reached the server {received}', { edited: formatDateTime(commit.timestamp), received: formatDateTime(commit.receivedAt) })}
         >
           {relativeTime(commit.timestamp)}
         </time>
         {node.parents.length > 1 && (
-          <span className="badge-slate">Merge of {node.parents.map(hashOf).join(' + ')}</span>
+          <span className="badge-slate">{t('Merge of {hashes}', { hashes: node.parents.map(hashOf).join(' + ') })}</span>
         )}
         <span
           className="bg-clock"
-          title="Vector clock: how many edits from each tablet this one had seen"
+          title={t('Vector clock: how many edits from each tablet this one had seen')}
         >
           <ClockView clock={commit.vectorClock} highlight={commit.clientId} />
         </span>
@@ -348,8 +353,8 @@ function CommitRow({
       {shown.length > 0 && (
         <div className="bg-decisions">
           {shown.map((d) => (
-            <span key={d.id} className={OUTCOME_STYLE[d.outcome] ?? 'badge-slate'} title={d.report}>
-              {OUTCOME_LABEL[d.outcome] ?? d.outcome} · {RULE_LABEL[d.rule] ?? d.rule}
+            <span key={d.id} className={OUTCOME_STYLE[d.outcome] ?? 'badge-slate'} title={translateReport(d.report)}>
+              {t(OUTCOME_LABEL[d.outcome] ?? d.outcome)} · {t(RULE_LABEL[d.rule] ?? d.rule)}
             </span>
           ))}
         </div>
@@ -361,15 +366,15 @@ function CommitRow({
           <p key={k.id} className="bg-clash">
             <Icon name="alert" className="h-3.5 w-3.5 flex-shrink-0" />
             <span>
-              Clashes on <b>{k.label} dose</b> with{' '}
+              {t('Clashes on')} <b>{t('{name} dose', { name: tName(k.label) })}</b> {t('with')}{' '}
               {other ? (
                 <button type="button" className="bg-link" onClick={() => onJump(other.id)}>
-                  {hashOf(other.id)} from {other.deviceName}
+                  {t('{hash} from {device}', { hash: hashOf(other.id), device: tName(other.deviceName) })}
                 </button>
               ) : (
-                'an edit from another tablet'
+                t('an edit from another tablet')
               )}
-              . Neither had seen the other.
+              . {t('Neither had seen the other.')}
             </span>
           </p>
         );
@@ -398,9 +403,10 @@ function MergeRow({
   onJump: (id: string) => void;
 }) {
   const [a, b] = sides;
+  useI18n();
   const cards = [
-    { commit: a, value: conflict.currentValue, tag: 'Stored first' },
-    { commit: b, value: conflict.incomingValue, tag: 'Arrived second' },
+    { commit: a, value: conflict.currentValue, tag: t('Stored first') },
+    { commit: b, value: conflict.incomingValue, tag: t('Arrived second') },
   ];
   const winner =
     conflict.resolution === 'current' ? 0 : conflict.resolution === 'incoming' ? 1 : -1;
@@ -409,10 +415,10 @@ function MergeRow({
       <div className="bg-merge-head">
         <Icon name="merge" className="h-4 w-4" />
         <p className="bg-msg">
-          {pending ? 'Merge conflict' : 'Merged'} · {conflict.label} dose
+          {pending ? t('Merge conflict') : t('Merged')} · {t('{name} dose', { name: tName(conflict.label) })}
         </p>
         <span className={pending ? 'badge-conflict' : 'badge-sage'}>
-          {pending ? 'Waiting for review' : `Resolved by ${conflict.resolvedByName ?? 'reviewer'}`}
+          {pending ? t('Waiting for review') : t('Resolved by {name}', { name: tName(conflict.resolvedByName) ?? t('reviewer') })}
         </span>
       </div>
       <div className="bg-diff">
@@ -423,7 +429,7 @@ function MergeRow({
             style={{ ['--lane' as string]: colorOf(s.commit) }}
           >
             <span className="bg-side-head">
-              <Icon name="git" className="h-3 w-3" /> {s.commit?.deviceName ?? 'Unknown tablet'}
+              <Icon name="git" className="h-3 w-3" /> {tName(s.commit?.deviceName) || t('Unknown tablet')}
               {s.commit && (
                 <button
                   type="button"
@@ -436,30 +442,30 @@ function MergeRow({
             </span>
             <span className="bg-side-value">{dose(s.value)}</span>
             <span className="bg-side-sub">
-              {s.value?.active ? s.value.frequency : 'medicine stopped'} ·{' '}
-              {s.commit?.userName ?? '—'} · {s.tag}
+              {s.value?.active ? tValue(s.value.frequency) : t('medicine stopped')} ·{' '}
+              {tName(s.commit?.userName) || '—'} · {s.tag}
             </span>
           </div>
         ))}
         <span className="bg-vs" aria-hidden="true">
-          vs
+          {t('vs')}
         </span>
       </div>
       {pending ? (
         <p className="bg-merge-foot">
-          The record keeps the stored dose until someone decides.{' '}
+          {t('The record keeps the stored dose until someone decides.')}{' '}
           <Link to="/conflicts" className="bg-link">
-            Open in Conflict Review <Icon name="arrowRight" className="inline h-3 w-3" />
+            {t('Open in Conflict Review')} <Icon name="arrowRight" className="inline h-3 w-3" />
           </Link>
         </p>
       ) : (
         <p className="bg-merge-foot">
           <Icon name="checkCircle" className="inline h-3.5 w-3.5 text-sage-600" />{' '}
-          {CHOICE_TEXT[conflict.resolution ?? ''] ?? 'Resolved'}:{' '}
+          {t(CHOICE_TEXT[conflict.resolution ?? ''] ?? 'Resolved')}:{' '}
           <b>
             {dose(conflict.resolvedValue)}
             {conflict.resolvedValue?.active && conflict.resolvedValue.frequency
-              ? `, ${conflict.resolvedValue.frequency}`
+              ? `, ${tValue(conflict.resolvedValue.frequency)}`
               : ''}
           </b>
           {conflict.resolvedAt && <> · {relativeTime(conflict.resolvedAt)}</>}

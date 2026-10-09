@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { Patient } from '@shared/types';
-import { plural } from '@shared/text';
 import { usePatients } from '../../hooks/usePatients';
 import { usePendingIds } from '../../hooks/usePendingIds';
 import { usePermissions } from '../../context/RBAC';
 import { Icon } from '../../components/Icon';
 import { EmptyState, ErrorNotice, PageHeader, SkeletonRows, ageFrom, initials, relativeTime } from '../../components/ui';
+import { useI18n } from '../../i18n/useI18n';
+import { tName } from '../../i18n/names';
 
 type Filter = 'all' | 'conflicts' | 'pending' | 'allergies';
 
@@ -23,20 +24,21 @@ function matches(p: Patient, q: string): boolean {
 
 function PatientBadges({ p, pending }: { p: Patient; pending: boolean }) {
   const severe = p.allergies.some((a) => a.severity === 'severe');
+  const { t } = useI18n();
   if (!p.hasOpenConflicts && !pending && !severe) return null;
   return (
     <div className="flex flex-wrap gap-1.5">
       {p.hasOpenConflicts && (
         <span className="badge-conflict">
-          <Icon name="alert" className="h-3 w-3" /> Needs review
+          <Icon name="alert" className="h-3 w-3" /> {t('Needs review')}
         </span>
       )}
       {pending && (
         <span className="badge-warning">
-          <Icon name="clock" className="h-3 w-3" /> Not synced
+          <Icon name="clock" className="h-3 w-3" /> {t('Not synced')}
         </span>
       )}
-      {severe && <span className="badge-danger">Severe allergy</span>}
+      {severe && <span className="badge-danger">{t('Severe allergy')}</span>}
     </div>
   );
 }
@@ -44,7 +46,7 @@ function PatientBadges({ p, pending }: { p: Patient; pending: boolean }) {
 function Avatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   return (
     <span
-      className={`flex flex-shrink-0 items-center justify-center rounded-xl bg-teal-50 font-bold text-teal-700 ring-1 ring-inset ring-teal-600/10 dark:bg-teal-900/40 dark:text-teal-300 ${
+      className={`flex flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 ${
         size === 'lg' ? 'h-10 w-10 text-sm' : 'h-9 w-9 text-xs'
       }`}
     >
@@ -61,6 +63,7 @@ export default function PatientList() {
   const [filter, setFilter] = useState<Filter>('all');
   const searchRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { t, tp } = useI18n();
 
   // "/" jumps to search, as in most record systems.
   useEffect(() => {
@@ -89,10 +92,10 @@ export default function PatientList() {
   );
 
   const filters: { id: Filter; label: string; count: number }[] = [
-    { id: 'all', label: 'All', count: patients.length },
-    { id: 'conflicts', label: 'Needs review', count: patients.filter((p) => p.hasOpenConflicts).length },
-    { id: 'pending', label: 'Not synced', count: patients.filter((p) => pendingIds.has(p.id)).length },
-    { id: 'allergies', label: 'Has allergies', count: patients.filter((p) => p.allergies.length > 0).length },
+    { id: 'all', label: t('All'), count: patients.length },
+    { id: 'conflicts', label: t('Needs review'), count: patients.filter((p) => p.hasOpenConflicts).length },
+    { id: 'pending', label: t('Not synced'), count: patients.filter((p) => pendingIds.has(p.id)).length },
+    { id: 'allergies', label: t('Has allergies'), count: patients.filter((p) => p.allergies.length > 0).length },
   ];
 
   const clearAll = () => {
@@ -103,12 +106,12 @@ export default function PatientList() {
   return (
     <div>
       <PageHeader
-        title="Patients"
-        subtitle="Stored encrypted on this device and synced when a connection is available."
+        title={t('Patients')}
+        subtitle={t('Stored encrypted on this device and synced when a connection is available.')}
         actions={
           canEditPatients && (
             <Link to="/patients/new" className="btn-primary">
-              <Icon name="plus" className="h-4 w-4" /> Add patient
+              <Icon name="plus" className="h-4 w-4" /> {t('Add patient')}
             </Link>
           )
         }
@@ -117,13 +120,13 @@ export default function PatientList() {
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative flex-1">
           <Icon name="search" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <label htmlFor="patient-search" className="sr-only">Search patients</label>
+          <label htmlFor="patient-search" className="sr-only">{t('Search patients')}</label>
           <input
             ref={searchRef}
             id="patient-search"
             type="search"
             className="form-input pl-10 pr-12 [&::-webkit-search-cancel-button]:hidden"
-            placeholder="Search by name, phone, allergy or medication"
+            placeholder={t('Search by name, phone, allergy or medication')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
@@ -136,21 +139,21 @@ export default function PatientList() {
                 searchRef.current?.focus();
               }}
               className="btn-icon absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2"
-              aria-label="Clear search"
+              aria-label={t('Clear search')}
             >
               <Icon name="x" className="h-4 w-4" />
             </button>
           ) : (
             <kbd
               className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-slate-200 bg-slate-50 px-1.5 font-mono text-[11px] text-slate-400 sm:block dark:border-slate-700 dark:bg-slate-800"
-              title="Press / to search"
+              title={t('Press / to search')}
             >
               /
             </kbd>
           )}
         </div>
         <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 sm:pb-0">
-          <div className="flex w-max gap-2" role="group" aria-label="Filter patients">
+          <div className="flex w-max gap-2" role="group" aria-label={t('Filter patients')}>
             {filters.map((f) => (
               <button
                 key={f.id}
@@ -172,14 +175,14 @@ export default function PatientList() {
 
       {!loading && patients.length > 0 && (
         <p className="mb-3 text-xs font-medium text-slate-500 dark:text-slate-400" aria-live="polite">
-          Showing {visible.length} of {plural(patients.length, 'patient')}
-          {query.trim() && <> matching &ldquo;{query.trim()}&rdquo;</>}
+          {tp(patients.length, 'Showing {shown} of {count} patient', 'Showing {shown} of {count} patients', { shown: visible.length })}
+          {query.trim() && <> {t('matching')} &ldquo;{query.trim()}&rdquo;</>}
         </p>
       )}
 
       {error && (
         <div className="mb-4">
-          <ErrorNotice message={`Could not read local records: ${error}`} />
+          <ErrorNotice message={`${t('Could not read local records:')} ${error}`} />
         </div>
       )}
 
@@ -189,9 +192,9 @@ export default function PatientList() {
         <div className="card">
           <EmptyState
             icon="patients"
-            title="No patients on this device yet"
-            message={canEditPatients ? 'Add a patient, or connect to sync records from other devices.' : 'Connect to sync records from the server.'}
-            action={canEditPatients && <Link to="/patients/new" className="btn-primary"><Icon name="plus" className="h-4 w-4" /> Add your first patient</Link>}
+            title={t('No patients on this device yet')}
+            message={canEditPatients ? t('Add a patient, or connect to sync records from other devices.') : t('Connect to sync records from the server.')}
+            action={canEditPatients && <Link to="/patients/new" className="btn-primary"><Icon name="plus" className="h-4 w-4" /> {t('Add your first patient')}</Link>}
           />
         </div>
       ) : visible.length === 0 ? (
@@ -199,9 +202,9 @@ export default function PatientList() {
           <EmptyState
             icon="search"
             tone="slate"
-            title="No matching patients"
-            message="Try a different search or filter."
-            action={<button type="button" className="btn-secondary" onClick={clearAll}>Clear search and filters</button>}
+            title={t('No matching patients')}
+            message={t('Try a different search or filter.')}
+            action={<button type="button" className="btn-secondary" onClick={clearAll}>{t('Clear search and filters')}</button>}
           />
         </div>
       ) : (
@@ -211,12 +214,12 @@ export default function PatientList() {
             <table className="w-full">
               <thead className="border-b border-slate-200/80 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-800/40">
                 <tr>
-                  <th className="table-head">Patient</th>
-                  <th className="table-head">Blood</th>
-                  <th className="table-head">Allergies</th>
-                  <th className="table-head">Medications</th>
-                  <th className="table-head">Updated</th>
-                  <th className="table-head"><span className="sr-only">Actions</span></th>
+                  <th className="table-head">{t('Patient')}</th>
+                  <th className="table-head">{t('Blood')}</th>
+                  <th className="table-head">{t('Allergies')}</th>
+                  <th className="table-head">{t('Medications')}</th>
+                  <th className="table-head">{t('Updated')}</th>
+                  <th className="table-head"><span className="sr-only">{t('Actions')}</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -230,30 +233,30 @@ export default function PatientList() {
                   >
                     <td className="table-cell">
                       <Link to={`/patients/${p.id}`} className="flex items-center gap-3 font-semibold text-slate-900 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">
-                        <Avatar name={p.name} />
+                        <Avatar name={tName(p.name)} />
                         <span>
-                          <span className="block">{p.name}</span>
+                          <span className="block">{tName(p.name)}</span>
                           <span className="block text-xs font-normal text-slate-500 dark:text-slate-400">
-                            {[ageFrom(p.dateOfBirth), p.gender !== 'unknown' ? p.gender : ''].filter(Boolean).join(' · ') || '—'}
+                            {[ageFrom(p.dateOfBirth), p.gender !== 'unknown' ? t(p.gender) : ''].filter(Boolean).join(' · ') || '—'}
                           </span>
                         </span>
                       </Link>
                       <div className="ml-12 mt-1.5 empty:hidden"><PatientBadges p={p} pending={pendingIds.has(p.id)} /></div>
                     </td>
                     <td className="table-cell">
-                      <span className="font-mono text-[13px] font-semibold text-slate-700 dark:text-slate-200">{p.bloodType}</span>
+                      <span className="font-mono text-[13px] font-semibold text-slate-700 dark:text-slate-200">{t(p.bloodType)}</span>
                     </td>
                     <td className="table-cell max-w-[16rem]">
-                      {p.allergies.length ? <span className="line-clamp-2">{p.allergies.map((a) => a.allergen).join(', ')}</span> : <span className="text-slate-400">None</span>}
+                      {p.allergies.length ? <span className="line-clamp-2">{p.allergies.map((a) => tName(a.allergen)).join(', ')}</span> : <span className="text-slate-400">{t('None')}</span>}
                     </td>
                     <td className="table-cell tabular-nums">{p.medications.length || <span className="text-slate-400">0</span>}</td>
                     <td className="table-cell whitespace-nowrap text-slate-500">{relativeTime(p.updatedAt)}</td>
                     <td className="table-cell text-right">
                       <div className="flex justify-end gap-1 opacity-70 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
-                        <Link to={`/patients/${p.id}`} className="btn-ghost btn-sm">View</Link>
+                        <Link to={`/patients/${p.id}`} className="btn-ghost btn-sm">{t('View')}</Link>
                         {canEditPatients && (
-                          <Link to={`/patients/${p.id}/edit`} className="btn-ghost btn-sm" aria-label={`Edit ${p.name}`}>
-                            <Icon name="edit" className="h-3.5 w-3.5" /> Edit
+                          <Link to={`/patients/${p.id}/edit`} className="btn-ghost btn-sm" aria-label={t('Edit {name}', { name: tName(p.name) })}>
+                            <Icon name="edit" className="h-3.5 w-3.5" /> {t('Edit')}
                           </Link>
                         )}
                       </div>
@@ -270,11 +273,11 @@ export default function PatientList() {
               <li key={p.id}>
                 <Link to={`/patients/${p.id}`} className="card card-interactive block p-4 sm:p-4">
                   <div className="flex items-center gap-3">
-                    <Avatar name={p.name} size="lg" />
+                    <Avatar name={tName(p.name)} size="lg" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-slate-900 dark:text-white">{p.name}</p>
+                      <p className="truncate font-semibold text-slate-900 dark:text-white">{tName(p.name)}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {p.bloodType} · {plural(p.allergies.length, 'allergy', 'allergies')} · {plural(p.medications.length, 'med')} · {relativeTime(p.updatedAt)}
+                        {t(p.bloodType)} · {tp(p.allergies.length, '{count} allergy', '{count} allergies')} · {tp(p.medications.length, '{count} med', '{count} meds')} · {relativeTime(p.updatedAt)}
                       </p>
                     </div>
                     <Icon name="chevronRight" className="h-4 w-4 text-slate-400" />

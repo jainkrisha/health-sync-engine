@@ -289,30 +289,31 @@
 .pass-field:focus { border-bottom-style: solid; border-bottom-color: var(--orange); background: rgba(224, 102, 58, 0.07); }
 .pass-field[aria-invalid='true'] { border-bottom-color: #c0262d; }
 
-/* The dark LCD strip for the password. */
+/* The password line: written on the card like the username, with a show/hide button. */
 .pass-lcd {
   display: flex;
   align-items: center;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #1c1a17, #11100d);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.7);
-  transition: box-shadow 0.15s;
+  border-bottom: 1.5px dashed rgba(29, 39, 51, 0.3);
+  transition: border-color 0.15s, background-color 0.15s;
 }
-.pass-lcd:focus-within { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 2px var(--orange); }
-.pass-lcd[data-invalid='true'] { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 2px #c0262d; }
+.pass-lcd:hover { border-bottom-color: rgba(29, 39, 51, 0.5); }
+.pass-lcd:focus-within { border-bottom-style: solid; border-bottom-color: var(--orange); background: rgba(224, 102, 58, 0.07); }
+.pass-lcd[data-invalid='true'] { border-bottom-color: #c0262d; }
 .pass-lcd input {
   flex: 1;
   min-width: 0;
   border: 0;
   background: transparent;
-  padding: 9px 10px;
-  font: 500 16px/1 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
-  letter-spacing: 2.5px;
-  color: #f0a063;
-  text-shadow: 0 0 6px rgba(240, 140, 80, 0.55);
+  padding: 6px 2px 5px;
+  font: 600 15px/1.2 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 1.5px;
+  color: var(--ink);
   outline: none;
 }
-.pass-lcd input::placeholder { color: rgba(240, 160, 99, 0.3); text-shadow: none; }
+.pass-lcd input::placeholder { color: rgba(29, 39, 51, 0.3); font-weight: 500; }
+/* The solid orange underline marks focus on these lines; drop the app-wide ring box. */
+.pass-field:focus-visible,
+.pass-lcd input:focus-visible { box-shadow: none; }
 
 /* Barcode strip. */
 .pass-barcode {
@@ -484,10 +485,11 @@
 }
 .phc-intro-title { margin-top: 8px; font: 800 22px/1.1 'Geist', 'Inter', sans-serif; letter-spacing: -0.5px; }
 .phc-intro-text { margin-top: 4px; font: 500 13px/1.45 'Geist', 'Inter', sans-serif; color: #3a4b5e; }
+/* Sits under the language switch, which stays fixed in the top-right corner. */
 .phc-intro-skip {
   position: absolute;
   right: 20px;
-  top: 20px;
+  top: 76px;
   padding: 8px 14px;
   border-radius: 999px;
   background: rgba(29, 39, 51, 0.85);

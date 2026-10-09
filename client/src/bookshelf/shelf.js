@@ -8,6 +8,9 @@
  * postMessage from the parent page.
  */
 import * as THREE from 'three';
+import { t, tp } from '../i18n/i18n';
+import { tName } from '../i18n/names';
+import '../i18n/hindi.css';
 
 /* ════════════════════════════════════════════════════════════════════════
    1 · THE CATALOGUE
@@ -37,7 +40,14 @@ if(REDUCED){ K.introStagger=0; K.introWallFade=260; K.introFade=200;
              K.hoverLift=260; K.hoverDrop=200; K.activeDuration=300;
              K.orbitAz=0; K.orbitEl=0; }
 
-const STUDIO = 'District Health Network';
+const STUDIO = t('District Health Network');
+
+// Static labels in bookshelf.html, in the language the app is set to.
+for (const id of ['detail-look', 'detail-close', 'hint', 'mbar-details', 'mbar-look']) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = t(el.textContent.trim());
+}
+document.getElementById('menubtn')?.setAttribute('aria-label', t('All PHCs'));
 const SPINES = [
   { spine:'#2b3d55', cloth:'#141b26' },
   { spine:'#9a4022', cloth:'#1d120d' },
@@ -65,17 +75,17 @@ function setCatalogue(phcs){
     const short = p.name.replace(/^PHC\s+/i, '');
     const online = p.devices.filter(d => d.online).length;
     BOOKS.push({
-      id: 'phc-' + i, name: p.name, title: p.name,
-      t1: 'PHC', t2: short.toUpperCase(),
-      sub: 'PATIENT REGISTER · ' + p.patientCount + (p.patientCount === 1 ? ' PATIENT' : ' PATIENTS'),
+      id: 'phc-' + i, name: p.name, title: tName(p.name),
+      t1: t('PHC'), t2: tName(short).toUpperCase(),
+      sub: t('PATIENT REGISTER') + ' · ' + tp(p.patientCount, '{count} PATIENT', '{count} PATIENTS'),
       year: p.since ? String(new Date(p.since).getFullYear()) : '2026',
       vol: ROMAN[i] || String(i + 1), shelf, slotX: (k - (row - 1) / 2) * K.slot,
       spine: sp.spine, cloth: sp.cloth, edge: '#efe9dd',
       patients: p.patientCount, staff: p.staff.length, devices: p.devices.length, online,
       conflicts: p.openConflicts.length,
-      blurb: `${p.patientCount} patient${p.patientCount === 1 ? '' : 's'} registered, ${p.staff.length} staff, ` +
-             `${online} of ${p.devices.length} device${p.devices.length === 1 ? '' : 's'} online. ` +
-             (p.openConflicts.length ? `${p.openConflicts.length} dose${p.openConflicts.length === 1 ? '' : 's'} waiting for review.` : 'No doses waiting for review.'),
+      blurb: tp(p.patientCount, '{count} patient registered, {staff} staff,', '{count} patients registered, {staff} staff,', { staff: p.staff.length }) + ' ' +
+             tp(p.devices.length, '{online} of {count} device online.', '{online} of {count} devices online.', { online }) + ' ' +
+             (p.openConflicts.length ? tp(p.openConflicts.length, '{count} dose waiting for review.', '{count} doses waiting for review.') : t('No doses waiting for review.')),
     });
   });
 }
@@ -97,16 +107,19 @@ function C(w,h){const c=document.createElement('canvas');c.width=w;c.height=h===
 function rr(g,x,y,w,h,r){r=Math.min(r,w/2,h/2);g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
 function lg(g,x0,y0,x1,y1,stops){const t=g.createLinearGradient(x0,y0,x1,y1);for(const s of stops)t.addColorStop(s[0],s[1]);return t;}
 function rg(g,x,y,r0,r1,stops,x1,y1){const t=g.createRadialGradient(x,y,r0,x1===undefined?x:x1,y1===undefined?y:y1,r1);for(const s of stops)t.addColorStop(s[0],s[1]);return t;}
+// Letter-spaced text is drawn one character at a time; Devanagari has to be drawn
+// whole, or its conjuncts and vowel signs come apart.
+const units = text => /[^\x00-\x7F]/.test(text) ? [text] : [...text];
 function tracked(g,text,x,y,track,align){
-  let w=0;for(const ch of text)w+=g.measureText(ch).width+track;w-=track;
+  let w=0;for(const ch of units(text))w+=g.measureText(ch).width+track;w-=track;
   let cx = align==='center'? x-w/2 : align==='right'? x-w : x;
   const prev=g.textAlign;g.textAlign='left';
-  for(const ch of text){g.fillText(ch,cx,y);cx+=g.measureText(ch).width+track;}
+  for(const ch of units(text)){g.fillText(ch,cx,y);cx+=g.measureText(ch).width+track;}
   g.textAlign=prev;return w;
 }
 function fitTracked(g,text,w,weight,family,track){
   let lo=4,hi=3000;
-  const meas=px=>{g.font=`${weight} ${px}px ${family}`;let t=0;for(const ch of text)t+=g.measureText(ch).width+track*px;return t-track*px;};
+  const meas=px=>{g.font=`${weight} ${px}px ${family}`;let t=0;for(const ch of units(text))t+=g.measureText(ch).width+track*px;return t-track*px;};
   for(let i=0;i<26;i++){const m=(lo+hi)/2;if(meas(m)>w)hi=m;else lo=m;}
   g.font=`${weight} ${lo}px ${family}`;return lo;
 }
@@ -179,7 +192,7 @@ function paintCover(b,W,H){
   // foot
   g.globalAlpha=.72;g.fillStyle=FOIL;
   g.font=`400 ${W*.0195}px ${SANS}`;
-  tracked(g,'REGISTER '+b.vol,W*.5,H*.884,W*.0195*.34,'center');
+  tracked(g,t('REGISTER')+' '+b.vol,W*.5,H*.884,W*.0195*.34,'center');
   g.globalAlpha=.92;
   g.font=`500 ${W*.0215}px ${SANS}`;
   tracked(g,'HEALTHSYNC',W*.5,H*.920,W*.0215*.34,'center');
@@ -202,7 +215,7 @@ function artBack(b,W,H){
     [[0,light?'rgba(255,255,255,.55)':'rgba(255,255,255,.10)'],[1,'rgba(0,0,0,0)']]);
   g.fillRect(0,0,W,H);
   // three figures from the register
-  const stats=[[b.patients,'PATIENTS'],[b.staff,'STAFF'],[b.devices,'DEVICES']];
+  const stats=[[b.patients,t('PATIENTS')],[b.staff,t('STAFF')],[b.devices,t('DEVICES')]];
   for(let i=0;i<3;i++){
     const x=W*(.10+i*.28), y=H*.115, w=W*.24, h=w*1.0;
     g.save();
@@ -214,7 +227,7 @@ function artBack(b,W,H){
     g.restore();
   }
   g.fillStyle=ink;g.globalAlpha=.55;g.font=`400 ${W*.017}px ${MONO}`;g.textAlign='left';
-  g.fillText('PHC REGISTER · '+b.year,W*.10,H*.415);
+  g.fillText(t('PHC REGISTER')+' · '+b.year,W*.10,H*.415);
   g.globalAlpha=1;
   // blurb
   g.font=`400 ${W*.030}px ${SERIF}`;g.fillStyle=ink;
@@ -239,7 +252,7 @@ function artBack(b,W,H){
   g.fillStyle=ink;g.font=`500 ${W*.022}px ${SANS}`;
   tracked(g,'HEALTHSYNC',W*.215,H*.845,W*.022*.30,'left');
   g.globalAlpha=.6;g.font=`400 ${W*.020}px ${SANS}`;
-  g.fillText('Register '+b.vol+' of the district',W*.215,H*.875);
+  g.fillText(t('Register {vol} of the district',{vol:b.vol}),W*.215,H*.875);
   g.globalAlpha=1;
   // barcode
   const bx=W*.60,by=H*.815,bw=W*.30,bh=H*.085;
@@ -913,7 +926,7 @@ function clearActive(){
   if(!S.active)return;
   const B=S.active;S.active=null;
   detailEl.classList.remove('on');document.body.classList.remove('reading');WASH.target=0;hintEl.classList.remove('on');
-  mDetails.textContent='Details';
+  mDetails.textContent=t('Details');
   dragReset();
   toInactive(B);
 }
@@ -1155,11 +1168,11 @@ const M={scroll:0,target:0,index:0,dragging:false,lastY:0};
 
 function showDetail(B){
   const d=B.data;
-  dMeta.textContent=`Register ${d.vol} · since ${d.year}`;
+  dMeta.textContent=`${t('Register')} ${d.vol} · ${t('since {year}',{year:d.year})}`;
   dTitle.textContent=d.title; dDesc.textContent=d.blurb;
   detailEl.classList.add('on'); document.body.classList.add('reading'); WASH.target=1;
-  if(MOBILE){ mMeta.textContent=`Register ${d.vol} · ${d.patients} patient${d.patients===1?'':'s'}`; mTitle.textContent=d.title;
-              mDetails.textContent='Close'; }
+  if(MOBILE){ mMeta.textContent=`${t('Register')} ${d.vol} · ${tp(d.patients,'{count} patient','{count} patients')}`; mTitle.textContent=d.title;
+              mDetails.textContent=t('Close'); }
 }
 dClose.addEventListener('click',e=>{e.stopPropagation();clearActive();});
 dLook.addEventListener('click',e=>{e.stopPropagation(); if(S.active) openRegister(S.active.data);});
@@ -1172,9 +1185,9 @@ BOOKS.forEach((d,i)=>{
   const b=document.createElement('button');
   b.className='tli rise';
   b.dataset.d=400+i*40;
-  b.setAttribute('aria-label',`${d.title}: ${d.patients} patients. Takes the register off the shelf.`);
-  b.innerHTML=`<span class="tlmark" style="background:${d.spine}" aria-hidden="true">${d.vol}</span><span class="tltxt"><p>${d.patients} patient${d.patients===1?'':'s'} · ${d.staff} staff</p>`+
-              `<p class="studio">Register ${d.vol}</p><h2>${d.title}</h2></span>`;
+  b.setAttribute('aria-label',`${d.title}: ${tp(d.patients,'{count} patient','{count} patients')}. ${t('Takes the register off the shelf.')}`);
+  b.innerHTML=`<span class="tlmark" style="background:${d.spine}" aria-hidden="true">${d.vol}</span><span class="tltxt"><p>${tp(d.patients,'{count} patient','{count} patients')} · ${t('{count} staff',{count:d.staff})}</p>`+
+              `<p class="studio">${t('Register')} ${d.vol}</p><h2>${d.title}</h2></span>`;
   b.addEventListener('pointerenter',()=>{ if(S.anim==='inactive'&&!MOBILE)setLifted(books[i]); });
   b.addEventListener('pointerleave',()=>{ if(S.anim==='inactive'&&!MOBILE)setLifted(null); });
   b.addEventListener('click',e=>{e.stopPropagation(); if(S.active)clearActive(); else setActive(books[i]);});
@@ -1182,7 +1195,7 @@ BOOKS.forEach((d,i)=>{
 });
 BOOKS.forEach((d,i)=>{
   const b=document.createElement('button');
-  b.innerHTML=`<span>Register ${d.vol} · ${d.patients} patient${d.patients===1?'':'s'}</span>${d.title}`;
+  b.innerHTML=`<span>${t('Register')} ${d.vol} · ${tp(d.patients,'{count} patient','{count} patients')}</span>${d.title}`;
   b.addEventListener('click',()=>{menu.hidden=true;M.target=i;if(S.active)clearActive();});
   menu.appendChild(b);
 });
@@ -1199,7 +1212,7 @@ function setMobileIndex(i,force){
   i=clamp(i,0,BOOKS.length-1);
   if(!force&&i===M.index)return;
   M.index=i; const d=BOOKS[i];
-  mMeta.textContent=`Register ${d.vol} · ${d.patients} patient${d.patients===1?'':'s'}`; mTitle.textContent=d.title;
+  mMeta.textContent=`${t('Register')} ${d.vol} · ${tp(d.patients,'{count} patient','{count} patients')}`; mTitle.textContent=d.title;
 }
 let snapTimer=null;
 function mobileSnap(delay){clearTimeout(snapTimer);

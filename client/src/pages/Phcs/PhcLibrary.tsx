@@ -8,16 +8,18 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ROLE_LABELS, type PhcSummary } from '@shared/types';
-import { plural } from '@shared/text';
 import { useApi } from '../../hooks/useApi';
 import { useSyncEngine } from '../../hooks/useSync';
 import { Icon } from '../../components/Icon';
 import { EmptyState, ErrorNotice, OfflineNotice, PageHeader, formatDate, relativeTime } from '../../components/ui';
+import { useI18n } from '../../i18n/useI18n';
+import { dateLocale, t, tp } from '../../i18n/i18n';
 import './phcs.css';
+import { tName } from '../../i18n/names';
 
 const COVERS: [string, string][] = [
   ['#2b3d55', '#1d2733'],
-  ['#c4612f', '#8e4220'],
+  ['#b0705a', '#7d4a39'],
   ['#3f6f63', '#274a41'],
   ['#b0843a', '#7d5a22'],
   ['#4f6378', '#2f3f50'],
@@ -44,14 +46,14 @@ function Emblem({ size = 54 }: { size?: number }) {
 function CoverArt({ phc }: { phc: PhcSummary }) {
   return (
     <div className="cover-art" style={coverFor(phc.name)}>
-      <p className="cover-kicker">HEALTHSYNC · PHC REGISTER</p>
-      <p className="cover-title">{phc.name}</p>
+      <p className="cover-kicker">HEALTHSYNC · {t('PHC REGISTER')}</p>
+      <p className="cover-title">{tName(phc.name)}</p>
       <div className="cover-emblem">
         <Emblem />
       </div>
       <div className="cover-foot">
-        <span>{plural(phc.patientCount, 'PATIENT')}</span>
-        <span>{phc.staff.length} STAFF</span>
+        <span>{tp(phc.patientCount, '{count} PATIENT', '{count} PATIENTS')}</span>
+        <span>{t('{count} STAFF', { count: phc.staff.length })}</span>
       </div>
     </div>
   );
@@ -61,7 +63,7 @@ function Stat({ value, label }: { value: ReactNode; label: string }) {
   return (
     <div className="rounded-lg bg-[rgba(29,39,51,0.05)] px-3 py-2.5">
       <p className="text-xl font-extrabold tabular-nums leading-none text-[#1d2733]">{value}</p>
-      <p className="mt-1 text-[11px] font-medium text-[rgba(29,39,51,0.6)]">{label}</p>
+      <p className="mt-1 text-[11px] font-medium text-[rgba(29,39,51,0.6)]">{t(label)}</p>
     </div>
   );
 }
@@ -72,13 +74,15 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
   const max = Math.max(1, ...phc.activity.map((a) => a.count));
   return [
     {
-      kicker: 'Chapter 1 · Overview',
-      title: phc.name,
+      kicker: t('Chapter 1 · Overview'),
+      title: tName(phc.name),
       body: (
         <>
           <p className="text-[13px] leading-6 text-[rgba(29,39,51,0.75)]">
-            A Primary Health Centre in the district network
-            {phc.since ? `, on HealthSync since ${formatDate(phc.since)}` : ''}. Records are kept encrypted on its devices and merged with the district when they sync.
+            {phc.since
+              ? t('A Primary Health Centre in the district network, on HealthSync since {date}.', { date: formatDate(phc.since) })
+              : t('A Primary Health Centre in the district network.')}{' '}
+            {t('Records are kept encrypted on its devices and merged with the district when they sync.')}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Stat value={phc.patientCount} label="patients registered" />
@@ -87,70 +91,70 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
             <Stat value={phc.openConflicts.length} label="doses under review" />
           </div>
           <p className="mt-4 text-[12px] text-[rgba(29,39,51,0.65)]">
-            Last sync <b className="text-[#1d2733]">{relativeTime(phc.lastSyncAt)}</b> · {phc.syncedThisWeek} changes this week
+            {t('Last sync')} <b className="text-[#1d2733]">{relativeTime(phc.lastSyncAt)}</b> · {t('{count} changes this week', { count: phc.syncedThisWeek })}
           </p>
         </>
       ),
     },
     {
-      kicker: 'Chapter 2 · People',
-      title: 'Staff',
+      kicker: t('Chapter 2 · People'),
+      title: t('Staff'),
       body: phc.staff.length ? (
         <ul className="divide-y divide-dashed divide-[rgba(29,39,51,0.2)]">
           {phc.staff.map((s) => (
             <li key={s.username} className="flex items-center gap-3 py-2.5">
               <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#2b3d55] text-[11px] font-bold text-[#f4efe3]">
-                {s.name.replace(/\(.*?\)/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')}
+                {tName(s.name).replace(/\(.*?\)/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold">{s.name}</span>
+                <span className="block truncate text-[13px] font-semibold">{tName(s.name)}</span>
                 <span className="block font-mono text-[11px] text-[rgba(29,39,51,0.6)]">{s.username}</span>
               </span>
-              <span className="rounded bg-[#e0663a] px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-wider text-[#fff8f0]">{ROLE_LABELS[s.role].toUpperCase()}</span>
+              <span className="font-mono text-[9px] font-bold tracking-wider text-[#423d35]">{t(ROLE_LABELS[s.role]).toUpperCase()}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-[13px] text-[rgba(29,39,51,0.6)]">No staff accounts yet.</p>
+        <p className="text-[13px] text-[rgba(29,39,51,0.6)]">{t('No staff accounts yet.')}</p>
       ),
     },
     {
-      kicker: 'Chapter 3 · Equipment',
-      title: 'Devices',
+      kicker: t('Chapter 3 · Equipment'),
+      title: t('Devices'),
       body: phc.devices.length ? (
         <ul className="space-y-2">
           {phc.devices.map((d) => (
             <li key={d.clientId} className="flex items-center gap-3 rounded-lg bg-[rgba(29,39,51,0.05)] px-3 py-2.5">
               <Icon name="device" className="h-4 w-4 text-[#2b3d55]" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold">{d.deviceName}</span>
+                <span className="block truncate text-[13px] font-semibold">{tName(d.deviceName)}</span>
                 <span className="block text-[11px] text-[rgba(29,39,51,0.6)]">
-                  {d.username} · synced {relativeTime(d.lastSyncAt)}
+                  {d.username} · {t('synced {when}', { when: relativeTime(d.lastSyncAt) })}
                 </span>
               </span>
               <span className={`flex items-center gap-1 text-[11px] font-semibold ${d.online ? 'text-[#2f7a5f]' : 'text-[rgba(29,39,51,0.5)]'}`}>
                 <span className={`h-2 w-2 rounded-full ${d.online ? 'bg-[#2f9a72]' : 'bg-[rgba(29,39,51,0.3)]'}`} />
-                {d.online ? 'Online' : 'Offline'}
+                {d.online ? t('Online') : t('Offline')}
               </span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-[13px] text-[rgba(29,39,51,0.6)]">No devices have synced yet.</p>
+        <p className="text-[13px] text-[rgba(29,39,51,0.6)]">{t('No devices have synced yet.')}</p>
       ),
     },
     {
-      kicker: 'Chapter 4 · Register',
-      title: 'Patients',
+      kicker: t('Chapter 4 · Register'),
+      title: t('Patients'),
       body: phc.recentPatients.length ? (
         <>
-          <p className="mb-2 text-[12px] text-[rgba(29,39,51,0.6)]">Most recently updated of {plural(phc.patientCount, 'patient')}</p>
+          <p className="mb-2 text-[12px] text-[rgba(29,39,51,0.6)]">{tp(phc.patientCount, 'Most recently updated of {count} patient', 'Most recently updated of {count} patients')}</p>
           <ul className="divide-y divide-dashed divide-[rgba(29,39,51,0.2)]">
             {phc.recentPatients.map((p) => (
               <li key={p.id}>
-                <Link to={`/patients/${p.id}`} className="flex items-center gap-2 py-2 text-[13px] font-semibold hover:text-[#c4542c]">
-                  <span className="flex-1 truncate">{p.name}</span>
-                  {p.needsReview && <span className="rounded bg-[#f6ddd3] px-1.5 text-[10px] font-bold text-[#8a2a1a]">REVIEW</span>}
+                <Link to={`/patients/${p.id}`} className="flex items-center gap-2 py-2 text-[13px] font-semibold hover:text-[#22665a]">
+                  <span className="flex-1 truncate">{tName(p.name)}</span>
+                  {p.needsReview && <span className="text-[10px] font-bold text-[#8a5a0b]">{t('REVIEW')}</span>}
                   <span className="text-[11px] font-normal text-[rgba(29,39,51,0.55)]">{relativeTime(p.updatedAt)}</span>
                 </Link>
               </li>
@@ -158,48 +162,48 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
           </ul>
         </>
       ) : (
-        <p className="text-[13px] text-[rgba(29,39,51,0.6)]">No patients registered from this PHC yet.</p>
+        <p className="text-[13px] text-[rgba(29,39,51,0.6)]">{t('No patients registered from this PHC yet.')}</p>
       ),
     },
     {
-      kicker: 'Chapter 5 · This week',
-      title: 'Sync activity',
+      kicker: t('Chapter 5 · This week'),
+      title: t('Sync activity'),
       body: (
         <>
-          <div className="flex h-32 items-end gap-2" role="img" aria-label={`Changes synced per day: ${phc.activity.map((a) => a.count).join(', ')}`}>
+          <div className="flex h-32 items-end gap-2" role="img" aria-label={`${t('Changes synced per day:')} ${phc.activity.map((a) => a.count).join(', ')}`}>
             {phc.activity.map((a) => (
               <div key={a.date} className="flex flex-1 flex-col items-center gap-1">
                 <span className="text-[10px] font-semibold tabular-nums text-[rgba(29,39,51,0.6)]">{a.count || ''}</span>
                 <span className="w-full rounded-t bg-[#2b3d55]" style={{ height: `${Math.max(3, (a.count / max) * 96)}px` }} />
                 <span className="font-mono text-[9px] text-[rgba(29,39,51,0.55)]">
-                  {new Date(`${a.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'narrow' })}
+                  {new Date(`${a.date}T00:00:00`).toLocaleDateString(dateLocale(), { weekday: 'narrow' })}
                 </span>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[12px] text-[rgba(29,39,51,0.65)]">{plural(phc.syncedThisWeek, 'change')} reached the district in the last 7 days.</p>
+          <p className="mt-3 text-[12px] text-[rgba(29,39,51,0.65)]">{tp(phc.syncedThisWeek, '{count} change reached the district in the last 7 days.', '{count} changes reached the district in the last 7 days.')}</p>
         </>
       ),
     },
     {
-      kicker: 'Chapter 6 · Attention',
-      title: 'Open conflicts',
+      kicker: t('Chapter 6 · Attention'),
+      title: t('Open conflicts'),
       body: phc.openConflicts.length ? (
         <>
           <ul className="space-y-2">
             {phc.openConflicts.map((c, i) => (
-              <li key={i} className="rounded-lg border border-[#e9b4a4] bg-[#f6ddd3] px-3 py-2 text-[13px]">
-                <b>{c.patientName}</b> · {c.label}
-                <span className="block text-[11px] text-[rgba(29,39,51,0.6)]">raised {relativeTime(c.createdAt)}</span>
+              <li key={i} className="rounded-lg border border-[#e6d3a3] bg-[#f8f0dc] px-3 py-2 text-[13px]">
+                <b>{tName(c.patientName)}</b> · {tName(c.label)}
+                <span className="block text-[11px] text-[rgba(29,39,51,0.6)]">{t('raised {when}', { when: relativeTime(c.createdAt) })}</span>
               </li>
             ))}
           </ul>
-          <Link to="/conflicts" className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-[#c4542c] hover:underline">
-            Open conflict review <Icon name="arrowRight" className="h-3.5 w-3.5" />
+          <Link to="/conflicts" className="mt-3 inline-flex items-center gap-1 text-[12px] font-semibold text-[#22665a] hover:underline">
+            {t('Open conflict review')} <Icon name="arrowRight" className="h-3.5 w-3.5" />
           </Link>
         </>
       ) : (
-        <p className="text-[13px] text-[rgba(29,39,51,0.65)]">Nothing waiting. Every dose from this PHC is settled.</p>
+        <p className="text-[13px] text-[rgba(29,39,51,0.65)]">{t('Nothing waiting. Every dose from this PHC is settled.')}</p>
       ),
     },
   ];
@@ -218,18 +222,20 @@ function Page({ n, side, kicker, title, children }: { n: number; side: 'left' | 
 }
 
 function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
-  const pages = useMemo(() => pagesFor(phc), [phc]);
+  // Rebuilt on every render so a language switch reaches the open book.
+  useI18n();
+  const pages = pagesFor(phc);
   // Leaves: the cover, then one leaf per pair of pages (front = right page, back = next left page).
-  const leaves = useMemo(() => {
+  const leaves = (() => {
     const out: { front: ReactNode; back: ReactNode }[] = [];
     out.push({
       front: <CoverArt phc={phc} />,
       back: (
         <div className="page left flex h-full flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(180deg,#efe7d6,#e4dac4)' }}>
           <span className="text-[#2b3d55]"><Emblem size={64} /></span>
-          <p className="mt-4 font-mono text-[10px] tracking-[2px] text-[rgba(29,39,51,0.6)]">THIS REGISTER BELONGS TO</p>
-          <p className="mt-1 text-xl font-extrabold tracking-tight text-[#1d2733]">{phc.name}</p>
-          <p className="mt-6 max-w-[16rem] text-[12px] leading-5 text-[rgba(29,39,51,0.6)]">Scroll or use the arrows to turn the page.</p>
+          <p className="mt-4 font-mono text-[10px] tracking-[2px] text-[rgba(29,39,51,0.6)]">{t('THIS REGISTER BELONGS TO')}</p>
+          <p className="mt-1 text-xl font-extrabold tracking-tight text-[#1d2733]">{tName(phc.name)}</p>
+          <p className="mt-6 max-w-[16rem] text-[12px] leading-5 text-[rgba(29,39,51,0.6)]">{t('Scroll or use the arrows to turn the page.')}</p>
         </div>
       ),
     });
@@ -252,7 +258,7 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
       });
     }
     return out;
-  }, [phc, pages]);
+  })();
 
   // turned = number of leaves flipped to the left (0 = closed book).
   const [turned, setTurned] = useState(0);
@@ -305,17 +311,17 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
     };
   }, [go, onClose]);
 
-  const spreadLabel = turned === 0 ? 'Cover' : turned === 1 ? 'Overview' : `Pages ${turned * 2 - 2}–${turned * 2 - 1}`;
+  const spreadLabel = turned === 0 ? t('Cover') : turned === 1 ? t('Overview') : t('Pages {from}–{to}', { from: turned * 2 - 2, to: turned * 2 - 1 });
 
   return createPortal(
-    <div className="book-stage" role="dialog" aria-modal="true" aria-label={`${phc.name} register`}>
+    <div className="book-stage" role="dialog" aria-modal="true" aria-label={t('{name} register', { name: tName(phc.name) })}>
       <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 px-4 py-4 sm:px-8">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] tracking-[2px] text-[#7a5a3a] dark:text-[#d9c7a8]">PHC REGISTER</p>
-          <p className="truncate text-lg font-extrabold tracking-tight text-[#1d2733] dark:text-[#f4efe3]">{phc.name}</p>
+          <p className="font-mono text-[10px] tracking-[2px] text-[#7a5a3a] dark:text-[#d9c7a8]">{t('PHC REGISTER')}</p>
+          <p className="truncate text-lg font-extrabold tracking-tight text-[#1d2733] dark:text-[#f4efe3]">{tName(phc.name)}</p>
         </div>
         <button type="button" onClick={onClose} className="btn bg-[#1d2733] text-[#f4efe3] hover:bg-[#2b3d55]" autoFocus>
-          <Icon name="x" className="h-4 w-4" /> Close
+          <Icon name="x" className="h-4 w-4" /> {t('Close')}
         </button>
       </div>
 
@@ -334,14 +340,14 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
                 className="leaf-face front turnable"
                 style={i === 0 ? { borderRadius: '3px 6px 6px 3px', boxShadow: '0 40px 60px -24px rgba(40,25,10,0.6)' } : undefined}
                 onClick={(e) => !(e.target as HTMLElement).closest('a,button') && go(1)}
-                title="Turn the page"
+                title={t('Turn the page')}
               >
                 {leaf.front}
               </div>
               <div
                 className="leaf-face back turnable"
                 onClick={(e) => !(e.target as HTMLElement).closest('a,button') && go(-1)}
-                title="Turn back"
+                title={t('Turn back')}
               >
                 {leaf.back}
               </div>
@@ -351,13 +357,13 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-3 px-4 py-5">
-        <button type="button" className="btn-icon bg-white/80 text-[#1d2733] shadow-card hover:bg-white" onClick={() => go(-1)} disabled={turned === 0} aria-label="Previous page">
+        <button type="button" className="btn-icon bg-white/80 text-[#1d2733] shadow-card hover:bg-white" onClick={() => go(-1)} disabled={turned === 0} aria-label={t('Previous page')}>
           <Icon name="chevronRight" className="h-5 w-5 rotate-180" />
         </button>
         <span className="min-w-[8rem] text-center font-mono text-[11px] tracking-[1.5px] text-[#4f3a26] dark:text-[#d9c7a8]" aria-live="polite">
           {spreadLabel.toUpperCase()}
         </span>
-        <button type="button" className="btn-icon bg-white/80 text-[#1d2733] shadow-card hover:bg-white" onClick={() => go(1)} disabled={turned === max} aria-label="Next page">
+        <button type="button" className="btn-icon bg-white/80 text-[#1d2733] shadow-card hover:bg-white" onClick={() => go(1)} disabled={turned === max} aria-label={t('Next page')}>
           <Icon name="chevronRight" className="h-5 w-5" />
         </button>
       </div>
@@ -370,6 +376,7 @@ export default function PhcLibrary() {
   const { connected } = useSyncEngine();
   const { data, loading, error, reload } = useApi<{ phcs: PhcSummary[] }>(connected ? '/phcs' : null, connected);
   const [open, setOpen] = useState<PhcSummary | null>(null);
+  const { lang } = useI18n();
   const phcs = useMemo(() => data?.phcs ?? [], [data]);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const phcsRef = useRef(phcs);
@@ -400,21 +407,21 @@ export default function PhcLibrary() {
 
   return (
     <div>
-      <PageHeader title="PHC library" subtitle="Every Primary Health Centre in the district, as a register on the shelf. Pick a book, then open its register." />
+      <PageHeader title={t('PHC library')} subtitle={t('Every Primary Health Centre in the district, as a register on the shelf. Pick a book, then open its register.')} />
 
       {!connected ? (
-        <OfflineNotice message="The PHC library is built from the district server. Connect to open it." />
+        <OfflineNotice message={t('The PHC library is built from the district server. Connect to open it.')} />
       ) : error ? (
-        <ErrorNotice message={`Could not load PHCs: ${error}`} onRetry={() => void reload()} />
+        <ErrorNotice message={`${t('Could not load PHCs:')} ${t(error)}`} onRetry={() => void reload()} />
       ) : loading && !data ? (
-        <div className="phc-shelf-frame skeleton" aria-busy="true" aria-label="Loading the shelf" />
+        <div className="phc-shelf-frame skeleton" aria-busy="true" aria-label={t('Loading the shelf')} />
       ) : phcs.length === 0 ? (
         <div className="card">
-          <EmptyState icon="clinic" title="No PHCs yet" message="PHCs appear here once a doctor signs up with a PHC name." />
+          <EmptyState icon="clinic" title={t('No PHCs yet')} message={t('PHCs appear here once a doctor signs up with a PHC name.')} />
         </div>
       ) : (
         <div className="phc-shelf-frame">
-          <iframe ref={frameRef} src="/bookshelf.html" title={`PHC library shelf: ${plural(phcs.length, 'PHC')}`} className="h-full w-full border-0" />
+          <iframe key={lang} ref={frameRef} src="/bookshelf.html" title={`${t('PHC library shelf')}: ${tp(phcs.length, '{count} PHC', '{count} PHCs')}`} className="h-full w-full border-0" />
         </div>
       )}
 

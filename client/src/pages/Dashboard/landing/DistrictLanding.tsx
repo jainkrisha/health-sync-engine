@@ -9,7 +9,9 @@ import { Link } from 'react-router-dom';
 import type { PhcSummary, StatsResponse } from '@shared/types';
 import { useApi } from '../../../hooks/useApi';
 import { useSyncEngine } from '../../../hooks/useSync';
+import { useI18n } from '../../../i18n/useI18n';
 import './districtLanding.css';
+import { tName } from '../../../i18n/names';
 
 const SCENES = [
   { src: '/landing/exterior.webp', pos: 'center 40%' },
@@ -46,6 +48,7 @@ function Words({ text, delay = 0 }: { text: string; delay?: number }) {
 
 export default function DistrictLanding({ stats }: { stats: StatsResponse | null }) {
   const { connected } = useSyncEngine();
+  const { t, locale } = useI18n();
   const phcsApi = useApi<{ phcs: PhcSummary[] }>(connected ? '/phcs' : null, connected);
   const phcs = useMemo(() => phcsApi.data?.phcs ?? [], [phcsApi.data]);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -121,10 +124,10 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
   };
 
   const chips = [
-    { id: 'dl-patients', n: '01', title: 'Patients', text: `${numbers.patients} registered across ${numbers.phcs} PHCs.` },
-    { id: 'dl-merges', n: '02', title: 'Merges', text: `${numbers.auto} edits merged without anyone stepping in.` },
-    { id: 'dl-reviews', n: '03', title: 'Reviews', text: `${numbers.pending} doses waiting for a clinician.` },
-    { id: 'dl-devices', n: '04', title: 'Devices', text: `${numbers.online} of ${numbers.devices} devices online now.` },
+    { id: 'dl-patients', n: '01', title: t('Patients'), text: t('{patients} registered across {phcs} PHCs.', { patients: numbers.patients, phcs: numbers.phcs }) },
+    { id: 'dl-merges', n: '02', title: t('Merges'), text: t('{count} edits merged without anyone stepping in.', { count: numbers.auto }) },
+    { id: 'dl-reviews', n: '03', title: t('Reviews'), text: t('{count} doses waiting for a clinician.', { count: numbers.pending }) },
+    { id: 'dl-devices', n: '04', title: t('Devices'), text: t('{online} of {devices} devices online now.', { online: numbers.online, devices: numbers.devices }) },
   ];
   const maxDay = Math.max(1, ...numbers.byDay.map((d) => d.synced + d.conflicts));
   const splitMax = Math.max(1, numbers.auto, numbers.manual, numbers.pending);
@@ -137,7 +140,7 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
     : 'M0,76 L300,76';
 
   return (
-    <div className="dl" ref={rootRef} aria-label="District overview">
+    <div className="dl" ref={rootRef} aria-label={t('District overview')}>
       {/* the scene: real photographs, one per chapter, crossfading and drifting */}
       <div className="dl-scene" aria-hidden="true">
         {SCENES.map((s, i) => (
@@ -155,10 +158,10 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
         <div className="dl-grain" />
       </div>
 
-      <nav className="dl-rail" aria-label="Chapters">
+      <nav className="dl-rail" aria-label={t('Chapters')}>
         <div className="dl-rail-in">
           {['dl-hero', ...chips.map((c) => c.id)].map((id, i) => (
-            <button key={id} type="button" className={chapter === i ? 'on' : ''} onClick={() => goTo(id)} aria-label={`Go to chapter ${i}`}>
+            <button key={id} type="button" className={chapter === i ? 'on' : ''} onClick={() => goTo(id)} aria-label={t('Go to chapter {n}', { n: i })}>
               <i />
             </button>
           ))}
@@ -169,29 +172,32 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
       <section className="dl-hero" id="dl-hero" data-scene>
         <div className="dl-hero-top">
           <div className="dl-eyebrow" data-rv="fade">
-            <span className="dl-dot" /> Chapter 00 — District overview
+            <span className="dl-dot" /> {t('Chapter 00 — District overview')}
           </div>
           <h1 className="dl-display dl-h-hero" data-rv="up">
-            <Words text="Every record," />
+            <Words text={t('Every record,')} />
             <br />
-            <Words text="every PHC," delay={160} />
+            <Words text={t('every PHC,')} delay={160} />
             <br />
-            <Words text="one district." delay={320} />
+            <Words text={t('one district.')} delay={320} />
           </h1>
           <p className="dl-body dl-hero-sub" data-rv="up">
-            {numbers.patients} patients, {numbers.phcs} primary health centres and {numbers.devices} devices, merged field by field. Nothing clinical is
-            guessed.
+            {t('{patients} patients, {phcs} primary health centres and {devices} devices, merged field by field. Nothing clinical is guessed.', {
+              patients: numbers.patients,
+              phcs: numbers.phcs,
+              devices: numbers.devices,
+            })}
           </p>
         </div>
         <div className="dl-hero-spacer" />
         <div className="dl-hero-foot">
           <div className="dl-cue" data-rv="fade">
-            <span>Scroll to enter</span>
+            <span>{t('Scroll to enter')}</span>
             <span className="dl-track">
               <i />
             </span>
             <button type="button" className="dl-skip" onClick={skip}>
-              Skip to dashboard
+              {t('Skip to dashboard')}
             </button>
           </div>
           <div className="dl-chapters">
@@ -209,8 +215,8 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
         <button type="button" className="dl-peek" data-rv="fade" onClick={() => goTo('dl-merges')}>
           <span className="dl-peek-fr" style={{ backgroundImage: 'url(/landing/ward.webp)' }} />
           <span className="dl-peek-cap">
-            <b>General ward</b>
-            <i>{numbers.weekSynced} changes this week</i>
+            <b>{t('General ward')}</b>
+            <i>{t('{count} changes this week', { count: numbers.weekSynced })}</i>
           </span>
         </button>
         <div className="dl-side" aria-hidden="true">
@@ -222,22 +228,24 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
       <section className="dl-sec" id="dl-patients" data-scene>
         <div className="dl-sec-head" data-rv="fade">
           <span className="dl-k">
-            <b>01</b> — Registered patients
+            <b>01</b> — {t('Registered patients')}
           </span>
           <span className="dl-rule" />
-          <span className="dl-k">Reception</span>
+          <span className="dl-k">{t('Reception')}</span>
         </div>
         <div className="dl-story">
           <h2 className="dl-display dl-h-sec" data-rv="up">
-            {numbers.phcs} health centres. One register.
+            {t('{count} health centres. One register.', { count: numbers.phcs })}
           </h2>
           <div className="dl-story-copy">
             <p className="dl-lead" data-rv="up">
-              Every visit starts on a PHC tablet, encrypted on the device, and reaches the district the moment a connection returns.
-              {numbers.busiest ? ` ${numbers.busiest.name} holds the largest register, with ${numbers.busiest.patientCount} patients.` : ''}
+              {t('Every visit starts on a PHC tablet, encrypted on the device, and reaches the district the moment a connection returns.')}
+              {numbers.busiest
+                ? ` ${t('{name} holds the largest register, with {count} patients.', { name: tName(numbers.busiest.name), count: numbers.busiest.patientCount })}`
+                : ''}
             </p>
             <Link className="dl-arrowlink" to="/phcs" data-rv="fade">
-              <span>Open the PHC library</span>
+              <span>{t('Open the PHC library')}</span>
               <span className="dl-ar">
                 <Arrow />
               </span>
@@ -247,19 +255,19 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
         <div className="dl-stats" data-rv="up">
           <div>
             <b>{pad2(numbers.patients)}</b>
-            <span>Patients</span>
+            <span>{t('Patients')}</span>
           </div>
           <div>
             <b>{pad2(numbers.phcs)}</b>
-            <span>PHCs</span>
+            <span>{t('PHCs')}</span>
           </div>
           <div>
             <b>{pad2(numbers.staff)}</b>
-            <span>PHC staff</span>
+            <span>{t('PHC staff')}</span>
           </div>
           <div>
             <b>{pad2(numbers.weekSynced)}</b>
-            <span>Changes · 7 days</span>
+            <span>{t('Changes · 7 days')}</span>
           </div>
         </div>
       </section>
@@ -268,24 +276,24 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
       <section className="dl-sec" id="dl-merges" data-scene>
         <div className="dl-sec-head" data-rv="fade">
           <span className="dl-k">
-            <b>02</b> — Merges
+            <b>02</b> — {t('Merges')}
           </span>
           <span className="dl-rule" />
-          <span className="dl-k">Wards</span>
+          <span className="dl-k">{t('Wards')}</span>
         </div>
         <div className="dl-mosaic">
           {/* 01 · how concurrent edits were settled, and the week's flow of changes */}
           <article className="dl-card dl-card-lead" data-rv="up">
             <div className="dl-panel">
               <div className="dl-panel-head">
-                <b>Merged automatically</b>
+                <b>{t('Merged automatically')}</b>
                 <span className="dl-card-big">{numbers.auto}</span>
               </div>
-              <div className="dl-split" role="img" aria-label={`Settled automatically ${numbers.auto}, by clinicians ${numbers.manual}, waiting ${numbers.pending}`}>
+              <div className="dl-split" role="img" aria-label={t('Settled automatically {auto}, by clinicians {manual}, waiting {pending}', { auto: numbers.auto, manual: numbers.manual, pending: numbers.pending })}>
                 {[
-                  { label: 'Automatic (CRDT rules)', value: numbers.auto, tone: 'sage' },
-                  { label: 'Decided by clinicians', value: numbers.manual, tone: 'navy' },
-                  { label: 'Waiting for review', value: numbers.pending, tone: 'orange' },
+                  { label: t('Automatic (CRDT rules)'), value: numbers.auto, tone: 'sage' },
+                  { label: t('Decided by clinicians'), value: numbers.manual, tone: 'navy' },
+                  { label: t('Waiting for review'), value: numbers.pending, tone: 'orange' },
                 ].map((r) => (
                   <div key={r.label} className="dl-split-row">
                     <span className="dl-split-label">{r.label}</span>
@@ -297,26 +305,26 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
                 ))}
               </div>
               <div className="dl-spark">
-                <span className="dl-k">Changes reaching the district · last 7 days</span>
+                <span className="dl-k">{t('Changes reaching the district · last 7 days')}</span>
                 <svg viewBox="0 0 300 80" preserveAspectRatio="none" aria-hidden="true">
                   <defs>
                     <linearGradient id="dl-spark-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stopColor="#e0663a" stopOpacity="0.45" />
-                      <stop offset="1" stopColor="#e0663a" stopOpacity="0" />
+                      <stop offset="0" stopColor="#5faf98" stopOpacity="0.45" />
+                      <stop offset="1" stopColor="#5faf98" stopOpacity="0" />
                     </linearGradient>
                   </defs>
                   <path d={`${sparkLine} L300,80 L0,80 Z`} fill="url(#dl-spark-fill)" />
-                  <path d={sparkLine} fill="none" stroke="#f0a063" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  <path d={sparkLine} fill="none" stroke="#8cc7b5" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                 </svg>
                 <div className="dl-spark-days">
                   {numbers.byDay.map((d) => (
-                    <span key={d.date}>{new Date(`${d.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'narrow' })}</span>
+                    <span key={d.date}>{new Date(`${d.date}T00:00:00`).toLocaleDateString(locale, { weekday: 'narrow' })}</span>
                   ))}
                 </div>
               </div>
             </div>
             <div className="dl-card-meta">
-              <span>Concurrent edits settled by the CRDT rules</span>
+              <span>{t('Concurrent edits settled by the CRDT rules')}</span>
               <span>01 / 03</span>
             </div>
           </article>
@@ -324,14 +332,14 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
           {/* 02 · resolution rate as a gauge */}
           <article className="dl-card" data-rv="up">
             <div className="dl-panel dl-panel-center">
-              <svg className="dl-gauge" viewBox="0 0 120 120" role="img" aria-label={`${numbers.rate}% resolved without a human`}>
+              <svg className="dl-gauge" viewBox="0 0 120 120" role="img" aria-label={t('{rate}% resolved without a human', { rate: numbers.rate })}>
                 <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(236,231,218,0.12)" strokeWidth="10" />
                 <circle
                   cx="60"
                   cy="60"
                   r="50"
                   fill="none"
-                  stroke="#e0663a"
+                  stroke="#5faf98"
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray={`${(numbers.rate / 100) * 314.16} 314.16`}
@@ -342,14 +350,14 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
                 </text>
               </svg>
               <div className="dl-panel-foot">
-                <b>Resolution rate</b>
+                <b>{t('Resolution rate')}</b>
                 <span>
-                  {numbers.auto} of {numbers.auto + numbers.manual + numbers.pending} concurrent edits
+                  {t('{auto} of {total} concurrent edits', { auto: numbers.auto, total: numbers.auto + numbers.manual + numbers.pending })}
                 </span>
               </div>
             </div>
             <div className="dl-card-meta">
-              <span>Resolved without a human</span>
+              <span>{t('Resolved without a human')}</span>
               <span>02 / 03</span>
             </div>
           </article>
@@ -358,20 +366,20 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
           <article className="dl-card" data-rv="up">
             <div className="dl-panel">
               <div className="dl-panel-head">
-                <b>Sent to review</b>
+                <b>{t('Sent to review')}</b>
                 <span className="dl-card-big">{numbers.weekReview}</span>
               </div>
-              <div className="dl-cols" role="img" aria-label={`Dose clashes per day: ${numbers.byDay.map((d) => d.conflicts).join(', ')}`}>
+              <div className="dl-cols" role="img" aria-label={`${t('Dose clashes per day:')} ${numbers.byDay.map((d) => d.conflicts).join(', ')}`}>
                 {numbers.byDay.map((d) => (
                   <span key={d.date} className="dl-col">
                     <i style={{ height: `${Math.max(3, (d.conflicts / reviewMax) * 100)}%` }} />
-                    <em>{new Date(`${d.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'narrow' })}</em>
+                    <em>{new Date(`${d.date}T00:00:00`).toLocaleDateString(locale, { weekday: 'narrow' })}</em>
                   </span>
                 ))}
               </div>
             </div>
             <div className="dl-card-meta">
-              <span>Dose clashes this week</span>
+              <span>{t('Dose clashes this week')}</span>
               <span>03 / 03</span>
             </div>
           </article>
@@ -382,56 +390,55 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
       <section className="dl-sec" id="dl-reviews" data-scene>
         <div className="dl-sec-head" data-rv="fade">
           <span className="dl-k">
-            <b>03</b> — Clinical review
+            <b>03</b> — {t('Clinical review')}
           </span>
           <span className="dl-rule" />
-          <span className="dl-k">Theatre</span>
+          <span className="dl-k">{t('Theatre')}</span>
         </div>
         <div className="dl-cur-head">
           <h2 className="dl-display dl-h-sec" data-rv="up">
-            Doses are never guessed.
+            {t('Doses are never guessed.')}
           </h2>
           <p className="dl-body-lg" data-rv="up">
-            When two devices change the same medication while offline, the case waits here for a clinician. Every decision lands in the
-            append-only audit trail.
+            {t('When two devices change the same medication while offline, the case waits here for a clinician. Every decision lands in the append-only audit trail.')}
           </p>
         </div>
         <div className="dl-atlas">
           <Link to="/conflicts" className="dl-plate" data-rv="up">
             <span className="dl-k">01</span>
-            <h3>Awaiting review</h3>
+            <h3>{t('Awaiting review')}</h3>
             <p className="dl-plate-num">{numbers.pending}</p>
-            <span className="dl-t">Open conflict review →</span>
+            <span className="dl-t">{t('Open conflict review')} →</span>
           </Link>
           <div className="dl-plate" data-rv="up">
             <span className="dl-k">02</span>
-            <h3>Resolved by clinicians</h3>
+            <h3>{t('Resolved by clinicians')}</h3>
             <p className="dl-plate-num">{numbers.resolved}</p>
-            <span className="dl-t">{numbers.manual} manual decisions</span>
+            <span className="dl-t">{t('{count} manual decisions', { count: numbers.manual })}</span>
           </div>
           <div className="dl-plate" data-rv="up">
             <span className="dl-k">03</span>
-            <h3>Automatic</h3>
+            <h3>{t('Automatic')}</h3>
             <p className="dl-plate-num">{numbers.auto}</p>
             <span className="dl-t">LWW · OR-Set · G-Set</span>
           </div>
           <div className="dl-plate" data-rv="up">
             <span className="dl-k">04</span>
-            <h3>Auto-resolution</h3>
+            <h3>{t('Auto-resolution')}</h3>
             <p className="dl-plate-num">{numbers.rate}%</p>
-            <span className="dl-t">of concurrent edits</span>
+            <span className="dl-t">{t('of concurrent edits')}</span>
           </div>
           <div className="dl-plate dl-plate-chart" data-rv="up">
             <span className="dl-k">05</span>
-            <h3>Last 7 days</h3>
-            <div className="dl-bars" role="img" aria-label={`Changes per day: ${numbers.byDay.map((d) => d.synced + d.conflicts).join(', ')}`}>
+            <h3>{t('Last 7 days')}</h3>
+            <div className="dl-bars" role="img" aria-label={`${t('Changes per day:')} ${numbers.byDay.map((d) => d.synced + d.conflicts).join(', ')}`}>
               {numbers.byDay.map((d) => (
                 <span key={d.date} style={{ height: `${Math.max(4, ((d.synced + d.conflicts) / maxDay) * 100)}%` }}>
                   {d.conflicts > 0 && <i style={{ height: `${(d.conflicts / (d.synced + d.conflicts)) * 100}%` }} />}
                 </span>
               ))}
             </div>
-            <span className="dl-t">Synced · sent to review</span>
+            <span className="dl-t">{t('Synced · sent to review')}</span>
           </div>
         </div>
       </section>
@@ -439,27 +446,27 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
       {/* ── 04 · devices / close ─────────────────────────────────────────── */}
       <section className="dl-sec dl-fin" id="dl-devices" data-scene>
         <div className="dl-eyebrow" data-rv="fade">
-          Chapter 04 — Devices
+          {t('Chapter 04 — Devices')}
         </div>
         <h2 className="dl-display" data-rv="up">
-          {numbers.devices} devices
+          {t('{count} devices', { count: numbers.devices })}
         </h2>
         <p className="dl-body-lg" data-rv="up">
-          {numbers.online} of them are online right now. Every PHC device keeps working offline and catches up with the district the moment it can.
+          {t('{count} of them are online right now. Every PHC device keeps working offline and catches up with the district the moment it can.', { count: numbers.online })}
         </p>
         <div className="dl-ctas" data-rv="fade">
           <Link className="dl-cta" to="/admin">
             <i />
-            <span>Users &amp; devices</span>
+            <span>{t('Users & devices')}</span>
             <Arrow />
           </Link>
           <button type="button" className="dl-cta" onClick={skip}>
             <i />
-            <span>Go to the dashboard</span>
+            <span>{t('Go to the dashboard')}</span>
             <Arrow />
           </button>
         </div>
-        <p className="dl-credit">Photographs: Unsplash (National Cancer Institute, Fabio Sasso, Adhy Savala, Alexander Mass).</p>
+        <p className="dl-credit">{t('Photographs')}: Unsplash (National Cancer Institute, Fabio Sasso, Adhy Savala, Alexander Mass).</p>
       </section>
     </div>
   );

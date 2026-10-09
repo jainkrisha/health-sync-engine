@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { syncEngine } from '../sync/syncEngine';
 import { getSession, onSessionChange } from '../lib/authStore';
+import { t } from '../i18n/i18n';
 import './BootLoader.css';
 
 const TICKS = 56;
@@ -179,13 +180,15 @@ function LoaderRun({ onDone }: { onDone: () => void }) {
         lastShown = shown;
       }
       const signedIn = Boolean(getSession());
-      const text = !signedIn
-        ? shown >= 100
-          ? 'DEVICE READY'
-          : 'PREPARING THIS DEVICE'
-        : shown >= 100
-          ? STAGE_TEXT[st === 'offline' ? 'offline' : 'done']
-          : STAGE_TEXT[st === 'done' || st === 'offline' ? 'syncing' : st];
+      const text = t(
+        !signedIn
+          ? shown >= 100
+            ? 'DEVICE READY'
+            : 'PREPARING THIS DEVICE'
+          : shown >= 100
+            ? STAGE_TEXT[st === 'offline' ? 'offline' : 'done']
+            : STAGE_TEXT[st === 'done' || st === 'offline' ? 'syncing' : st],
+      );
       if (text !== lastText && statusRef.current) {
         statusRef.current.textContent = text;
         lastText = text;
@@ -258,7 +261,7 @@ function LoaderRun({ onDone }: { onDone: () => void }) {
       ref={rootRef}
       className={`hs-loader ${visible ? '' : 'is-done'}`}
       role="progressbar"
-      aria-label="Loading HealthSync"
+      aria-label={t('Loading HealthSync')}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-busy={visible}
@@ -267,17 +270,17 @@ function LoaderRun({ onDone }: { onDone: () => void }) {
       <div className="scene">
         <div className="stage">
           <div className="brand">
-            <img src="/favicon.svg" alt="" />
+            <img src="/logo.svg" alt="" />
             HealthSync
           </div>
           <div className="haze"><i ref={hazeRef} /></div>
           <div className="plate" ref={plateRef} />
           <div className="brk tr" /><div className="brk bl" />
           <div className="readout"><b ref={numRef}>0</b><u>%</u></div>
-          <div className="barlabel">SYNC</div>
+          <div className="barlabel">{t('SYNC')}</div>
           <div className="bar" ref={barRef} />
           <div className="status" aria-live="polite">
-            <span ref={statusRef}>{STAGE_TEXT.store}</span>
+            <span ref={statusRef}>{t(STAGE_TEXT.store)}</span>
             <span className="dots" ref={dotsRef}>...</span>
           </div>
           {marker('m-tl')}{marker('m-tr')}{marker('m-bl')}{marker('m-br')}

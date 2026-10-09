@@ -19,6 +19,7 @@ import {
   type ReactNode,
 } from 'react'
 import { Icon, type IconName } from './Icon'
+import { useI18n } from '../i18n/useI18n'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
+  const { t: translate } = useI18n()
   const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const dismiss = useCallback((id: string) => {
@@ -77,7 +79,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {/* Toast stack — bottom centre on phones (above the tab bar), bottom-right on larger screens */}
       <div
         aria-live="polite"
-        aria-label="Notifications"
+        aria-label={translate('Notifications')}
         className="pointer-events-none fixed inset-x-4 bottom-20 z-toast flex flex-col items-center gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:items-end lg:bottom-6"
       >
         {toasts.map(t => (
@@ -98,6 +100,7 @@ function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: strin
     info: { bar: 'bg-medical-500', icon: 'text-medical-600 dark:text-medical-400', name: 'info' },
   }
   const s = styles[item.type]
+  const { t: translate } = useI18n()
 
   return (
     <div
@@ -111,7 +114,7 @@ function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: strin
       <span className="flex-1 py-0.5 font-medium leading-5">{item.message}</span>
       <button
         onClick={() => onDismiss(item.id)}
-        aria-label="Dismiss notification"
+        aria-label={translate('Dismiss notification')}
         className="btn-icon -my-1 h-8 w-8 flex-shrink-0"
       >
         <Icon name="x" className="h-4 w-4" />

@@ -17,6 +17,8 @@ import {
   PageHeader,
   SkeletonRows,
 } from '../../components/ui';
+import { useI18n } from '../../i18n/useI18n';
+import { tName } from '../../i18n/names';
 
 type TypeFilter = 'all' | 'automatic' | 'manual';
 type View = 'graph' | 'list';
@@ -30,6 +32,7 @@ export default function AuditTrail() {
   const [type, setType] = useState<TypeFilter>('all');
   const [concurrentOnly, setConcurrentOnly] = useState(false);
   const [view, setView] = useState<View>('graph');
+  const { t, tp } = useI18n();
 
   // The graph is drawn per patient, from the server's own list (a device copy can
   // be out of date); it starts with the most contested record.
@@ -88,11 +91,11 @@ export default function AuditTrail() {
   return (
     <div>
       <PageHeader
-        title="Audit trail"
+        title={t('Audit trail')}
         subtitle={
           <span className="flex items-start gap-1.5">
-            <Icon name="lock" className="mt-1 h-3.5 w-3.5 flex-shrink-0" /> Append-only record of
-            how every change was merged. Entries cannot be edited or deleted.
+            <Icon name="lock" className="mt-1 h-3.5 w-3.5 flex-shrink-0" />{' '}
+            {t('Append-only record of how every change was merged. Entries cannot be edited or deleted.')}
           </span>
         }
       />
@@ -101,7 +104,7 @@ export default function AuditTrail() {
         <div
           className="inline-flex rounded-full border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900"
           role="tablist"
-          aria-label="Audit view"
+          aria-label={t('Audit view')}
         >
           {(
             [
@@ -121,14 +124,14 @@ export default function AuditTrail() {
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
               }`}
             >
-              <Icon name={icon} className="h-4 w-4" /> {label}
+              <Icon name={icon} className="h-4 w-4" /> {t(label)}
             </button>
           ))}
         </div>
         {view === 'graph' && (
           <div className="flex min-w-[220px] flex-1 items-center gap-2 sm:flex-none">
             <label htmlFor="graph-patient" className="text-sm text-slate-500 dark:text-slate-400">
-              Patient
+              {t('Patient')}
             </label>
             <select
               id="graph-patient"
@@ -138,7 +141,7 @@ export default function AuditTrail() {
             >
               {graphPatients.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {`${p.name} · ${p.commits} edit${p.commits === 1 ? '' : 's'} from ${p.devices} tablet${p.devices === 1 ? '' : 's'}${p.openConflicts ? ' · conflict open' : ''}`}
+                  {`${tName(p.name)} · ${tp(p.commits, '{count} edit', '{count} edits')} ${tp(p.devices, 'from {count} tablet', 'from {count} tablets')}${p.openConflicts ? ` · ${t('conflict open')}` : ''}`}
                 </option>
               ))}
             </select>
@@ -148,18 +151,18 @@ export default function AuditTrail() {
 
       {view === 'graph' ? (
         !connected ? (
-          <OfflineNotice message="The audit trail lives on the server. Connect to view it." />
+          <OfflineNotice message={t('The audit trail lives on the server. Connect to view it.')} />
         ) : graphList.error || history.error ? (
           <ErrorNotice
-            message={`Could not load the history: ${graphList.error ?? history.error}`}
+            message={`${t('Could not load the history:')} ${t(graphList.error ?? history.error ?? '')}`}
           />
         ) : graphList.data && graphPatients.length === 0 ? (
           <div className="card">
             <EmptyState
               icon="git"
               tone="slate"
-              title="No synced edits yet"
-              message="Patient edits appear here once a tablet syncs them."
+              title={t('No synced edits yet')}
+              message={t('Patient edits appear here once a tablet syncs them.')}
             />
           </div>
         ) : !history.data || history.loading ? (
@@ -169,8 +172,8 @@ export default function AuditTrail() {
             <EmptyState
               icon="git"
               tone="slate"
-              title="No synced edits yet"
-              message="This patient's edits appear here once a tablet syncs them."
+              title={t('No synced edits yet')}
+              message={t("This patient's edits appear here once a tablet syncs them.")}
             />
           </div>
         ) : (
@@ -188,7 +191,7 @@ export default function AuditTrail() {
             onClick={() => setFiltersOpen((o) => !o)}
           >
             <span className="inline-flex items-center gap-2">
-              <Icon name="list" className="h-4 w-4" /> Filters
+              <Icon name="list" className="h-4 w-4" /> {t('Filters')}
               {activeFilters > 0 && (
                 <span className="rounded-full bg-teal-600 px-1.5 text-[11px] font-bold tabular-nums text-white">
                   {activeFilters}
@@ -207,7 +210,7 @@ export default function AuditTrail() {
           >
             <div className="lg:col-span-2">
               <label htmlFor="audit-patient" className="form-label">
-                Patient
+                {t('Patient')}
               </label>
               <select
                 id="audit-patient"
@@ -215,17 +218,17 @@ export default function AuditTrail() {
                 value={patientId}
                 onChange={(e) => setPatientId(e.target.value)}
               >
-                <option value="">All patients</option>
+                <option value="">{t('All patients')}</option>
                 {patients.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {tName(p.name)}
                   </option>
                 ))}
               </select>
             </div>
             <div>
               <label htmlFor="audit-from" className="form-label">
-                From
+                {t('From')}
               </label>
               <input
                 id="audit-from"
@@ -237,7 +240,7 @@ export default function AuditTrail() {
             </div>
             <div>
               <label htmlFor="audit-to" className="form-label">
-                To
+                {t('To')}
               </label>
               <input
                 id="audit-to"
@@ -250,7 +253,7 @@ export default function AuditTrail() {
             </div>
             <div>
               <label htmlFor="audit-type" className="form-label">
-                Resolution
+                {t('Resolution')}
               </label>
               <select
                 id="audit-type"
@@ -258,9 +261,9 @@ export default function AuditTrail() {
                 value={type}
                 onChange={(e) => setType(e.target.value as TypeFilter)}
               >
-                <option value="all">All</option>
-                <option value="automatic">Automatic (CRDT rules)</option>
-                <option value="manual">Manual review</option>
+                <option value="all">{t('All')}</option>
+                <option value="automatic">{t('Automatic (CRDT rules)')}</option>
+                <option value="manual">{t('Manual review')}</option>
               </select>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 md:col-span-2 lg:col-span-5">
@@ -271,36 +274,36 @@ export default function AuditTrail() {
                   checked={concurrentOnly}
                   onChange={(e) => setConcurrentOnly(e.target.checked)}
                 />
-                Only concurrent edits (real merges)
+                {t('Only concurrent edits (real merges)')}
               </label>
               <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                 <span className="tabular-nums">
-                  {entries.length} entries · {counts.automatic} automatic · {counts.manual} manual
+                  {t('{entries} entries · {auto} automatic · {manual} manual', { entries: entries.length, auto: counts.automatic, manual: counts.manual })}
                 </span>
                 <button className="btn-ghost btn-sm" onClick={clear} disabled={activeFilters === 0}>
-                  <Icon name="x" className="h-3.5 w-3.5" /> Clear filters
+                  <Icon name="x" className="h-3.5 w-3.5" /> {t('Clear filters')}
                 </button>
               </div>
             </div>
           </div>
 
           {!connected ? (
-            <OfflineNotice message="The audit trail lives on the server. Connect to view it." />
+            <OfflineNotice message={t('The audit trail lives on the server. Connect to view it.')} />
           ) : loading && !data ? (
             <SkeletonRows rows={4} />
           ) : error ? (
-            <ErrorNotice message={`Could not load the audit trail: ${error}`} />
+            <ErrorNotice message={`${t('Could not load the audit trail:')} ${t(error)}`} />
           ) : entries.length === 0 ? (
             <div className="card">
               <EmptyState
                 icon="shield"
                 tone="slate"
-                title="No audit entries match"
-                message="Try widening the filters."
+                title={t('No audit entries match')}
+                message={t('Try widening the filters.')}
                 action={
                   activeFilters > 0 && (
                     <button type="button" className="btn-secondary" onClick={clear}>
-                      Clear filters
+                      {t('Clear filters')}
                     </button>
                   )
                 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { t } from '../i18n/i18n';
 
 export interface TagInputProps {
   value: string[];
@@ -15,8 +16,8 @@ export const TagInput: React.FC<TagInputProps> = ({
   value = [],
   onChange,
   label,
-  placeholder = 'Type tag and press Enter...',
-  emptyMessage = 'No items listed.',
+  placeholder = t('Type tag and press Enter...'),
+  emptyMessage = t('No items listed.'),
   error,
   helperText,
   containerClassName = '',
@@ -96,7 +97,7 @@ export const TagInput: React.FC<TagInputProps> = ({
                 type="button"
                 onClick={() => handleRemoveTag(idx)}
                 className="hover:bg-rose-200/60 rounded-full p-0.5 text-rose-600 transition-colors"
-                aria-label={`Remove tag ${tag}`}
+                aria-label={t('Remove {tag}', { tag })}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -118,7 +119,7 @@ export const TagInput: React.FC<TagInputProps> = ({
               clipRule="evenodd"
             />
           </svg>
-          <span>{error}</span>
+          <span>{t(error)}</span>
         </p>
       ) : helperText ? (
         <p className="text-xs text-slate-500">{helperText}</p>

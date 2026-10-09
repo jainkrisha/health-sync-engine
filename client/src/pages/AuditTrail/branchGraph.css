@@ -6,7 +6,8 @@
   --bg-muted: #7a7263;
   --bg-line: #e2dbcc;
   --bg-soft: #f7f4ee;
-  --bg-ember: #e0663a;
+  --bg-ember: #a87714;
+  --bg-link: #2f5f94;
 }
 .dark .bg-wrap {
   --bg-surface: #1b1814;
@@ -15,6 +16,8 @@
   --bg-muted: #a39a89;
   --bg-line: #2a2620;
   --bg-soft: #221f1a;
+  --bg-ember: #e6b95e;
+  --bg-link: #9db9dc;
 }
 
 .bg-legend {
@@ -29,10 +32,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px 6px 10px;
-  border: 1px solid var(--bg-line);
-  border-radius: 999px;
-  background: var(--bg-soft);
+  padding: 4px 6px;
   font-size: 12px;
   color: var(--bg-ink);
 }
@@ -41,7 +41,6 @@
   height: 10px;
   border-radius: 50%;
   background: var(--lane);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane) 22%, transparent);
 }
 .bg-legend-name {
   display: inline-flex;
@@ -149,12 +148,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 1px 8px;
-  border-radius: 999px;
   font-weight: 600;
   color: var(--lane);
-  background: color-mix(in srgb, var(--lane) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--lane) 35%, transparent);
 }
 .dark .bg-branch {
   color: color-mix(in srgb, var(--lane) 70%, white);
@@ -176,14 +171,12 @@
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12.5px;
-  color: #7d3520;
-  background: #fdf3ee;
-  border: 1px solid #f5c3ab;
+  color: var(--bg-ink);
+  background: var(--bg-soft);
+  border: 1px solid var(--bg-line);
 }
-.dark .bg-clash {
-  color: #f5c3ab;
-  background: rgba(224, 102, 58, 0.12);
-  border-color: rgba(224, 102, 58, 0.35);
+.bg-clash > svg {
+  color: var(--bg-ember);
 }
 .bg-clash .h-3\.5 {
   margin-top: 2px;
@@ -196,7 +189,7 @@
   background: none;
   font: inherit;
   font-weight: 600;
-  color: var(--bg-ember);
+  color: var(--bg-link);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -218,6 +211,19 @@
 .bg-row-pending .bg-merge {
   border: 1.5px dashed var(--bg-ember);
   background: color-mix(in srgb, var(--bg-ember) 5%, var(--bg-surface));
+}
+/* In dark mode a pending merge uses the navy conflict card. */
+.dark .bg-row-pending .bg-merge {
+  border: 1px solid #4f6378;
+  background: linear-gradient(180deg, #2b3d55, #1d2733);
+  box-shadow: none;
+}
+.dark .bg-row-pending .bg-merge-foot {
+  color: #c9d6e6;
+}
+.dark .bg-row-pending .bg-side {
+  background: var(--bg-surface);
+  border-color: var(--bg-line);
 }
 .bg-merge-head {
   display: flex;
@@ -292,7 +298,7 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--bg-surface);
   background: var(--bg-ember);
   box-shadow: 0 0 0 4px var(--bg-surface);
 }
