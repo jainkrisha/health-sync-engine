@@ -7,6 +7,7 @@ import { usePermissions } from '../../context/RBAC';
 import { Icon } from '../../components/Icon';
 import { EmptyState, ErrorNotice, PageHeader, SkeletonRows, ageFrom, initials, relativeTime } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
+import { tName } from '../../i18n/names';
 
 type Filter = 'all' | 'conflicts' | 'pending' | 'allergies';
 
@@ -232,9 +233,9 @@ export default function PatientList() {
                   >
                     <td className="table-cell">
                       <Link to={`/patients/${p.id}`} className="flex items-center gap-3 font-semibold text-slate-900 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">
-                        <Avatar name={p.name} />
+                        <Avatar name={tName(p.name)} />
                         <span>
-                          <span className="block">{p.name}</span>
+                          <span className="block">{tName(p.name)}</span>
                           <span className="block text-xs font-normal text-slate-500 dark:text-slate-400">
                             {[ageFrom(p.dateOfBirth), p.gender !== 'unknown' ? t(p.gender) : ''].filter(Boolean).join(' · ') || '—'}
                           </span>
@@ -246,7 +247,7 @@ export default function PatientList() {
                       <span className="font-mono text-[13px] font-semibold text-slate-700 dark:text-slate-200">{t(p.bloodType)}</span>
                     </td>
                     <td className="table-cell max-w-[16rem]">
-                      {p.allergies.length ? <span className="line-clamp-2">{p.allergies.map((a) => a.allergen).join(', ')}</span> : <span className="text-slate-400">{t('None')}</span>}
+                      {p.allergies.length ? <span className="line-clamp-2">{p.allergies.map((a) => tName(a.allergen)).join(', ')}</span> : <span className="text-slate-400">{t('None')}</span>}
                     </td>
                     <td className="table-cell tabular-nums">{p.medications.length || <span className="text-slate-400">0</span>}</td>
                     <td className="table-cell whitespace-nowrap text-slate-500">{relativeTime(p.updatedAt)}</td>
@@ -254,7 +255,7 @@ export default function PatientList() {
                       <div className="flex justify-end gap-1 opacity-70 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                         <Link to={`/patients/${p.id}`} className="btn-ghost btn-sm">{t('View')}</Link>
                         {canEditPatients && (
-                          <Link to={`/patients/${p.id}/edit`} className="btn-ghost btn-sm" aria-label={t('Edit {name}', { name: p.name })}>
+                          <Link to={`/patients/${p.id}/edit`} className="btn-ghost btn-sm" aria-label={t('Edit {name}', { name: tName(p.name) })}>
                             <Icon name="edit" className="h-3.5 w-3.5" /> {t('Edit')}
                           </Link>
                         )}
@@ -272,9 +273,9 @@ export default function PatientList() {
               <li key={p.id}>
                 <Link to={`/patients/${p.id}`} className="card card-interactive block p-4 sm:p-4">
                   <div className="flex items-center gap-3">
-                    <Avatar name={p.name} size="lg" />
+                    <Avatar name={tName(p.name)} size="lg" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-slate-900 dark:text-white">{p.name}</p>
+                      <p className="truncate font-semibold text-slate-900 dark:text-white">{tName(p.name)}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         {t(p.bloodType)} · {tp(p.allergies.length, '{count} allergy', '{count} allergies')} · {tp(p.medications.length, '{count} med', '{count} meds')} · {relativeTime(p.updatedAt)}
                       </p>

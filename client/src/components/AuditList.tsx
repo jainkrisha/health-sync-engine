@@ -4,6 +4,7 @@ import { formatDateTime, shortId } from './ui';
 import { OUTCOME_LABEL, OUTCOME_STYLE, RULE_LABEL } from './auditLabels';
 import { useI18n } from '../i18n/useI18n';
 import { translateReport } from '../i18n/reports';
+import { tName } from '../i18n/names';
 
 export function AuditList({
   entries,
@@ -35,7 +36,7 @@ export function AuditList({
             </time>
             {showPatient && (
               <span className="font-semibold text-slate-800 dark:text-slate-100">
-                {e.patientName || t('Unnamed patient')}
+                {tName(e.patientName) || t('Unnamed patient')}
               </span>
             )}
             <span className="badge-slate">{t(FIELD_LABELS[e.field] ?? e.field)}</span>
@@ -48,7 +49,7 @@ export function AuditList({
           <p className="mt-1.5 text-sm leading-6 text-slate-800 dark:text-slate-200">{translateReport(e.report)}</p>
           <p className="mt-0.5 text-xs text-slate-400">
             {e.resolutionType === 'manual'
-              ? t('Manual review by {name}', { name: e.resolvedByName ?? t('reviewer') })
+              ? t('Manual review by {name}', { name: tName(e.resolvedByName) ?? t('reviewer') })
               : `${t('Automatic')}${e.clientId ? ` · ${t('from device {id}', { id: shortId(e.clientId) })}` : ''}`}
           </p>
         </li>

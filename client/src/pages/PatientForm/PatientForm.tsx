@@ -9,6 +9,7 @@ import { PageHeader, SectionHeading, Spinner } from '../../components/ui';
 import { todayLocal } from '@shared/text';
 import { normaliseKey } from '@shared/mergeEngine';
 import { useI18n } from '../../i18n/useI18n';
+import { tName } from '../../i18n/names';
 
 export interface PatientFormProps {
   mode?: 'add' | 'edit';
@@ -56,8 +57,8 @@ export function PatientForm({ mode }: PatientFormProps) {
   return (
     <div className="pb-12">
       <PageHeader
-        back={isEditMode && patient ? { to: `/patients/${patient.id}`, label: patient.name } : { to: '/patients', label: t('Patients') }}
-        title={isEditMode ? t('Edit {name}', { name: patient?.name ?? t('patient') }) : t('Add new patient')}
+        back={isEditMode && patient ? { to: `/patients/${patient.id}`, label: tName(patient.name) } : { to: '/patients', label: t('Patients') }}
+        title={isEditMode ? t('Edit {name}', { name: tName(patient?.name) || t('patient') }) : t('Add new patient')}
         subtitle={
           isEditMode
             ? t('Only the fields you change are synced, so edits made on other devices are kept.')

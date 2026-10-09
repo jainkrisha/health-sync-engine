@@ -11,6 +11,7 @@ import { useI18n } from '../../i18n/useI18n';
 import { t } from '../../i18n/i18n';
 import { tValue } from '../../i18n/clinical';
 import './caseWave.css';
+import { tName } from '../../i18n/names';
 
 const CARD_COLORS = ['#2b3d55', '#34485f', '#3c5f50', '#2f4257', '#3a4b5e', '#283a4f', '#423d35', '#31455a'];
 const STEP_COOLDOWN_MS = 320; // one case per scroll gesture, never a blur
@@ -252,12 +253,12 @@ export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Con
               type="button"
               className="case-wave-card"
               style={{ ['--card-color' as string]: CARD_COLORS[i % CARD_COLORS.length] }}
-              aria-label={`${c.status === 'pending_review' ? t('Review') : t('Settled')}: ${c.patientName}, ${c.label}, ${dose(c, 'current')} ${t('vs')} ${dose(c, 'incoming')}`}
+              aria-label={`${c.status === 'pending_review' ? t('Review') : t('Settled')}: ${tName(c.patientName)}, ${tName(c.label)}, ${dose(c, 'current')} ${t('vs')} ${dose(c, 'incoming')}`}
               tabIndex={echo ? -1 : 0}
             >
               <span className="case-wave-face">
                 <span className="case-wave-chip">{c.status === 'pending_review' ? t('Review') : t('Settled')}</span>
-                <span className="case-wave-initials">{initialsOf(c.patientName)}</span>
+                <span className="case-wave-initials">{initialsOf(tName(c.patientName))}</span>
                 <span className="case-wave-dose">
                   <b>{dose(c, 'current')}</b>
                   <i>{t('vs')}</i>
@@ -265,9 +266,9 @@ export function CaseWave({ cases, onOpen }: { cases: Conflict[]; onOpen: (c: Con
                 </span>
               </span>
               <span className="case-wave-identity">
-                <span className="case-wave-name">{c.patientName}</span>
+                <span className="case-wave-name">{tName(c.patientName)}</span>
                 <span className="case-wave-role">
-                  {c.label} · {relativeTime(c.createdAt)}
+                  {tName(c.label)} · {relativeTime(c.createdAt)}
                 </span>
                 <span className="case-wave-open" aria-hidden="true">{t('Open case')}</span>
               </span>

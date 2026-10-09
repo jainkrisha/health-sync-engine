@@ -9,6 +9,7 @@ import { ErrorNotice, OfflineNotice, PageHeader, RoleBadge, SectionHeading, Skel
 import { Icon } from '../../components/Icon';
 import { useI18n } from '../../i18n/useI18n';
 import { tFacility } from '../../i18n/i18n';
+import { tName } from '../../i18n/names';
 
 export default function Admin() {
   const { connected } = useSyncEngine();
@@ -24,7 +25,7 @@ export default function Admin() {
     try {
       const res = await api<{ user: PublicUser }>(`/users/${u.id}/role`, { method: 'PATCH', body: { role } });
       users.setData((prev) => (prev ? { users: prev.users.map((x) => (x.id === u.id ? res.user : x)) } : prev));
-      toast({ message: t('{name} is now {role}. It applies at their next sign-in.', { name: u.name, role: t(ROLE_LABELS[role]) }), type: 'success' });
+      toast({ message: t('{name} is now {role}. It applies at their next sign-in.', { name: tName(u.name), role: t(ROLE_LABELS[role]) }), type: 'success' });
     } catch (err) {
       toast({ message: err instanceof Error ? err.message : t('Could not change role'), type: 'error' });
     } finally {
@@ -57,9 +58,9 @@ export default function Admin() {
             {users.data?.users.map((u) => (
               <li key={u.id} className="card p-4 sm:p-4">
                 <div className="flex items-start gap-3">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{initials(u.name)}</span>
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{initials(tName(u.name))}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-slate-900 dark:text-white">{u.name}{u.id === me?.id && <span className="ml-2 text-xs font-normal text-slate-400">({t('you')})</span>}</p>
+                    <p className="truncate font-semibold text-slate-900 dark:text-white">{tName(u.name)}{u.id === me?.id && <span className="ml-2 text-xs font-normal text-slate-400">({t('you')})</span>}</p>
                     <p className="truncate text-xs text-slate-500 dark:text-slate-400"><span className="font-mono">{u.username}</span> · {tFacility(u.facility)}</p>
                   </div>
                   <RoleBadge role={u.role} />
@@ -93,15 +94,15 @@ export default function Admin() {
                   <tr key={u.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
                     <td className="table-cell">
                       <span className="flex items-center gap-3 font-semibold text-slate-900 dark:text-white">
-                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{initials(u.name)}</span>
-                        <span>{u.name}{u.id === me?.id && <span className="ml-2 text-xs font-normal text-slate-400">({t('you')})</span>}</span>
+                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{initials(tName(u.name))}</span>
+                        <span>{tName(u.name)}{u.id === me?.id && <span className="ml-2 text-xs font-normal text-slate-400">({t('you')})</span>}</span>
                       </span>
                     </td>
                     <td className="table-cell font-mono text-xs">{u.username}</td>
                     <td className="table-cell">{tFacility(u.facility)}</td>
                     <td className="table-cell"><RoleBadge role={u.role} /></td>
                     <td className="table-cell">
-                      <label className="sr-only" htmlFor={`role-${u.id}`}>{t('Role for {name}', { name: u.name })}</label>
+                      <label className="sr-only" htmlFor={`role-${u.id}`}>{t('Role for {name}', { name: tName(u.name) })}</label>
                       <select
                         id={`role-${u.id}`}
                         className="form-input py-1.5 pr-8"
@@ -140,7 +141,7 @@ export default function Admin() {
               <li key={d.clientId} className="card flex items-center gap-3 p-4 sm:p-4">
                 <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"><Icon name="device" className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-slate-900 dark:text-white">{d.deviceName}</p>
+                  <p className="truncate font-semibold text-slate-900 dark:text-white">{tName(d.deviceName)}</p>
                   <p className="truncate text-xs text-slate-500 dark:text-slate-400">{d.facility || '—'} · {d.username} · {relativeTime(d.lastSyncAt)}</p>
                 </div>
                 <DeviceStatus online={d.online} />
@@ -162,7 +163,7 @@ export default function Admin() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {devices.data?.devices.map((d) => (
                   <tr key={d.clientId} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                    <td className="table-cell font-semibold text-slate-900 dark:text-white">{d.deviceName}</td>
+                    <td className="table-cell font-semibold text-slate-900 dark:text-white">{tName(d.deviceName)}</td>
                     <td className="table-cell">{d.facility || '—'}</td>
                     <td className="table-cell font-mono text-xs" title={d.clientId}>{shortId(d.clientId)}</td>
                     <td className="table-cell">{d.username}</td>

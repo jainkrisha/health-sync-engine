@@ -16,6 +16,7 @@ import { NavWheel, type WheelItem } from './NavWheel';
 import { useI18n } from '../i18n/useI18n';
 import { LanguageSwitch } from '../i18n/LanguageSwitch';
 import { LANG_NAMES, tFacility } from '../i18n/i18n';
+import { tName } from '../i18n/names';
 
 interface NavItem {
   to: string;
@@ -155,10 +156,10 @@ export function Layout() {
           {user && (
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-xs font-bold text-white">
-                {initials(user.name)}
+                {initials(tName(user.name))}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+                <p className="truncate text-sm font-semibold text-white">{tName(user.name)}</p>
                 <p className="truncate text-xs text-slate-400">{tFacility(user.facility)}</p>
               </div>
             </div>
@@ -213,10 +214,10 @@ export function Layout() {
               {user && (
                 <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 lg:flex dark:border-slate-700">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-teal-700 text-[11px] font-bold text-white" aria-hidden="true">
-                    {initials(user.name)}
+                    {initials(tName(user.name))}
                   </span>
                   <span className="hidden min-w-0 flex-col leading-tight xl:flex">
-                    <span className="max-w-[11rem] truncate text-xs font-semibold text-slate-900 dark:text-white">{user.name}</span>
+                    <span className="max-w-[11rem] truncate text-xs font-semibold text-slate-900 dark:text-white">{tName(user.name)}</span>
                     <span className="text-[11px] text-slate-500 dark:text-slate-400">{tFacility(user.facility)}</span>
                   </span>
                   <button

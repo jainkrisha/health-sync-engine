@@ -27,6 +27,7 @@ import { t } from '../../i18n/i18n';
 import { translateReport } from '../../i18n/reports';
 import { tValue } from '../../i18n/clinical';
 import './branchGraph.css';
+import { tName } from '../../i18n/names';
 
 const LANE_COLORS = ['#b86f52', '#4f7cb0', '#3a8f7a', '#8a8273', '#7d7c45', '#5f8a94'];
 const REVIEW_COLOR = 'var(--bg-review)';
@@ -41,23 +42,23 @@ const hashOf = (id: string) => id.replace(/-/g, '').slice(0, 7);
 function summary(c: HistoryCommit): string {
   if (c.operation === 'create') {
     const p = c.payload as CreatePayload;
-    return p.name ? t('Created the record for {name}', { name: p.name }) : t('Created the record');
+    return p.name ? t('Created the record for {name}', { name: tName(p.name) }) : t('Created the record');
   }
   if (c.operation === 'delete') return t('Archived the record');
   const label = t(FIELD_LABELS[c.field ?? ''] ?? c.field ?? 'Record').toLowerCase();
   if (c.field === 'allergies') {
     const p = c.payload as AllergyPayload;
     return p.op === 'add'
-      ? t('Added allergy {name} ({severity})', { name: p.allergen, severity: t(p.severity) })
-      : t('Removed allergy {name}', { name: p.allergen });
+      ? t('Added allergy {name} ({severity})', { name: tName(p.allergen), severity: t(p.severity) })
+      : t('Removed allergy {name}', { name: tName(p.allergen) });
   }
   if (c.field === 'medications') {
     const p = c.payload as MedicationPayload;
     if (p.op === 'setCritical')
       return p.active
-        ? t('Set {name} to {dose}', { name: p.name, dose: `${tValue(p.dosage)}${p.frequency ? `, ${tValue(p.frequency)}` : ''}` })
-        : t('Stopped {name}', { name: p.name });
-    return t('Updated {name} dates', { name: p.name });
+        ? t('Set {name} to {dose}', { name: tName(p.name), dose: `${tValue(p.dosage)}${p.frequency ? `, ${tValue(p.frequency)}` : ''}` })
+        : t('Stopped {name}', { name: tName(p.name) });
+    return t('Updated {name} dates', { name: tName(p.name) });
   }
   if (c.field === 'vitals') {
     const r = (c.payload as VitalsPayload).reading ?? {};
@@ -161,10 +162,10 @@ export function BranchGraph({ history }: { history: PatientHistory }) {
           <li key={lane.key} style={{ ['--lane' as string]: color(i) }}>
             <span className="bg-legend-dot" aria-hidden="true" />
             <span className="bg-legend-name">
-              <Icon name={lane.review ? 'merge' : 'git'} className="h-3.5 w-3.5" /> {lane.review ? t(lane.label) : lane.label}
+              <Icon name={lane.review ? 'merge' : 'git'} className="h-3.5 w-3.5" /> {lane.review ? t(lane.label) : tName(lane.label)}
             </span>
             {lane.people.length > 0 && (
-              <span className="bg-legend-people">{lane.people.join(', ')}</span>
+              <span className="bg-legend-people">{lane.people.map(tName).join(', ')}</span>
             )}
           </li>
         ))}
@@ -330,9 +331,9 @@ function CommitRow({
           {hashOf(commit.id)}
         </code>
         <span className="bg-branch" style={{ ['--lane' as string]: laneColor }}>
-          <Icon name="git" className="h-3 w-3" /> {commit.deviceName}
+          <Icon name="git" className="h-3 w-3" /> {tName(commit.deviceName)}
         </span>
-        <span>{commit.userName}</span>
+        <span>{tName(commit.userName)}</span>
         <time
           dateTime={commit.timestamp}
           title={t('Edited {edited} · reached the server {received}', { edited: formatDateTime(commit.timestamp), received: formatDateTime(commit.receivedAt) })}
@@ -365,7 +366,7 @@ function CommitRow({
           <p key={k.id} className="bg-clash">
             <Icon name="alert" className="h-3.5 w-3.5 flex-shrink-0" />
             <span>
-              {t('Clashes on')} <b>{t('{name} dose', { name: k.label })}</b> {t('with')}{' '}
+              {t('Clashes on')} <b>{t('{name} dose', { name: tName(k.label) })}</b> {t('with')}{' '}
               {other ? (
                 <button type="button" className="bg-link" onClick={() => onJump(other.id)}>
                   {t('{hash} from {device}', { hash: hashOf(other.id), device: other.deviceName })}
@@ -414,10 +415,10 @@ function MergeRow({
       <div className="bg-merge-head">
         <Icon name="merge" className="h-4 w-4" />
         <p className="bg-msg">
-          {pending ? t('Merge conflict') : t('Merged')} · {t('{name} dose', { name: conflict.label })}
+          {pending ? t('Merge conflict') : t('Merged')} · {t('{name} dose', { name: tName(conflict.label) })}
         </p>
         <span className={pending ? 'badge-conflict' : 'badge-sage'}>
-          {pending ? t('Waiting for review') : t('Resolved by {name}', { name: conflict.resolvedByName ?? t('reviewer') })}
+          {pending ? t('Waiting for review') : t('Resolved by {name}', { name: tName(conflict.resolvedByName) ?? t('reviewer') })}
         </span>
       </div>
       <div className="bg-diff">

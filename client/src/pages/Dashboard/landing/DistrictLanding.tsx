@@ -11,6 +11,7 @@ import { useApi } from '../../../hooks/useApi';
 import { useSyncEngine } from '../../../hooks/useSync';
 import { useI18n } from '../../../i18n/useI18n';
 import './districtLanding.css';
+import { tName } from '../../../i18n/names';
 
 const SCENES = [
   { src: '/landing/exterior.webp', pos: 'center 40%' },
@@ -240,7 +241,7 @@ export default function DistrictLanding({ stats }: { stats: StatsResponse | null
             <p className="dl-lead" data-rv="up">
               {t('Every visit starts on a PHC tablet, encrypted on the device, and reaches the district the moment a connection returns.')}
               {numbers.busiest
-                ? ` ${t('{name} holds the largest register, with {count} patients.', { name: numbers.busiest.name, count: numbers.busiest.patientCount })}`
+                ? ` ${t('{name} holds the largest register, with {count} patients.', { name: tName(numbers.busiest.name), count: numbers.busiest.patientCount })}`
                 : ''}
             </p>
             <Link className="dl-arrowlink" to="/phcs" data-rv="fade">

@@ -20,6 +20,7 @@ import { EmptyState, PageHeader, SectionHeading, initials, relativeTime } from '
 import DistrictLanding from './landing/DistrictLanding';
 import { useI18n } from '../../i18n/useI18n';
 import { t as translate, tFacility } from '../../i18n/i18n';
+import { tName } from '../../i18n/names';
 
 // Day keys use the device's local calendar date. (toISOString() would shift them
 // to UTC, putting today's changes under yesterday east of Greenwich, e.g. in IST.)
@@ -121,11 +122,11 @@ export default function Dashboard() {
     <div className="space-y-6">
       {user && portalForRole(user.role) === 'district' && <DistrictLanding stats={stats.data ?? null} />}
       <PageHeader
-        title={t('Hello, {name}', { name: greetingName(user?.name) })}
+        title={t('Hello, {name}', { name: tName(greetingName(user?.name)) })}
         subtitle={
           user && portalForRole(user.role) === 'district'
             ? t("{facility}: every PHC's records, sync activity and conflict resolution at a glance.", { facility: tFacility(user.facility) })
-            : t('{facility}: records on this device, sync activity and conflict resolution at a glance.', { facility: user?.facility ?? t('PHC') })
+            : t('{facility}: records on this device, sync activity and conflict resolution at a glance.', { facility: user?.facility ? tFacility(user.facility) : t('PHC') })
         }
         actions={
           perms.canEditPatients && (
@@ -257,9 +258,9 @@ export default function Dashboard() {
                 {patients.slice(0, 6).map((p) => (
                   <li key={p.id}>
                     <Link to={`/patients/${p.id}`} className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">{initials(p.name)}</span>
+                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">{initials(tName(p.name))}</span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-slate-800 group-hover:text-teal-700 dark:text-slate-100 dark:group-hover:text-teal-300">{p.name}</span>
+                        <span className="block truncate text-sm font-semibold text-slate-800 group-hover:text-teal-700 dark:text-slate-100 dark:group-hover:text-teal-300">{tName(p.name)}</span>
                         <span className="block text-xs text-slate-400">{t('Updated {when}', { when: relativeTime(p.updatedAt) })}</span>
                       </span>
                       {p.hasOpenConflicts && <span className="badge-conflict">{t('Review')}</span>}

@@ -28,6 +28,7 @@ import {
   formatDateTime,
   relativeTime,
 } from '../../components/ui';
+import { tName } from '../../i18n/names';
 
 const SEVERITY_STYLE = { severe: 'badge-danger', moderate: 'badge-warning', mild: 'badge-sage', unknown: 'badge-slate' } as const;
 
@@ -152,7 +153,7 @@ export default function PatientDetail() {
             ]
           : [],
       );
-      toast({ message: t('{name} archived', { name: patient.name }), type: 'success' });
+      toast({ message: t('{name} archived', { name: tName(patient.name) }), type: 'success' });
       navigate('/patients');
     } catch (err) {
       toast({ message: `${t('Could not archive:')} ${err instanceof Error ? t(err.message) : t('unknown error')}`, type: 'error' });
@@ -166,7 +167,7 @@ export default function PatientDetail() {
     <div className="pb-10">
       <PageHeader
         back={{ to: '/patients', label: t('Patients') }}
-        title={patient.name}
+        title={tName(patient.name)}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
             <span>{[ageFrom(patient.dateOfBirth), patient.gender !== 'unknown' ? t(capitalize(patient.gender)) : '', t('Blood {type}', { type: t(patient.bloodType) })].filter(Boolean).join(' · ')}</span>
@@ -219,7 +220,7 @@ export default function PatientDetail() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{t('{when} by {name}', { when: formatDateTime(latest.recordedAt), name: latest.recordedBy || t('unknown') })}</p>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{t('{when} by {name}', { when: formatDateTime(latest.recordedAt), name: tName(latest.recordedBy) || t('unknown') })}</p>
             </>
           ) : (
             <EmptyState compact tone="slate" icon="activity" title={t('No readings yet')} />
@@ -294,7 +295,7 @@ export default function PatientDetail() {
       <ConfirmDialog
         isOpen={confirmArchive}
         title={t('Archive patient?')}
-        message={t('{name} will be hidden on every device after sync. The full history stays in the audit trail.', { name: patient.name })}
+        message={t('{name} will be hidden on every device after sync. The full history stays in the audit trail.', { name: tName(patient.name) })}
         confirmText={t('Archive')}
         variant="danger"
         onCancel={() => setConfirmArchive(false)}
@@ -316,7 +317,7 @@ function AllergiesCard({ patient }: { patient: Patient }) {
           {patient.allergies.map((a) => (
             <li key={a.allergen} className="flex items-start justify-between gap-3 py-2.5">
               <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">{a.allergen}</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{tName(a.allergen)}</p>
                 {a.reaction && <p className="text-xs text-slate-500 dark:text-slate-400">{tValue(a.reaction)}</p>}
               </div>
               <span className={`${SEVERITY_STYLE[a.severity]} capitalize`}>{t(a.severity)}</span>
@@ -341,7 +342,7 @@ function MedicationsCard({ patient, canReview }: { patient: Patient; canReview: 
             <li key={m.name} className="py-2.5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{m.name}</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{tName(m.name)}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     {[m.dosage, m.frequency].filter(Boolean).map(tValue).join(' · ') || t('No dose recorded')}
                     {(m.startDate || m.endDate) && ` · ${formatDate(m.startDate)} → ${m.endDate ? formatDate(m.endDate) : t('ongoing')}`}

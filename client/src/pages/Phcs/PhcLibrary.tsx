@@ -15,6 +15,7 @@ import { EmptyState, ErrorNotice, OfflineNotice, PageHeader, formatDate, relativ
 import { useI18n } from '../../i18n/useI18n';
 import { dateLocale, t, tp } from '../../i18n/i18n';
 import './phcs.css';
+import { tName } from '../../i18n/names';
 
 const COVERS: [string, string][] = [
   ['#2b3d55', '#1d2733'],
@@ -46,7 +47,7 @@ function CoverArt({ phc }: { phc: PhcSummary }) {
   return (
     <div className="cover-art" style={coverFor(phc.name)}>
       <p className="cover-kicker">HEALTHSYNC · {t('PHC REGISTER')}</p>
-      <p className="cover-title">{phc.name}</p>
+      <p className="cover-title">{tName(phc.name)}</p>
       <div className="cover-emblem">
         <Emblem />
       </div>
@@ -74,7 +75,7 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
   return [
     {
       kicker: t('Chapter 1 · Overview'),
-      title: phc.name,
+      title: tName(phc.name),
       body: (
         <>
           <p className="text-[13px] leading-6 text-[rgba(29,39,51,0.75)]">
@@ -103,10 +104,10 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
           {phc.staff.map((s) => (
             <li key={s.username} className="flex items-center gap-3 py-2.5">
               <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#2b3d55] text-[11px] font-bold text-[#f4efe3]">
-                {s.name.replace(/\(.*?\)/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')}
+                {tName(s.name).replace(/\(.*?\)/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('')}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold">{s.name}</span>
+                <span className="block truncate text-[13px] font-semibold">{tName(s.name)}</span>
                 <span className="block font-mono text-[11px] text-[rgba(29,39,51,0.6)]">{s.username}</span>
               </span>
               <span className="font-mono text-[9px] font-bold tracking-wider text-[#423d35]">{t(ROLE_LABELS[s.role]).toUpperCase()}</span>
@@ -126,7 +127,7 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
             <li key={d.clientId} className="flex items-center gap-3 rounded-lg bg-[rgba(29,39,51,0.05)] px-3 py-2.5">
               <Icon name="device" className="h-4 w-4 text-[#2b3d55]" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold">{d.deviceName}</span>
+                <span className="block truncate text-[13px] font-semibold">{tName(d.deviceName)}</span>
                 <span className="block text-[11px] text-[rgba(29,39,51,0.6)]">
                   {d.username} · {t('synced {when}', { when: relativeTime(d.lastSyncAt) })}
                 </span>
@@ -152,7 +153,7 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
             {phc.recentPatients.map((p) => (
               <li key={p.id}>
                 <Link to={`/patients/${p.id}`} className="flex items-center gap-2 py-2 text-[13px] font-semibold hover:text-[#22665a]">
-                  <span className="flex-1 truncate">{p.name}</span>
+                  <span className="flex-1 truncate">{tName(p.name)}</span>
                   {p.needsReview && <span className="text-[10px] font-bold text-[#8a5a0b]">{t('REVIEW')}</span>}
                   <span className="text-[11px] font-normal text-[rgba(29,39,51,0.55)]">{relativeTime(p.updatedAt)}</span>
                 </Link>
@@ -192,7 +193,7 @@ function pagesFor(phc: PhcSummary): { kicker: string; title: string; body: React
           <ul className="space-y-2">
             {phc.openConflicts.map((c, i) => (
               <li key={i} className="rounded-lg border border-[#e6d3a3] bg-[#f8f0dc] px-3 py-2 text-[13px]">
-                <b>{c.patientName}</b> · {c.label}
+                <b>{tName(c.patientName)}</b> · {tName(c.label)}
                 <span className="block text-[11px] text-[rgba(29,39,51,0.6)]">{t('raised {when}', { when: relativeTime(c.createdAt) })}</span>
               </li>
             ))}
@@ -233,7 +234,7 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
         <div className="page left flex h-full flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(180deg,#efe7d6,#e4dac4)' }}>
           <span className="text-[#2b3d55]"><Emblem size={64} /></span>
           <p className="mt-4 font-mono text-[10px] tracking-[2px] text-[rgba(29,39,51,0.6)]">{t('THIS REGISTER BELONGS TO')}</p>
-          <p className="mt-1 text-xl font-extrabold tracking-tight text-[#1d2733]">{phc.name}</p>
+          <p className="mt-1 text-xl font-extrabold tracking-tight text-[#1d2733]">{tName(phc.name)}</p>
           <p className="mt-6 max-w-[16rem] text-[12px] leading-5 text-[rgba(29,39,51,0.6)]">{t('Scroll or use the arrows to turn the page.')}</p>
         </div>
       ),
@@ -313,11 +314,11 @@ function OpenBook({ phc, onClose }: { phc: PhcSummary; onClose: () => void }) {
   const spreadLabel = turned === 0 ? t('Cover') : turned === 1 ? t('Overview') : t('Pages {from}–{to}', { from: turned * 2 - 2, to: turned * 2 - 1 });
 
   return createPortal(
-    <div className="book-stage" role="dialog" aria-modal="true" aria-label={t('{name} register', { name: phc.name })}>
+    <div className="book-stage" role="dialog" aria-modal="true" aria-label={t('{name} register', { name: tName(phc.name) })}>
       <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 px-4 py-4 sm:px-8">
         <div className="min-w-0">
           <p className="font-mono text-[10px] tracking-[2px] text-[#7a5a3a] dark:text-[#d9c7a8]">{t('PHC REGISTER')}</p>
-          <p className="truncate text-lg font-extrabold tracking-tight text-[#1d2733] dark:text-[#f4efe3]">{phc.name}</p>
+          <p className="truncate text-lg font-extrabold tracking-tight text-[#1d2733] dark:text-[#f4efe3]">{tName(phc.name)}</p>
         </div>
         <button type="button" onClick={onClose} className="btn bg-[#1d2733] text-[#f4efe3] hover:bg-[#2b3d55]" autoFocus>
           <Icon name="x" className="h-4 w-4" /> {t('Close')}

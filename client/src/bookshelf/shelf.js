@@ -9,6 +9,7 @@
  */
 import * as THREE from 'three';
 import { t, tp } from '../i18n/i18n';
+import { tName } from '../i18n/names';
 import '../i18n/hindi.css';
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -74,8 +75,8 @@ function setCatalogue(phcs){
     const short = p.name.replace(/^PHC\s+/i, '');
     const online = p.devices.filter(d => d.online).length;
     BOOKS.push({
-      id: 'phc-' + i, name: p.name, title: p.name,
-      t1: t('PHC'), t2: short.toUpperCase(),
+      id: 'phc-' + i, name: p.name, title: tName(p.name),
+      t1: t('PHC'), t2: tName(short).toUpperCase(),
       sub: t('PATIENT REGISTER') + ' · ' + tp(p.patientCount, '{count} PATIENT', '{count} PATIENTS'),
       year: p.since ? String(new Date(p.since).getFullYear()) : '2026',
       vol: ROMAN[i] || String(i + 1), shelf, slotX: (k - (row - 1) / 2) * K.slot,

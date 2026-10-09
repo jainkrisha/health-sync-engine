@@ -10,6 +10,7 @@
  */
 import { DISTRICT_FACILITY } from '@shared/types';
 import { hi } from './hi';
+import { tName } from './names';
 
 export const LANGS = ['en', 'hi'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -92,9 +93,9 @@ export function t(text: string, vars?: Record<string, string | number>): string 
   return out.replace(/\{(\w+)\}/g, (whole, name: string) => (name in vars ? String(vars[name]) : whole));
 }
 
-/** A facility name: the district hospital is translated, PHC names are kept as registered. */
+/** A facility name: the district hospital is translated, PHC names are written in Devanagari. */
 export function tFacility(name: string): string {
-  return name === DISTRICT_FACILITY ? t(name) : name;
+  return name === DISTRICT_FACILITY ? t(name) : tName(name);
 }
 
 /** Count-aware text: tp(n, '{count} change', '{count} changes'). */

@@ -18,6 +18,7 @@ import { ClockView, EmptyState, ErrorNotice, OfflineNotice, PageHeader, Skeleton
 import { useI18n } from '../../i18n/useI18n';
 import { t } from '../../i18n/i18n';
 import { tValue } from '../../i18n/clinical';
+import { tName } from '../../i18n/names';
 
 type Tab = 'pending_review' | 'resolved';
 
@@ -77,7 +78,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
       const body: { choice: ConflictChoice; note?: string; value?: MedicationCritical } = { choice, note: note.trim() || undefined };
       if (choice === 'custom') body.value = { dosage: dosage.trim(), frequency: frequency.trim(), active: true };
       const res = await api<{ conflict: Conflict }>(`/conflicts/${conflict.id}/resolve`, { method: 'POST', body });
-      toast({ message: t('{label} for {name} resolved', { label: conflict.label, name: conflict.patientName }), type: 'success' });
+      toast({ message: t('{label} for {name} resolved', { label: tName(conflict.label), name: tName(conflict.patientName) }), type: 'success' });
       onResolved(res.conflict);
       void syncEngine.triggerSync();
     } catch (err) {
@@ -99,8 +100,8 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
         >
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white">{conflict.patientName || t('Patient')}</h3>
-              <span className="badge-slate"><Icon name="pill" className="h-3 w-3" /> {conflict.label}</span>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white">{tName(conflict.patientName) || t('Patient')}</h3>
+              <span className="badge-slate"><Icon name="pill" className="h-3 w-3" /> {tName(conflict.label)}</span>
               {pending ? <span className="badge-conflict">{t('Awaiting review')}</span> : <span className="badge-sage">{t('Resolved')}</span>}
             </div>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
@@ -166,7 +167,7 @@ function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved
               <div className="flex gap-3 rounded-xl bg-teal-50 p-4 text-sm text-teal-900 ring-1 ring-inset ring-teal-600/10 dark:bg-teal-950/30 dark:text-teal-200">
                 <Icon name="checkCircle" className="mt-0.5 h-4 w-4 flex-shrink-0" />
                 <div>
-                {t('Resolved {when} by', { when: formatDateTime(conflict.resolvedAt) })} <strong>{conflict.resolvedByName}</strong>:{' '}
+                {t('Resolved {when} by', { when: formatDateTime(conflict.resolvedAt) })} <strong>{tName(conflict.resolvedByName)}</strong>:{' '}
                 {conflict.resolution === 'custom' ? t('corrected to') : conflict.resolution === 'current' ? t('kept value A,') : t('kept value B,')}{' '}
                 <strong>{conflict.resolvedValue ? describe(conflict.resolvedValue) : ''}</strong>
                 {conflict.note && <p className="mt-1 text-xs opacity-80">{t('Note')}: {conflict.note}</p>}
@@ -236,7 +237,7 @@ export default function ConflictDashboard() {
 
       {openCase &&
         createPortal(
-          <div className="case-modal" role="dialog" aria-modal="true" aria-label={t('Case: {name}', { name: openCase.patientName })} onClick={(e) => e.target === e.currentTarget && setOpenCase(null)}>
+          <div className="case-modal" role="dialog" aria-modal="true" aria-label={t('Case: {name}', { name: tName(openCase.patientName) })} onClick={(e) => e.target === e.currentTarget && setOpenCase(null)}>
             <div className="case-modal-panel">
               <div className="mb-3 flex justify-end">
                 <button type="button" className="btn bg-white/90 text-slate-800 shadow-card hover:bg-white" onClick={() => setOpenCase(null)} autoFocus>

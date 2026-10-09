@@ -18,6 +18,7 @@ import {
   SkeletonRows,
 } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
+import { tName } from '../../i18n/names';
 
 type TypeFilter = 'all' | 'automatic' | 'manual';
 type View = 'graph' | 'list';
@@ -140,7 +141,7 @@ export default function AuditTrail() {
             >
               {graphPatients.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {`${p.name} · ${tp(p.commits, '{count} edit', '{count} edits')} ${tp(p.devices, 'from {count} tablet', 'from {count} tablets')}${p.openConflicts ? ` · ${t('conflict open')}` : ''}`}
+                  {`${tName(p.name)} · ${tp(p.commits, '{count} edit', '{count} edits')} ${tp(p.devices, 'from {count} tablet', 'from {count} tablets')}${p.openConflicts ? ` · ${t('conflict open')}` : ''}`}
                 </option>
               ))}
             </select>
@@ -220,7 +221,7 @@ export default function AuditTrail() {
                 <option value="">{t('All patients')}</option>
                 {patients.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {tName(p.name)}
                   </option>
                 ))}
               </select>
