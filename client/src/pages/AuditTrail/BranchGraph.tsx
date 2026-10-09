@@ -369,7 +369,7 @@ function CommitRow({
               {t('Clashes on')} <b>{t('{name} dose', { name: tName(k.label) })}</b> {t('with')}{' '}
               {other ? (
                 <button type="button" className="bg-link" onClick={() => onJump(other.id)}>
-                  {t('{hash} from {device}', { hash: hashOf(other.id), device: other.deviceName })}
+                  {t('{hash} from {device}', { hash: hashOf(other.id), device: tName(other.deviceName) })}
                 </button>
               ) : (
                 t('an edit from another tablet')
@@ -429,7 +429,7 @@ function MergeRow({
             style={{ ['--lane' as string]: colorOf(s.commit) }}
           >
             <span className="bg-side-head">
-              <Icon name="git" className="h-3 w-3" /> {s.commit?.deviceName ?? t('Unknown tablet')}
+              <Icon name="git" className="h-3 w-3" /> {tName(s.commit?.deviceName) || t('Unknown tablet')}
               {s.commit && (
                 <button
                   type="button"
@@ -443,7 +443,7 @@ function MergeRow({
             <span className="bg-side-value">{dose(s.value)}</span>
             <span className="bg-side-sub">
               {s.value?.active ? tValue(s.value.frequency) : t('medicine stopped')} ·{' '}
-              {s.commit?.userName ?? '—'} · {s.tag}
+              {tName(s.commit?.userName) || '—'} · {s.tag}
             </span>
           </div>
         ))}

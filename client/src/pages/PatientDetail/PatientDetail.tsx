@@ -254,7 +254,7 @@ export default function PatientDetail() {
                     <td className="table-cell">{v.temperature ?? '—'}</td>
                     <td className="table-cell">{v.respiratoryRate ?? '—'}</td>
                     <td className="table-cell">{v.oxygenSaturation ?? '—'}</td>
-                    <td className="table-cell whitespace-nowrap">{v.recordedBy || '—'}</td>
+                    <td className="table-cell whitespace-nowrap">{tName(v.recordedBy) || '—'}</td>
                   </tr>
                 ))}
               </tbody>

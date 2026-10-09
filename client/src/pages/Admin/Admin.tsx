@@ -142,7 +142,7 @@ export default function Admin() {
                 <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"><Icon name="device" className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold text-slate-900 dark:text-white">{tName(d.deviceName)}</p>
-                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">{d.facility || '—'} · {d.username} · {relativeTime(d.lastSyncAt)}</p>
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">{tName(d.facility) || '—'} · {d.username} · {relativeTime(d.lastSyncAt)}</p>
                 </div>
                 <DeviceStatus online={d.online} />
               </li>
@@ -164,7 +164,7 @@ export default function Admin() {
                 {devices.data?.devices.map((d) => (
                   <tr key={d.clientId} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
                     <td className="table-cell font-semibold text-slate-900 dark:text-white">{tName(d.deviceName)}</td>
-                    <td className="table-cell">{d.facility || '—'}</td>
+                    <td className="table-cell">{tName(d.facility) || '—'}</td>
                     <td className="table-cell font-mono text-xs" title={d.clientId}>{shortId(d.clientId)}</td>
                     <td className="table-cell">{d.username}</td>
                     <td className="table-cell">{relativeTime(d.lastSyncAt)}</td>
