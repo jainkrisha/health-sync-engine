@@ -1,9 +1,10 @@
 /**
- * Dose reviews — when two devices changed the same medicine dose while
- * offline, the system does not guess. A clinical reviewer picks the correct
- * dose here (or types a new one), and every device gets the decision.
+ * Dose reviews. When two devices changed the same medicine dose while offline,
+ * the system does not guess. Each case is one short form: the two doses side
+ * by side in a table, one question ("Which dose is correct?") answered with
+ * radio buttons, and one button. Every device gets the decision.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { Conflict, ConflictChoice, MedicationCritical } from '@shared/types';
 import { api } from '../../api/client';
@@ -11,8 +12,7 @@ import { useApi } from '../../hooks/useApi';
 import { useSyncEngine } from '../../hooks/useSync';
 import { syncEngine } from '../../sync/syncEngine';
 import { useToast } from '../../components/Toast';
-import { Icon } from '../../components/Icon';
-import { ClockView, EmptyState, ErrorNotice, OfflineNotice, PageHeader, SkeletonRows, Spinner, formatDateTime, relativeTime, shortId } from '../../components/ui';
+import { ErrorNotice, Loading, OfflineNotice, PageHeader, Spinner, formatDateTime, relativeTime, shortId } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
 import { t } from '../../i18n/i18n';
 import { tValue } from '../../i18n/clinical';
@@ -25,185 +25,164 @@ function describe(v: MedicationCritical): string {
   return [v.dosage, v.frequency].filter(Boolean).map(tValue).join(' · ') || t('(no dose)');
 }
 
-function Option({
-  letter,
-  value,
-  clientId,
-  timestamp,
-  clock,
-  note,
-}: {
-  letter: 'A' | 'B';
-  value: MedicationCritical;
-  clientId: string;
-  timestamp: string;
-  clock: Record<string, number>;
-  note: string;
-}) {
-  useI18n();
-  return (
-    <div className="rounded-lg border-2 border-slate-300 bg-white p-4 dark:border-slate-600 dark:bg-slate-900">
-      <p className="text-base font-bold text-slate-700 dark:text-slate-300">{t('Dose {letter}', { letter })}</p>
-      <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{describe(value)}</p>
-      <p className="mt-2 text-base text-slate-700 dark:text-slate-300">
-        {t('Entered {when}', { when: timestamp ? formatDateTime(timestamp) : '—' })}
-      </p>
-      <p className="text-sm text-slate-700 dark:text-slate-300">{t(note)}</p>
-      <details className="mt-2 text-sm">
-        <summary className="cursor-pointer font-semibold text-slate-700 dark:text-slate-300">{t('Technical details')}</summary>
-        <dl className="mt-2 space-y-1">
-          <div className="flex gap-2">
-            <dt className="font-semibold">{t('Device')}</dt>
-            <dd className="font-mono">{clientId ? shortId(clientId) : t('unknown')}</dd>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <dt className="font-semibold">{t('Clock')}</dt>
-            <dd>
-              <ClockView clock={clock} highlight={clientId} />
-            </dd>
-          </div>
-        </dl>
-      </details>
-    </div>
-  );
-}
-
-function ConflictCard({ conflict, onResolved }: { conflict: Conflict; onResolved: (c: Conflict) => void }) {
-  const [custom, setCustom] = useState(false);
+function ConflictCase({ conflict, onResolved }: { conflict: Conflict; onResolved: (c: Conflict) => void }) {
+  const [choice, setChoice] = useState<ConflictChoice | null>(null);
   const [dosage, setDosage] = useState(conflict.incomingValue.dosage);
   const [frequency, setFrequency] = useState(conflict.incomingValue.frequency);
   const [note, setNote] = useState('');
-  const [busy, setBusy] = useState<ConflictChoice | null>(null);
+  const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const { toast } = useToast();
   useI18n();
   const pending = conflict.status === 'pending_review';
+  const id = conflict.id;
 
-  const resolve = async (choice: ConflictChoice) => {
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
     setProblem(null);
-    if (choice === 'custom' && !dosage.trim()) {
-      setProblem(t('Type the correct dose first.'));
-      return;
-    }
-    setBusy(choice);
+    if (!choice) return setProblem(t('Choose which dose is correct.'));
+    if (choice === 'custom' && !dosage.trim()) return setProblem(t('Type the correct dose first.'));
+    setBusy(true);
     try {
       const body: { choice: ConflictChoice; note?: string; value?: MedicationCritical } = { choice, note: note.trim() || undefined };
       if (choice === 'custom') body.value = { dosage: dosage.trim(), frequency: frequency.trim(), active: true };
-      const res = await api<{ conflict: Conflict }>(`/conflicts/${conflict.id}/resolve`, { method: 'POST', body });
+      const res = await api<{ conflict: Conflict }>(`/conflicts/${id}/resolve`, { method: 'POST', body });
       toast({ message: t('Saved. {label} for {name} is resolved and sent to every device.', { label: tName(conflict.label), name: tName(conflict.patientName) }), type: 'success' });
       onResolved(res.conflict);
       void syncEngine.triggerSync();
     } catch (err) {
       setProblem(err instanceof Error ? t(err.message) : t('Could not save the decision. Please try again.'));
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   };
 
-  return (
-    <li id={`conflict-${conflict.id}`} className="scroll-mt-28">
-      <article className="card space-y-5" aria-labelledby={`conflict-h-${conflict.id}`}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 id={`conflict-h-${conflict.id}`} className="text-xl font-bold text-slate-900 dark:text-white">
-              {tName(conflict.patientName) || t('Patient')}
-            </h2>
-            <p className="mt-1 flex items-center gap-2 text-lg text-slate-800 dark:text-slate-200">
-              <Icon name="pill" className="h-5 w-5" /> {tName(conflict.label)}
-            </p>
-          </div>
-          {pending ? (
-            <span className="badge-warning text-base">
-              <Icon name="clock" className="h-5 w-5" /> {t('Waiting since {when}', { when: relativeTime(conflict.createdAt) })}
-            </span>
-          ) : (
-            <span className="badge-ok text-base">
-              <Icon name="checkCircle" className="h-5 w-5" /> {t('Resolved')}
-            </span>
-          )}
-        </div>
+  const sides = [
+    { key: 'A', title: t('Dose A'), sub: t('On the record now'), value: conflict.currentValue, client: conflict.currentClientId, at: conflict.currentTimestamp },
+    { key: 'B', title: t('Dose B'), sub: t('The other change'), value: conflict.incomingValue, client: conflict.incomingClientId, at: conflict.incomingTimestamp },
+  ];
 
-        <p className="text-base text-slate-800 dark:text-slate-200">
-          {t('Two devices changed this dose while they were offline, so neither saw the other. The record keeps dose A until you decide.')}
+  return (
+    <li className="section" id={`conflict-${id}`}>
+      <article aria-labelledby={`conflict-h-${id}`}>
+        <span className="caption">{tName(conflict.label)}</span>
+        <h2 id={`conflict-h-${id}`} className="heading-l">
+          <Link to={`/patients/${conflict.patientId}`} className="link">
+            {tName(conflict.patientName) || t('Patient')}
+          </Link>
+        </h2>
+        <p className={`mt-2 ${pending ? 'status-warn' : 'status-ok'}`}>
+          {pending ? t('Waiting since {when}', { when: relativeTime(conflict.createdAt) }) : t('Resolved')}
         </p>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Option letter="A" value={conflict.currentValue} clientId={conflict.currentClientId} timestamp={conflict.currentTimestamp} clock={conflict.currentClock} note="On the record now" />
-          <Option letter="B" value={conflict.incomingValue} clientId={conflict.incomingClientId} timestamp={conflict.incomingTimestamp} clock={conflict.incomingClock} note="The other change" />
+        {pending && <p className="mt-4 max-w-[40rem]">{t('Two devices changed this dose while they were offline, so neither saw the other. The record keeps dose A until you decide.')}</p>}
+
+        <div className="mt-5 overflow-x-auto">
+          <table className="table min-w-[30rem]">
+            <thead>
+              <tr>
+                <td />
+                {sides.map((s) => (
+                  <th key={s.key} scope="col">
+                    {s.title}
+                    <span className="block font-normal text-muted">{s.sub}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">{t('Dose and how often')}</th>
+                {sides.map((s) => (
+                  <td key={s.key} className="text-xl font-bold">
+                    {describe(s.value)}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <th scope="row">{t('Entered')}</th>
+                {sides.map((s) => (
+                  <td key={s.key}>{s.at ? formatDateTime(s.at) : '—'}</td>
+                ))}
+              </tr>
+              <tr>
+                <th scope="row">{t('Device')}</th>
+                {sides.map((s) => (
+                  <td key={s.key}>
+                    <span className="font-mono text-sm">{s.client ? shortId(s.client) : t('unknown')}</span>
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {pending ? (
-          <div className="space-y-4 border-t border-slate-200 pt-5 dark:border-slate-800">
-            <div>
-              <label htmlFor={`note-${conflict.id}`} className="form-label">
-                {t('Note for the record (optional)')}
-              </label>
-              <p className="form-help -mt-1 mb-1.5">{t('For example: Confirmed with the doctor by phone')}</p>
-              <input id={`note-${conflict.id}`} className="form-input" value={note} onChange={(e) => setNote(e.target.value)} />
-            </div>
-            <p className="text-lg font-bold text-slate-900 dark:text-white">{t('Which dose is correct?')}</p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <button className="btn-primary" disabled={busy !== null} onClick={() => void resolve('current')}>
-                {busy === 'current' ? <Spinner /> : <Icon name="check" className="h-5 w-5" />} {t('Keep dose A')}
-              </button>
-              <button className="btn-primary" disabled={busy !== null} onClick={() => void resolve('incoming')}>
-                {busy === 'incoming' ? <Spinner /> : <Icon name="check" className="h-5 w-5" />} {t('Use dose B')}
-              </button>
-              {!custom && (
-                <button className="btn-secondary" onClick={() => setCustom(true)}>
-                  <Icon name="edit" className="h-5 w-5" /> {t('Neither: enter the correct dose')}
-                </button>
-              )}
-            </div>
-            {custom && (
-              <div className="grid gap-4 rounded-lg border-2 border-brand-600 bg-brand-50 p-4 sm:grid-cols-2 dark:border-brand-400 dark:bg-brand-950">
-                <div>
-                  <label htmlFor={`dose-${conflict.id}`} className="form-label">
-                    {t('Correct dose')}
-                  </label>
-                  <input id={`dose-${conflict.id}`} className="form-input" value={dosage} onChange={(e) => setDosage(e.target.value)} />
-                </div>
-                <div>
-                  <label htmlFor={`freq-${conflict.id}`} className="form-label">
-                    {t('How often?')}
-                  </label>
-                  <input id={`freq-${conflict.id}`} className="form-input" value={frequency} onChange={(e) => setFrequency(e.target.value)} />
-                </div>
-                <div className="flex flex-wrap gap-3 sm:col-span-2">
-                  <button className="btn-primary" disabled={busy !== null} onClick={() => void resolve('custom')}>
-                    {busy === 'custom' ? <Spinner /> : <Icon name="check" className="h-5 w-5" />} {t('Save the correct dose')}
-                  </button>
-                  <button className="btn-plain" onClick={() => setCustom(false)} disabled={busy !== null}>
-                    {t('Cancel')}
-                  </button>
-                </div>
-              </div>
-            )}
+          <form onSubmit={(e) => void submit(e)} noValidate className="mt-6 max-w-[40rem]">
             {problem && (
-              <div role="alert" className="notice-danger">
-                <Icon name="alert" className="mt-0.5 h-5 w-5 flex-shrink-0" />
-                <p>{problem}</p>
+              <div className="error-summary" role="alert">
+                <h3 className="heading-m">{t('There is a problem')}</h3>
+                <p className="mt-2 font-bold text-alert">{problem}</p>
               </div>
             )}
-            <Link to={`/patients/${conflict.patientId}`} className="link inline-flex items-center gap-1">
-              {t('Open the patient record')} <Icon name="arrowRight" className="h-4 w-4" />
-            </Link>
-          </div>
-        ) : (
-          <div className="notice-ok">
-            <Icon name="checkCircle" className="mt-0.5 h-5 w-5 flex-shrink-0" />
-            <div>
-              <p>
-                {t('Resolved {when} by', { when: formatDateTime(conflict.resolvedAt) })} <strong>{tName(conflict.resolvedByName)}</strong>:{' '}
-                {conflict.resolution === 'custom' ? t('corrected to') : conflict.resolution === 'current' ? t('kept dose A,') : t('chose dose B,')}{' '}
-                <strong>{conflict.resolvedValue ? describe(conflict.resolvedValue) : ''}</strong>
-              </p>
-              {conflict.note && (
-                <p className="mt-1">
-                  {t('Note')}: {conflict.note}
-                </p>
+            <fieldset className="form-group">
+              <legend className="form-label-l">{t('Which dose is correct?')}</legend>
+              <div className="radios">
+                {(
+                  [
+                    ['current', t('Keep dose A: {dose}', { dose: describe(conflict.currentValue) })],
+                    ['incoming', t('Use dose B: {dose}', { dose: describe(conflict.incomingValue) })],
+                    ['custom', t('Neither. Enter the correct dose')],
+                  ] as const
+                ).map(([value, label]) => (
+                  <label key={value} className="radio">
+                    <input type="radio" name={`choice-${id}`} checked={choice === value} onChange={() => setChoice(value)} />
+                    <span className="radio-label font-bold">{label}</span>
+                  </label>
+                ))}
+              </div>
+              {choice === 'custom' && (
+                <div className="ml-3.5 mt-4 border-l-[5px] border-rule pl-6">
+                  <div className="form-group">
+                    <label htmlFor={`dose-${id}`} className="form-label">
+                      {t('Correct dose')}
+                    </label>
+                    <span className="form-hint">{t('For example: 500 mg')}</span>
+                    <input id={`dose-${id}`} className="input w-chars-10" value={dosage} onChange={(e) => setDosage(e.target.value)} />
+                  </div>
+                  <div className="form-group mb-2">
+                    <label htmlFor={`freq-${id}`} className="form-label">
+                      {t('How often?')}
+                    </label>
+                    <input id={`freq-${id}`} className="input w-chars-20 max-w-full" value={frequency} onChange={(e) => setFrequency(e.target.value)} />
+                  </div>
+                </div>
               )}
+            </fieldset>
+            <div className="form-group">
+              <label htmlFor={`note-${id}`} className="form-label">
+                {t('Note for the record')} <span className="font-normal text-muted">{t('(optional)')}</span>
+              </label>
+              <span className="form-hint">{t('For example: Confirmed with the doctor by phone')}</span>
+              <input id={`note-${id}`} className="input" value={note} onChange={(e) => setNote(e.target.value)} />
             </div>
+            <button type="submit" className="btn-primary" disabled={busy}>
+              {busy && <Spinner />}
+              {t('Save decision')}
+            </button>
+          </form>
+        ) : (
+          <div className="inset">
+            <p>
+              {t('Resolved {when} by', { when: formatDateTime(conflict.resolvedAt) })} <strong>{tName(conflict.resolvedByName)}</strong>:{' '}
+              {conflict.resolution === 'custom' ? t('corrected to') : conflict.resolution === 'current' ? t('kept dose A,') : t('chose dose B,')}{' '}
+              <strong>{conflict.resolvedValue ? describe(conflict.resolvedValue) : ''}</strong>
+            </p>
+            {conflict.note && (
+              <p className="mt-1">
+                {t('Note')}: {conflict.note}
+              </p>
+            )}
           </div>
         )}
       </article>
@@ -236,43 +215,46 @@ export default function ConflictDashboard() {
   return (
     <div>
       <PageHeader
+        caption={t('District hospital')}
         title={t('Dose reviews')}
-        subtitle={t('Sometimes two devices change the same medicine dose while they are offline. The system never guesses a dose: you choose the correct one here, and every device gets your decision.')}
-        actions={
-          <button className="btn-plain" onClick={() => void reload()} disabled={!connected}>
-            <Icon name="sync" className="h-5 w-5" /> {t('Refresh')}
-          </button>
-        }
+        lead={t('Sometimes two devices change the same medicine dose while they are offline. The system never guesses a dose: you choose the correct one here, and every device gets your decision.')}
       />
 
-      <div className="segmented mb-6" role="tablist" aria-label={t('Which reviews to show')}>
+      <div className="mb-8 flex flex-wrap gap-x-8 border-b border-rule" role="tablist" aria-label={t('Which reviews to show')}>
         {(['pending_review', 'resolved'] as const).map((s) => (
-          <button key={s} role="tab" aria-selected={tab === s} onClick={() => setTab(s)} className="segmented-item">
-            <Icon name={s === 'pending_review' ? 'clock' : 'checkCircle'} className="h-5 w-5" />
+          <button
+            key={s}
+            role="tab"
+            aria-selected={tab === s}
+            onClick={() => setTab(s)}
+            className={`-mb-px border-b-[5px] pb-2 pt-1 text-base ${tab === s ? 'border-band font-bold' : 'border-transparent text-link underline underline-offset-[0.15em]'}`}
+          >
             {s === 'pending_review' ? t('Waiting for review') : t('Already reviewed')}
-            {s === tab && data && <span className="tabular-nums">({conflicts.length})</span>}
+            {s === tab && data && ` (${conflicts.length})`}
           </button>
         ))}
+        <button className="btn-text mb-2 ml-auto self-end text-sm" onClick={() => void reload()} disabled={!connected}>
+          {t('Refresh')}
+        </button>
       </div>
 
       {!connected ? (
         <OfflineNotice message={t('Dose reviews need the internet, because your decision has to reach every device. Patient records still work offline.')} />
       ) : loading && !data ? (
-        <SkeletonRows rows={3} />
+        <Loading />
       ) : error ? (
         <ErrorNotice message={`${t('Could not load the dose reviews:')} ${t(error)}`} onRetry={() => void reload()} />
       ) : conflicts.length === 0 ? (
-        <div className="card">
-          <EmptyState
-            icon={tab === 'pending_review' ? 'checkCircle' : 'clock'}
-            title={tab === 'pending_review' ? t('Nothing to review') : t('No reviews yet')}
-            message={tab === 'pending_review' ? t('When two devices change the same dose while offline, it will appear here.') : t('Doses you or other reviewers decide will be listed here.')}
-          />
+        <div>
+          <h2 className="heading-m">{tab === 'pending_review' ? t('Nothing to review') : t('No reviews yet')}</h2>
+          <p className="mt-2">
+            {tab === 'pending_review' ? t('When two devices change the same dose while offline, it will appear here.') : t('Doses you or other reviewers decide will be listed here.')}
+          </p>
         </div>
       ) : (
-        <ol className="space-y-6" aria-label={t('Dose reviews, newest first')}>
+        <ol className="space-y-0" aria-label={t('Dose reviews, newest first')}>
           {conflicts.map((c) => (
-            <ConflictCard key={c.id} conflict={c} onResolved={removeResolved} />
+            <ConflictCase key={c.id} conflict={c} onResolved={removeResolved} />
           ))}
         </ol>
       )}

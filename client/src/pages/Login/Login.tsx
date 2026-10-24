@@ -1,18 +1,18 @@
 /**
- * Sign-in. First "Where do you work?" (a health centre, or the district
- * hospital), then the username and password for that place. The same card
- * switches to "Create an account". Each account opens only in its own place;
- * the server says so in plain words if someone picks the wrong one.
+ * Sign-in, laid out like a public service form: one question at the top
+ * ("Where do you work?"), then the username and password for that place, one
+ * green button. "Create an account" swaps the same form to registration. Each
+ * account opens only in its own place; the server says so in plain words.
  */
-import { useState, type InputHTMLAttributes, type ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState, type ReactNode } from 'react';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PORTAL_ROLES, ROLE_LABELS, type Portal, type Role } from '@shared/types';
-import { Icon, type IconName } from '../../components/Icon';
 import { Spinner } from '../../components/ui';
+import { Mark } from '../../components/Mark';
 import { deviceLabel, profileKey } from '../../lib/deviceProfile';
 import { useI18n } from '../../i18n/useI18n';
 import { t as translate } from '../../i18n/i18n';
@@ -45,18 +45,16 @@ const ROLE_HELP: Partial<Record<Role, string>> = {
   auditor: 'Can read the change history; cannot edit',
 };
 
-const PLACES: Record<Portal, { title: string; help: string; icon: IconName; signIn: string; create: string }> = {
+const PLACES: Record<Portal, { title: string; help: string; signIn: string; create: string }> = {
   phc: {
     title: 'Primary Health Centre (PHC)',
     help: 'For doctors, nurses and health workers. Works without internet.',
-    icon: 'clinic',
     signIn: 'Sign in to PHC',
     create: 'Create PHC account',
   },
   district: {
     title: 'District hospital',
     help: 'For administrators, dose reviewers and auditors.',
-    icon: 'hospital',
     signIn: 'Sign in to district system',
     create: 'Create district account',
   },
@@ -80,41 +78,47 @@ function rememberPortal(p: Portal) {
   }
 }
 
-function FieldError({ id, message }: { id: string; message?: string }) {
+/** "There is a problem" box at the top of the form, each line linking to its field. */
+function ErrorSummary({ errors, server, ids }: { errors: FieldErrors; server: string | null; ids: Record<string, string> }) {
   useI18n();
-  if (!message) return null;
+  const items = Object.entries(errors)
+    .filter(([, e]) => e?.message)
+    .map(([field, e]) => ({ id: ids[field], message: String(e!.message) }));
+  if (!items.length && !server) return null;
   return (
-    <p className="form-error" id={id}>
-      <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" /> {translate(message)}
-    </p>
+    <div className="error-summary" role="alert" tabIndex={-1}>
+      <h2 className="heading-m">{translate('There is a problem')}</h2>
+      <ul className="mt-3 space-y-1">
+        {server && <li className="font-bold text-alert">{translate(server)}</li>}
+        {items.map((i) => (
+          <li key={i.id}>
+            <a href={`#${i.id}`} className="font-bold text-alert underline">
+              {translate(i.message)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
-function Field({
-  id,
-  label,
-  help,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  help?: string;
-  error?: string;
-  children: ReactNode;
-}) {
+function Field({ id, label, hint, error, children }: { id: string; label: string; hint?: string; error?: string; children: ReactNode }) {
   return (
-    <div>
+    <div className={`form-group ${error ? 'form-group-error' : ''}`}>
       <label htmlFor={id} className="form-label">
         {label}
       </label>
-      {help && (
-        <p className="form-help -mt-1 mb-1.5" id={`${id}-help`}>
-          {help}
-        </p>
+      {hint && (
+        <span className="form-hint" id={`${id}-hint`}>
+          {hint}
+        </span>
+      )}
+      {error && (
+        <span className="form-error" id={`${id}-error`}>
+          {translate(error)}
+        </span>
       )}
       {children}
-      <FieldError id={`${id}-error`} message={error} />
     </div>
   );
 }
@@ -122,31 +126,20 @@ function Field({
 function PlaceChoice({ portal, onChange }: { portal: Portal; onChange: (p: Portal) => void }) {
   const { t } = useI18n();
   return (
-    <fieldset>
-      <legend className="form-label">{t('Where do you work?')}</legend>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {(['phc', 'district'] as const).map((p) => {
-          const place = PLACES[p];
-          const checked = portal === p;
-          return (
-            <label
-              key={p}
-              className={`flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 ${
-                checked
-                  ? 'border-brand-600 bg-brand-50 dark:border-brand-300 dark:bg-brand-950'
-                  : 'border-slate-300 bg-white hover:border-brand-600 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-brand-300'
-              }`}
-            >
-              <input type="radio" name="place" value={p} checked={checked} onChange={() => onChange(p)} className="mt-1 h-5 w-5 flex-shrink-0 accent-brand-600" />
-              <span className="min-w-0">
-                <span className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
-                  <Icon name={place.icon} className="h-5 w-5 flex-shrink-0" /> {t(place.title)}
-                </span>
-                <span className="mt-1 block text-sm text-slate-700 dark:text-slate-300">{t(place.help)}</span>
+    <fieldset className="form-group">
+      <legend className="form-label-l">{t('Where do you work?')}</legend>
+      <div className="radios">
+        {(['phc', 'district'] as const).map((p) => (
+          <label key={p} className="radio">
+            <input type="radio" name="place" value={p} checked={portal === p} onChange={() => onChange(p)} aria-describedby={`place-${p}-hint`} />
+            <span className="radio-label">
+              <span className="block font-bold">{t(PLACES[p].title)}</span>
+              <span className="block text-muted" id={`place-${p}-hint`}>
+                {t(PLACES[p].help)}
               </span>
-            </label>
-          );
-        })}
+            </span>
+          </label>
+        ))}
       </div>
     </fieldset>
   );
@@ -173,53 +166,52 @@ function SignInForm({ portal, onCreate }: { portal: Portal; onCreate: () => void
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-5" aria-label={t(PLACES[portal].signIn)}>
-      <Field id="login-username" label={t('Username')} error={errors.username?.message}>
-        <input
-          id="login-username"
-          className={`form-input ${errors.username ? 'form-input-error' : ''}`}
-          autoComplete="username"
-          autoCapitalize="none"
-          spellCheck={false}
-          aria-invalid={errors.username ? true : undefined}
-          aria-describedby={errors.username ? 'login-username-error' : undefined}
-          {...form.register('username')}
-        />
-      </Field>
-      <Field id="login-password" label={t('Password')} error={errors.password?.message}>
-        <div className="flex gap-2">
+    <>
+      <form onSubmit={form.handleSubmit(onSubmit)} noValidate aria-label={t(PLACES[portal].signIn)}>
+        <ErrorSummary errors={errors} server={serverError} ids={{ username: 'login-username', password: 'login-password' }} />
+        <Field id="login-username" label={t('Username')} error={errors.username?.message}>
           <input
-            id="login-password"
-            type={showPassword ? 'text' : 'password'}
-            className={`form-input ${errors.password ? 'form-input-error' : ''}`}
-            autoComplete="current-password"
-            aria-invalid={errors.password ? true : undefined}
-            aria-describedby={errors.password ? 'login-password-error' : undefined}
-            {...form.register('password')}
+            id="login-username"
+            className={`input w-chars-20 max-w-full ${errors.username ? 'input-error' : ''}`}
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            aria-invalid={errors.username ? true : undefined}
+            aria-describedby={errors.username ? 'login-username-error' : undefined}
+            {...form.register('username')}
           />
-          <button type="button" className="btn-plain flex-shrink-0" onClick={() => setShowPassword((s) => !s)} aria-pressed={showPassword}>
-            <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-5 w-5" />
-            {showPassword ? t('Hide') : t('Show')}
-          </button>
-        </div>
-      </Field>
-      {serverError && (
-        <div role="alert" className="notice-danger">
-          <Icon name="alert" className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>{t(serverError)}</p>
-        </div>
-      )}
-      <button type="submit" className="btn-primary w-full" disabled={form.formState.isSubmitting}>
-        {form.formState.isSubmitting ? <Spinner /> : <Icon name="arrowRight" className="h-5 w-5" />}
-        {t(PLACES[portal].signIn)}
-      </button>
-      <p className="text-center text-base text-slate-700 dark:text-slate-300">
-        {t('First time here?')}{' '}
+        </Field>
+        <Field id="login-password" label={t('Password')} error={errors.password?.message}>
+          <div className="flex max-w-full items-stretch gap-3">
+            <input
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              className={`input w-chars-20 max-w-full ${errors.password ? 'input-error' : ''}`}
+              autoComplete="current-password"
+              aria-invalid={errors.password ? true : undefined}
+              aria-describedby={errors.password ? 'login-password-error' : undefined}
+              {...form.register('password')}
+            />
+            <button type="button" className="btn-secondary" onClick={() => setShowPassword((s) => !s)} aria-pressed={showPassword} aria-controls="login-password">
+              {showPassword ? t('Hide') : t('Show')}
+            </button>
+          </div>
+        </Field>
+        <button type="submit" className="btn-primary" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting && <Spinner />}
+          {t(PLACES[portal].signIn)}
+        </button>
+      </form>
+
+      <h2 className="heading-m mt-12">{t('First time here?')}</h2>
+      <p className="mt-2">
+        {t('Ask your medical officer for an account, or')}{' '}
         <button type="button" className="link" onClick={onCreate}>
           {t('Create an account')}
         </button>
+        .
       </p>
-    </form>
+    </>
   );
 }
 
@@ -249,66 +241,62 @@ function RegisterForm({ portal, onBack }: { portal: Portal; onBack: () => void }
     }
   };
 
-  const input = (name: 'name' | 'username' | 'password' | 'facility', props: InputHTMLAttributes<HTMLInputElement> = {}) => (
+  const input = (name: 'name' | 'username' | 'password' | 'facility', width: string, extra: Record<string, unknown> = {}) => (
     <input
       id={`reg-${name}`}
-      className={`form-input ${errors[name] ? 'form-input-error' : ''}`}
+      className={`input ${width} max-w-full ${errors[name] ? 'input-error' : ''}`}
       aria-invalid={errors[name] ? true : undefined}
-      aria-describedby={errors[name] ? `reg-${name}-error` : undefined}
-      {...props}
+      aria-describedby={[`reg-${name}-hint`, errors[name] && `reg-${name}-error`].filter(Boolean).join(' ')}
+      {...extra}
       {...form.register(name)}
     />
   );
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-5" aria-label={t(PLACES[portal].create)}>
+    <form onSubmit={form.handleSubmit(onSubmit)} noValidate aria-label={t(PLACES[portal].create)}>
+      <ErrorSummary
+        errors={errors}
+        server={serverError}
+        ids={{ name: 'reg-name', facility: 'reg-facility', username: 'reg-username', password: 'reg-password' }}
+      />
       <Field id="reg-name" label={t('Full name')} error={errors.name?.message}>
-        {input('name', { autoComplete: 'name' })}
+        {input('name', 'w-full', { autoComplete: 'name' })}
       </Field>
       {portal === 'phc' ? (
-        <Field id="reg-facility" label={t('PHC name')} help={t('For example: PHC Hadapsar')} error={errors.facility?.message}>
-          {input('facility')}
+        <Field id="reg-facility" label={t('PHC name')} hint={t('For example: PHC Hadapsar')} error={errors.facility?.message}>
+          {input('facility', 'w-full')}
         </Field>
       ) : (
-        <fieldset>
+        <fieldset className="form-group">
           <legend className="form-label">{t('What is your job?')}</legend>
-          <div className="grid gap-2">
+          <div className="radios">
             {PORTAL_ROLES.district.map((r) => (
-              <label
-                key={r}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border-2 border-slate-300 p-3 hover:border-brand-600 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:border-slate-600 dark:has-[:checked]:border-brand-300 dark:has-[:checked]:bg-brand-950"
-              >
-                <input type="radio" value={r} className="mt-1 h-5 w-5 flex-shrink-0 accent-brand-600" {...form.register('role')} />
-                <span>
-                  <span className="block font-bold text-slate-900 dark:text-white">{t(ROLE_LABELS[r])}</span>
-                  <span className="block text-sm text-slate-700 dark:text-slate-300">{t(ROLE_HELP[r] ?? '')}</span>
+              <label key={r} className="radio">
+                <input type="radio" value={r} {...form.register('role')} />
+                <span className="radio-label">
+                  <span className="block font-bold">{t(ROLE_LABELS[r])}</span>
+                  <span className="block text-muted">{t(ROLE_HELP[r] ?? '')}</span>
                 </span>
               </label>
             ))}
           </div>
         </fieldset>
       )}
-      <Field id="reg-username" label={t('Choose a username')} help={t('You will type this every time you sign in.')} error={errors.username?.message}>
-        {input('username', { autoComplete: 'username', autoCapitalize: 'none', spellCheck: false })}
+      <Field id="reg-username" label={t('Choose a username')} hint={t('You will type this every time you sign in.')} error={errors.username?.message}>
+        {input('username', 'w-chars-20', { autoComplete: 'username', autoCapitalize: 'none', spellCheck: false })}
       </Field>
-      <Field id="reg-password" label={t('Choose a password')} help={t('At least 6 characters.')} error={errors.password?.message}>
-        {input('password', { type: 'password', autoComplete: 'new-password' })}
+      <Field id="reg-password" label={t('Choose a password')} hint={t('At least 6 characters.')} error={errors.password?.message}>
+        {input('password', 'w-chars-20', { type: 'password', autoComplete: 'new-password' })}
       </Field>
-      {serverError && (
-        <div role="alert" className="notice-danger">
-          <Icon name="alert" className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>{t(serverError)}</p>
-        </div>
-      )}
-      <button type="submit" className="btn-primary w-full" disabled={form.formState.isSubmitting}>
-        {form.formState.isSubmitting ? <Spinner /> : <Icon name="check" className="h-5 w-5" />}
-        {t(PLACES[portal].create)}
-      </button>
-      <p className="text-center">
+      <div className="flex flex-wrap items-center gap-6">
+        <button type="submit" className="btn-primary" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting && <Spinner />}
+          {t(PLACES[portal].create)}
+        </button>
         <button type="button" className="link" onClick={onBack}>
           {t('I already have an account: sign in')}
         </button>
-      </p>
+      </div>
     </form>
   );
 }
@@ -318,80 +306,60 @@ export function Login() {
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
   const { t } = useI18n();
 
-  const points: [IconName, string][] = [
-    ['wifiOff', 'Keeps working when the internet is off.'],
-    ['sync', 'Sends records to the district hospital when you are back online.'],
-    ['lock', 'Patient records are locked (encrypted) on this device.'],
-  ];
-
   return (
-    <div className="flex min-h-screen flex-col bg-slate-100 dark:bg-slate-950">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="" className="h-10 w-10" />
-            <span className="text-xl font-bold text-slate-900 dark:text-white">HealthSync</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Icon name="globe" className="h-5 w-5 text-slate-700 dark:text-slate-300" />
-            <span className="sr-only">{t('Language')}</span>
-            <LanguageSwitch className="flex gap-2" buttonClassName="segmented-item min-h-[2.5rem] px-3 py-1.5" />
-          </div>
+    <div className="flex min-h-screen flex-col">
+      <header className="bg-band text-white">
+        <div className="mx-auto flex max-w-page flex-wrap items-center gap-4 px-4 py-3 sm:px-6">
+          <span className="flex items-center gap-2.5">
+            <Mark className="h-7 w-7" />
+            <span className="text-xl font-bold tracking-tight">HealthSync</span>
+          </span>
+          <LanguageSwitch light className="ml-auto" />
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_minmax(0,34rem)] lg:items-start lg:py-14">
-        <section className="lg:pt-6" aria-labelledby="about-h">
-          <h2 id="about-h" className="text-[1.75rem] font-bold leading-tight text-slate-900 sm:text-[2.25rem] dark:text-white">
-            {t('Patient records for health centres')}
-          </h2>
-          <p className="mt-3 max-w-xl text-lg text-slate-700 dark:text-slate-300">
-            {t('Record patients, allergies, medicines and check-ups. Everything is saved on this device first.')}
-          </p>
-          <ul className="mt-6 space-y-4">
-            {points.map(([icon, text]) => (
-              <li key={text} className="flex items-start gap-3 text-base text-slate-800 dark:text-slate-200">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-800 dark:bg-brand-950 dark:text-brand-200">
-                  <Icon name={icon} className="h-5 w-5" />
-                </span>
-                <span className="pt-2">{t(text)}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <main className="mx-auto grid w-full max-w-page flex-1 gap-10 px-4 pb-16 pt-8 sm:px-6 sm:pt-12 md:grid-cols-[2fr_1fr]">
+        <div>
+          <h1 className="heading-xl">{mode === 'signin' ? t('Sign in') : t('Create an account')}</h1>
+          <p className="lead mt-4">{t('Patient records for health centres. Everything is saved on this device first.')}</p>
+          <div className="mt-8">
+            <PlaceChoice portal={portal} onChange={setPortal} />
+            {mode === 'signin' ? (
+              <SignInForm key={`in-${portal}`} portal={portal} onCreate={() => setMode('register')} />
+            ) : (
+              <RegisterForm key={`reg-${portal}`} portal={portal} onBack={() => setMode('signin')} />
+            )}
+          </div>
+        </div>
 
-        <section className="card space-y-6 sm:p-8" aria-labelledby="signin-h">
-          <h1 id="signin-h" className="page-title">
-            {mode === 'signin' ? t('Sign in') : t('Create an account')}
-          </h1>
-          <PlaceChoice portal={portal} onChange={setPortal} />
-          {mode === 'signin' ? (
-            <SignInForm key={`in-${portal}`} portal={portal} onCreate={() => setMode('register')} />
-          ) : (
-            <RegisterForm key={`reg-${portal}`} portal={portal} onBack={() => setMode('signin')} />
-          )}
-          <details className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-base dark:border-slate-700 dark:bg-slate-800/60">
-            <summary className="cursor-pointer font-semibold text-slate-900 dark:text-white">{t('Demo accounts for the project')}</summary>
-            <dl className="mt-3 space-y-1 text-slate-800 dark:text-slate-200">
-              <div className="flex flex-wrap gap-x-2">
-                <dt className="font-semibold">{t('PHC')}:</dt>
-                <dd className="font-mono">worker1 … worker5</dd>
-              </div>
-              <div className="flex flex-wrap gap-x-2">
-                <dt className="font-semibold">{t('District hospital')}:</dt>
-                <dd className="font-mono">admin, reviewer, auditor</dd>
-              </div>
-              <div className="flex flex-wrap gap-x-2">
-                <dt className="font-semibold">{t('Password')}:</dt>
-                <dd className="font-mono">password123</dd>
-              </div>
-            </dl>
+        <aside className="border-t-[5px] border-band pt-4 md:mt-[4.5rem]">
+          <h2 className="heading-m">{t('Works without internet')}</h2>
+          <p className="mt-2">{t('The first sign-in needs internet. After that, the PHC works offline.')}</p>
+          <p className="mt-3">{t('Records are locked (encrypted) on this device and sent to the district hospital when you are back online.')}</p>
+          <details className="details mt-6">
+            <summary>{t('Demo accounts for the project')}</summary>
+            <div className="details-body">
+              <dl className="space-y-2">
+                <div>
+                  <dt className="font-bold">{t('PHC')}</dt>
+                  <dd className="font-mono">worker1 … worker5</dd>
+                </div>
+                <div>
+                  <dt className="font-bold">{t('District hospital')}</dt>
+                  <dd className="font-mono">admin, reviewer, auditor</dd>
+                </div>
+                <div>
+                  <dt className="font-bold">{t('Password')}</dt>
+                  <dd className="font-mono">password123</dd>
+                </div>
+              </dl>
+            </div>
           </details>
-        </section>
+        </aside>
       </main>
 
-      <footer className="px-4 pb-6 text-center text-sm text-slate-700 dark:text-slate-300">
-        {t(deviceLabel)} · {t('The first sign-in needs internet. After that, the PHC works offline.')}
+      <footer className="border-t-[3px] border-band bg-panel">
+        <p className="mx-auto max-w-page px-4 py-5 text-sm text-muted sm:px-6">{t(deviceLabel)}</p>
       </footer>
     </div>
   );

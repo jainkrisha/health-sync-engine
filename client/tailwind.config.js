@@ -1,38 +1,37 @@
 /** @type {import('tailwindcss').Config} */
+// Colours are CSS variables (see src/index.css), so the dark screen swaps one
+// set of values instead of every class carrying a dark: twin.
+const v = (name) => `rgb(var(--${name}) / <alpha-value>)`;
+
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // HealthSync palette: calm clinical blue for actions and links, on
-        // Tailwind's own slate neutrals. Status colours are Tailwind's green
-        // (done, saved), amber (waiting, needs a look) and red (danger, severe
-        // allergy). Every text pairing used in the app meets WCAG AA contrast.
-        brand: {
-          50: '#eef4fb',
-          100: '#d9e6f5',
-          200: '#b5cdeb',
-          300: '#86acdb',
-          400: '#5287c6',
-          500: '#2f6bb0',
-          600: '#1f5fa6',
-          700: '#194e8a',
-          800: '#153f6f',
-          900: '#12345a',
-          950: '#0b2039',
-        },
+        ink: v('ink'), // body text
+        muted: v('muted'), // hints and secondary text
+        paper: v('paper'), // page
+        panel: v('panel'), // table heads, details, quiet areas
+        line: v('line'), // form borders and rules
+        rule: v('rule'), // light row separators
+        link: v('link'),
+        band: v('band'), // the header band
+        go: v('go'), // primary action
+        'go-edge': v('go-edge'),
+        alert: v('alert'), // allergies, errors, removal
+        'alert-soft': v('alert-soft'),
+        warn: v('warn'), // waiting, not sent yet
+        'warn-soft': v('warn-soft'),
+        ok: v('ok'),
+        focus: v('focus'),
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
+        sans: ['"Atkinson Hyperlegible Next"', '"Atkinson Hyperlegible"', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['"Atkinson Hyperlegible Mono"', 'ui-monospace', 'Consolas', 'monospace'],
       },
-      borderRadius: {
-        card: '0.75rem',
-      },
-      boxShadow: {
-        card: '0 1px 2px 0 rgb(15 23 42 / 0.06)',
-        pop: '0 12px 32px -8px rgb(15 23 42 / 0.25)',
+      maxWidth: {
+        page: '60rem',
       },
       zIndex: {
         header: '20',

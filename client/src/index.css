@@ -1,179 +1,285 @@
-/* Inter loads when online; offline the app uses the device's own UI font (not an error). */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/*
+ * HealthSync design system.
+ *
+ * The app is a clinical register, not a dashboard. It borrows from the
+ * patterns people already meet in public health services and hospital
+ * records (GOV.UK and NHS service design, the patient banner of clinical
+ * systems, the red allergy wristband): text on white, ruled rows instead of
+ * floating cards, one obvious green button per page, underlined blue links,
+ * and a thick yellow focus that is visible on any screen.
+ *
+ * Type is Atkinson Hyperlegible Next, drawn by the Braille Institute so that
+ * letters people confuse (I l 1, 0 O, rn m) stay distinct for readers with
+ * low vision. 16px on phones, 19px from tablets up.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  html {
-    font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-    /* 17px base: easier to read on tablets held at arm's length. Every rem size scales with it. */
-    font-size: 106.25%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
-    /* Anchored sections land below the sticky top bar. */
-    scroll-padding-top: 6rem;
+  :root {
+    --ink: 11 12 12;
+    --muted: 80 90 95;
+    --paper: 255 255 255;
+    --panel: 243 242 241;
+    --line: 80 90 95;
+    --rule: 177 180 182;
+    --link: 29 95 168;
+    --band: 10 79 71;
+    --go: 0 112 60;
+    --go-edge: 0 45 24;
+    --alert: 177 14 30;
+    --alert-soft: 253 236 236;
+    --warn: 122 72 0;
+    --warn-soft: 255 244 204;
+    --ok: 0 112 60;
+    --focus: 255 221 0;
     color-scheme: light;
   }
   html.dark {
+    --ink: 236 237 236;
+    --muted: 177 182 186;
+    --paper: 17 20 22;
+    --panel: 29 33 36;
+    --line: 177 182 186;
+    --rule: 59 66 71;
+    --link: 138 184 236;
+    --band: 8 47 43;
+    --go: 29 125 75;
+    --go-edge: 6 48 27;
+    --alert: 255 138 128;
+    --alert-soft: 58 20 20;
+    --warn: 245 196 81;
+    --warn-soft: 51 40 6;
+    --ok: 108 195 143;
     color-scheme: dark;
   }
 
+  html {
+    font-family: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 1rem;
+  }
+  @media (min-width: 641px) {
+    html {
+      font-size: 118.75%; /* 19px */
+    }
+  }
+
   body {
-    @apply min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+    @apply min-h-screen bg-paper text-ink;
     margin: 0;
-    line-height: 1.55;
+    line-height: 1.45;
   }
 
   h1, h2, h3 {
     text-wrap: balance;
   }
-  p {
-    text-wrap: pretty;
-  }
 
-  /* A thick yellow ring with a dark edge: visible on every background. */
+  /* Yellow block with a black edge: the focus style of UK public services, visible on every colour. */
   :focus-visible {
-    outline: 3px solid #f5b800;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 5px #0f172a;
-    border-radius: 0.375rem;
+    outline: 3px solid rgb(var(--focus));
+    outline-offset: 0;
+    box-shadow: 0 0 0 6px #0b0c0c;
+  }
+  a:focus-visible {
+    outline: none;
+    box-shadow: 0 -2px rgb(var(--focus)), 0 4px #0b0c0c;
+    background: rgb(var(--focus));
+    color: #0b0c0c;
+    text-decoration: none;
   }
 
   ::selection {
-    @apply bg-brand-200 text-brand-950;
+    background: rgb(var(--focus));
+    color: #0b0c0c;
   }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
-      animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
     }
   }
 }
 
 @layer components {
-  /* ── Surfaces ─────────────────────────────────────────────────────────── */
-  .card {
-    @apply rounded-card border border-slate-200 bg-white p-5 shadow-card sm:p-6 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none;
+  /* ── Headings ─────────────────────────────────────────────────────────── */
+  .caption {
+    @apply mb-1 block text-lg text-muted;
+  }
+  .heading-xl {
+    @apply text-[2rem] font-bold leading-[1.1] sm:text-[2.5rem];
+  }
+  .heading-l {
+    @apply text-2xl font-bold leading-tight sm:text-[1.75rem];
+  }
+  .heading-m {
+    @apply text-xl font-bold leading-snug;
+  }
+  .heading-s {
+    @apply text-base font-bold;
+  }
+  .lead {
+    @apply text-lg leading-snug sm:text-xl;
+  }
+  .section {
+    @apply mt-10 border-t-2 border-ink pt-5 first:mt-0 first:border-0 first:pt-0;
   }
 
-  /* ── Buttons: at least 48px tall, text always beside the icon ─────────── */
-  .btn {
-    @apply inline-flex min-h-[3rem] select-none items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-base font-semibold leading-tight
-      transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  /* ── Links and buttons ────────────────────────────────────────────────── */
+  .link {
+    @apply text-link underline decoration-1 underline-offset-[0.15em] hover:decoration-[3px];
   }
+  .btn {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-[2px] px-4 pb-[0.55rem] pt-[0.6rem] text-center text-base font-semibold leading-tight
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  /* One green button per page: the thing to do next. The darker bottom edge makes it read as pressable. */
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 dark:bg-brand-500 dark:hover:bg-brand-400 dark:hover:text-slate-950;
+    @apply btn bg-go text-white shadow-[0_2px_0_rgb(var(--go-edge))] hover:brightness-90 active:translate-y-[2px] active:shadow-none;
   }
   .btn-secondary {
-    @apply btn border-2 border-brand-600 bg-white text-brand-700 hover:bg-brand-50 dark:border-brand-300 dark:bg-transparent dark:text-brand-200 dark:hover:bg-brand-950;
+    @apply btn bg-panel text-ink shadow-[0_2px_0_rgb(var(--rule))] hover:brightness-95 active:translate-y-[2px] active:shadow-none;
   }
-  .btn-plain {
-    @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800;
+  .btn-warning {
+    @apply btn bg-[#b10e1e] text-white shadow-[0_2px_0_#55070e] hover:brightness-90 active:translate-y-[2px] active:shadow-none;
   }
-  .btn-danger {
-    @apply btn bg-red-700 text-white hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-500;
+  .btn-start {
+    @apply btn-primary px-5 text-lg font-bold;
   }
-  .btn-danger-outline {
-    @apply btn border-2 border-red-700 bg-white text-red-700 hover:bg-red-50 dark:border-red-400 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-950;
-  }
-  .btn-ghost {
-    @apply btn px-3 font-semibold text-brand-700 underline-offset-4 hover:bg-brand-50 hover:underline dark:text-brand-300 dark:hover:bg-slate-800;
-  }
-  .btn-sm {
-    @apply min-h-[2.5rem] px-3.5 py-2 text-sm;
-  }
-  .btn-icon {
-    @apply btn h-12 w-12 p-0 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800;
-  }
-  .link {
-    @apply font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-900 hover:decoration-2 dark:text-brand-300 dark:hover:text-brand-200;
+  .btn-text {
+    @apply link inline-flex items-center gap-1.5 font-semibold disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* ── Forms ────────────────────────────────────────────────────────────── */
+  .form-group {
+    @apply mb-7;
+  }
+  .form-group-error {
+    @apply border-l-[5px] border-alert pl-4;
+  }
   .form-label {
-    @apply mb-1.5 block text-base font-semibold text-slate-900 dark:text-slate-100;
+    @apply mb-1 block text-base font-bold;
   }
-  .form-input {
-    @apply block min-h-[3rem] w-full rounded-lg border-2 border-slate-400 bg-white px-3.5 py-2.5 text-base text-slate-900
-      placeholder:text-slate-500 hover:border-slate-500 focus:border-brand-600 focus:outline-none
-      disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500
-      dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-brand-300;
+  .form-label-l {
+    @apply mb-2 block text-xl font-bold;
   }
-  .form-input-error {
-    @apply border-red-700 dark:border-red-400;
+  .form-hint {
+    @apply mb-2 block text-muted;
   }
   .form-error {
-    @apply mt-1.5 flex items-start gap-1.5 text-sm font-semibold text-red-700 dark:text-red-300;
+    @apply mb-2 block font-bold text-alert;
   }
-  .form-help {
-    @apply mt-1 text-sm text-slate-600 dark:text-slate-300;
+  .input {
+    @apply block h-[2.5rem] w-full rounded-none border-2 border-line bg-paper px-2 text-base text-ink focus:border-ink;
+  }
+  .input-error {
+    @apply border-alert;
+  }
+  .select {
+    @apply input w-auto min-w-[12rem] pr-8;
+  }
+  /* Field widths follow the expected answer, a cue to what goes in it. */
+  .w-chars-4 { width: 5.5ch; }
+  .w-chars-7 { width: 9ch; }
+  .w-chars-10 { width: 12ch; }
+  .w-chars-20 { width: 22ch; }
+
+  .radios {
+    @apply space-y-3;
+  }
+  .radio {
+    @apply flex cursor-pointer items-start gap-3;
+  }
+  .radio input {
+    @apply mt-0.5 h-7 w-7 flex-shrink-0 cursor-pointer accent-[rgb(var(--ink))];
+  }
+  .radio-label {
+    @apply pt-0.5;
   }
 
-  /* ── Status text: an icon and coloured words, never a coloured capsule ── */
-  .badge {
-    @apply inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold;
+  /* Listed at the top of a form when something needs fixing; each item jumps to its field. */
+  .error-summary {
+    @apply mb-8 border-[5px] border-alert p-4 sm:p-5;
   }
-  .badge-ok { @apply badge text-green-800 dark:text-green-300; }
-  .badge-info { @apply badge text-brand-700 dark:text-brand-300; }
-  .badge-warning { @apply badge text-amber-800 dark:text-amber-300; }
-  .badge-danger { @apply badge text-red-700 dark:text-red-300; }
-  .badge-muted { @apply badge text-slate-600 dark:text-slate-300; }
 
-  /* Notice boxes: a coloured left edge, an icon and a plain sentence. */
-  .notice {
-    @apply flex items-start gap-3 rounded-lg border border-l-[6px] px-4 py-3 text-base;
+  /* ── Text blocks ──────────────────────────────────────────────────────── */
+  /* Inset text: a grey rule on the left. Information worth noticing, not a warning. */
+  .inset {
+    @apply my-6 border-l-[10px] border-rule py-1 pl-4;
   }
-  .notice-info { @apply notice border-brand-300 border-l-brand-600 bg-brand-50 text-brand-950 dark:border-brand-800 dark:border-l-brand-400 dark:bg-brand-950 dark:text-brand-100; }
-  .notice-ok { @apply notice border-green-300 border-l-green-700 bg-green-50 text-green-950 dark:border-green-900 dark:border-l-green-400 dark:bg-green-950 dark:text-green-100; }
-  .notice-warning { @apply notice border-amber-300 border-l-amber-600 bg-amber-50 text-amber-950 dark:border-amber-900 dark:border-l-amber-400 dark:bg-amber-950 dark:text-amber-100; }
-  .notice-danger { @apply notice border-red-300 border-l-red-700 bg-red-50 text-red-950 dark:border-red-900 dark:border-l-red-400 dark:bg-red-950 dark:text-red-100; }
+  /* Warning text: bold with a round "!" mark. Used for things that cannot be undone or put a patient at risk. */
+  .warning {
+    @apply flex items-start gap-3 font-bold;
+  }
+  .warning-mark {
+    @apply flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-ink text-xl font-bold leading-none text-paper;
+  }
 
-  /* ── Type ─────────────────────────────────────────────────────────────── */
-  .page-title {
-    @apply text-[1.75rem] font-bold leading-tight text-slate-900 sm:text-[2rem] dark:text-white;
+  /* Status: coloured words after a short bar. Not a coloured capsule. */
+  .status {
+    @apply inline-flex items-center gap-2 font-bold before:inline-block before:content-[''] before:h-[1em] before:w-1.5 before:flex-shrink-0 before:bg-current;
   }
-  .page-subtitle {
-    @apply mt-2 max-w-3xl text-base leading-relaxed text-slate-700 dark:text-slate-300;
+  .status-ok { @apply status text-ok; }
+  .status-warn { @apply status text-warn; }
+  .status-alert { @apply status text-alert; }
+  .status-muted { @apply status text-muted; }
+
+  /* ── Summary list: label, value, change link on ruled rows ────────────── */
+  .summary {
+    @apply border-t border-rule;
   }
-  .section-title {
-    @apply text-xl font-bold text-slate-900 dark:text-white;
+  .summary-row {
+    @apply grid gap-1 border-b border-rule py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_6rem] sm:gap-5;
   }
-  .eyebrow {
-    @apply text-sm font-semibold text-slate-600 dark:text-slate-300;
+  .summary-key {
+    @apply font-bold;
   }
 
   /* ── Tables ───────────────────────────────────────────────────────────── */
-  .table-head {
-    @apply bg-slate-50 px-4 py-3 text-left text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200;
+  .table {
+    @apply w-full border-collapse text-left;
   }
-  .table-cell {
-    @apply px-4 py-3.5 align-top text-base text-slate-800 dark:text-slate-200;
+  .table th,
+  .table td {
+    @apply border-b border-rule py-2.5 pr-5 align-top last:pr-0;
   }
-
-  /* ── Tabs and option groups ───────────────────────────────────────────── */
-  .segmented {
-    @apply inline-flex flex-wrap gap-2;
+  .table thead th {
+    @apply font-bold;
   }
-  .segmented-item {
-    @apply inline-flex min-h-[2.75rem] items-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800
-      hover:border-brand-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-brand-300;
-  }
-  .segmented-item[aria-selected='true'],
-  .segmented-item[aria-pressed='true'] {
-    @apply border-brand-600 bg-brand-600 text-white dark:border-brand-400 dark:bg-brand-400 dark:text-slate-950;
+  .table-num {
+    @apply text-right tabular-nums;
   }
 
-  /* ── Loading ──────────────────────────────────────────────────────────── */
-  .skeleton {
-    @apply rounded-md bg-slate-200 dark:bg-slate-800;
+  /* ── Details (show / hide) ────────────────────────────────────────────── */
+  .details > summary {
+    @apply inline-flex cursor-pointer list-none items-start gap-2 text-link underline decoration-1 underline-offset-[0.15em] hover:decoration-[3px];
+  }
+  .details > summary::-webkit-details-marker {
+    display: none;
+  }
+  .details > summary::before {
+    content: '';
+    @apply mt-[0.45em] h-0 w-0 flex-shrink-0 border-y-[0.4em] border-l-[0.65em] border-y-transparent border-l-current;
+  }
+  .details[open] > summary::before {
+    @apply border-x-[0.4em] border-b-0 border-t-[0.65em] border-x-transparent border-t-current;
+  }
+  .details-body {
+    @apply mt-3 border-l-[5px] border-rule py-1 pl-4;
+  }
+
+  /* ── Patient banner and allergy band ──────────────────────────────────── */
+  /* The banner clinical systems put above every record, so the right patient is never in doubt. */
+  .patient-banner {
+    @apply border-b-2 border-t-[6px] border-ink bg-panel px-4 py-3 sm:px-5;
+  }
+  /* Red like a hospital allergy wristband. Shown first on every record that has one. */
+  .allergy-band {
+    @apply border-l-[10px] border-alert bg-alert-soft px-4 py-3;
   }
 }

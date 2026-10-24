@@ -341,7 +341,7 @@ function CommitRow({
           {relativeTime(commit.timestamp)}
         </time>
         {node.parents.length > 1 && (
-          <span className="badge-muted">{t('Merge of {hashes}', { hashes: node.parents.map(hashOf).join(' + ') })}</span>
+          <span className="status-muted">{t('Merge of {hashes}', { hashes: node.parents.map(hashOf).join(' + ') })}</span>
         )}
         <span
           className="bg-clock"
@@ -353,7 +353,7 @@ function CommitRow({
       {shown.length > 0 && (
         <div className="bg-decisions">
           {shown.map((d) => (
-            <span key={d.id} className={OUTCOME_STYLE[d.outcome] ?? 'badge-muted'} title={translateReport(d.report)}>
+            <span key={d.id} className={OUTCOME_STYLE[d.outcome] ?? 'status-muted'} title={translateReport(d.report)}>
               {t(OUTCOME_LABEL[d.outcome] ?? d.outcome)} · {t(RULE_LABEL[d.rule] ?? d.rule)}
             </span>
           ))}
@@ -417,7 +417,7 @@ function MergeRow({
         <p className="bg-msg">
           {pending ? t('Merge conflict') : t('Merged')} · {t('{name} dose', { name: tName(conflict.label) })}
         </p>
-        <span className={pending ? 'badge-warning' : 'badge-ok'}>
+        <span className={pending ? 'status-warn' : 'status-ok'}>
           {pending ? t('Waiting for review') : t('Resolved by {name}', { name: tName(conflict.resolvedByName) ?? t('reviewer') })}
         </span>
       </div>
@@ -455,12 +455,12 @@ function MergeRow({
         <p className="bg-merge-foot">
           {t('The record keeps the stored dose until someone decides.')}{' '}
           <Link to="/conflicts" className="bg-link">
-            {t('Open in Conflict Review')} <Icon name="arrowRight" className="inline h-3 w-3" />
+            {t('Open in Dose reviews')} <Icon name="arrowRight" className="inline h-3 w-3" />
           </Link>
         </p>
       ) : (
         <p className="bg-merge-foot">
-          <Icon name="checkCircle" className="inline h-3.5 w-3.5 text-green-600" />{' '}
+          <Icon name="checkCircle" className="inline h-3.5 w-3.5 text-ok" />{' '}
           {t(CHOICE_TEXT[conflict.resolution ?? ''] ?? 'Resolved')}:{' '}
           <b>
             {dose(conflict.resolvedValue)}

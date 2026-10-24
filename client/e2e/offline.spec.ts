@@ -28,12 +28,12 @@ test('records can be created and read with no network, then sync', async ({ brow
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: /Hello/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'PHC Offline Test' })).toBeVisible();
   // The strip says the work stays on this device ("Offline" or "Cannot reach the server").
   await expect(page.getByRole('status').filter({ hasText: /Offline|Cannot reach the server/ })).toBeVisible();
 
   const name = `Offline Patient ${run}`;
-  await page.getByRole('link', { name: 'Add patient' }).first().click();
+  await page.getByRole('link', { name: 'Register a patient' }).first().click();
   await page.getByLabel('Full name').fill(name);
   await page.getByLabel('Date of birth').fill('1975-01-01');
   await page.getByRole('button', { name: 'Save patient' }).click();

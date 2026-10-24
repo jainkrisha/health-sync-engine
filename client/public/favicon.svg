@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="HealthSync">
-  <rect width="64" height="64" rx="14" fill="#1f5fa6"/>
-  <path d="M26 14h12v12h12v12H38v12H26V38H14V26h12z" fill="#fff"/>
-  <path d="M47 47a19 19 0 0 1-15 7" stroke="#86acdb" stroke-width="4" fill="none" stroke-linecap="round"/>
-  <path d="M17 17a19 19 0 0 1 15-7" stroke="#86acdb" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <rect width="64" height="64" fill="#0a4f47"/>
+  <rect x="27" y="10" width="10" height="44" fill="#fff"/>
+  <rect x="11.5" y="27.5" width="41" height="9" fill="none" stroke="#fff" stroke-width="4"/>
 </svg>

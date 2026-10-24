@@ -33,13 +33,21 @@ export default defineConfig({
         // Never serve the app shell for API or socket requests.
         navigateFallbackDenylist: [/^\/api/, /^\/socket\.io/],
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
+        // Keep the Atkinson Hyperlegible font after the first visit, so offline screens use it too.
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'fonts', expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }, cacheableResponse: { statuses: [0, 200] } },
+          },
+        ],
       },
       manifest: {
         name: 'HealthSync',
         short_name: 'HealthSync',
         description: 'Offline-first patient record system',
-        theme_color: '#1f5fa6',
-        background_color: '#f1f5f9',
+        theme_color: '#0a4f47',
+        background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
         icons: [

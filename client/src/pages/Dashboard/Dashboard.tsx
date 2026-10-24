@@ -1,7 +1,8 @@
 /**
- * Home — what to do next, then the numbers that matter: patients, changes not
- * sent yet, doses waiting for a doctor, and (at the district hospital) how each
- * health centre is doing.
+ * Home. Answers three questions in order: what can I do now (register or find
+ * a patient), what needs my attention (changes not sent, doses waiting for a
+ * doctor), and what happened recently. Numbers are written as sentences and
+ * tables, not tiles.
  */
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,11 +16,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { getOutboxSince, type OutboxSummary } from '../../db/mutationLog';
 import { onDataChanged } from '../../lib/events';
-import { StatCard } from '../../components/Card';
-import { Icon } from '../../components/Icon';
-import { Avatar, EmptyState, Loading, PageHeader, SectionHeading, relativeTime } from '../../components/ui';
+import { Loading, ageFrom, relativeTime } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
-import { t as translate, tFacility } from '../../i18n/i18n';
+import { tFacility } from '../../i18n/i18n';
 import { tName } from '../../i18n/names';
 
 // Day keys use the device's local calendar date. (toISOString() would shift them
@@ -36,13 +35,6 @@ function last7Days(): string[] {
     days.push(dayKey(d));
   }
   return days;
-}
-
-// "Dr. Priya (PHC Wagholi)" -> "Dr. Priya"; "Admin User" -> "Admin".
-function greetingName(name: string | undefined): string {
-  const words = (name ?? '').replace(/\(.*?\)/g, '').trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return translate('there');
-  return /^(dr|mr|mrs|ms)\.?$/i.test(words[0]) && words[1] ? `${words[0]} ${words[1]}` : words[0];
 }
 
 function useOutboxWeek() {
@@ -65,15 +57,17 @@ function FindPatient() {
     navigate(q.trim() ? `/patients?q=${encodeURIComponent(q.trim())}` : '/patients');
   };
   return (
-    <form onSubmit={submit} role="search" className="card">
-      <label htmlFor="home-search" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
-        <Icon name="search" className="h-6 w-6 text-brand-700 dark:text-brand-300" /> {t('Find a patient')}
+    <form onSubmit={submit} role="search">
+      <label htmlFor="home-search" className="form-label-l">
+        {t('Find a patient')}
       </label>
-      <p className="form-help mb-3">{t('Type a name, phone number, allergy or medicine.')}</p>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input id="home-search" type="search" className="form-input" value={q} onChange={(e) => setQ(e.target.value)} />
-        <button type="submit" className="btn-primary flex-shrink-0">
-          <Icon name="search" className="h-5 w-5" /> {t('Search')}
+      <span className="form-hint" id="home-search-hint">
+        {t('Type a name, phone number, allergy or medicine.')}
+      </span>
+      <div className="flex max-w-xl gap-3">
+        <input id="home-search" type="search" className="input" aria-describedby="home-search-hint" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button type="submit" className="btn-secondary flex-shrink-0">
+          {t('Search')}
         </button>
       </div>
     </form>
@@ -100,38 +94,35 @@ function WeekChart() {
     return [...map.values()].map((d) => ({ ...d, label: new Date(`${d.day}T00:00:00`).toLocaleDateString(locale, { weekday: 'short' }) }));
   }, [outbox, locale]);
   const dark = theme === 'dark';
-  const axis = dark ? '#cbd5e1' : '#334155';
-  const grid = dark ? '#334155' : '#e2e8f0';
+  const ink = dark ? '#ecedec' : '#0b0c0c';
+  const rule = dark ? '#3b4247' : '#b1b4b6';
   const total = data.reduce((n, d) => n + d.synced + d.pending + d.conflicts, 0);
 
   return (
-    <section className="card" aria-labelledby="chart-h">
-      <SectionHeading id="chart-h" icon="activity">
+    <section className="section" aria-labelledby="chart-h">
+      <h2 id="chart-h" className="heading-l">
         {t('Changes from this device in the last 7 days')}
-      </SectionHeading>
+      </h2>
       {total === 0 ? (
-        <p className="text-base text-slate-700 dark:text-slate-300">{t('No changes made on this device in the last 7 days.')}</p>
+        <p className="mt-3">{t('No changes made on this device in the last 7 days.')}</p>
       ) : (
         <div
-          className="h-64"
+          className="mt-4 h-64"
           role="img"
           aria-label={`${t('Bar chart of changes by day.')} ${data
             .map((d) => t('{day}: {synced} sent, {pending} not sent yet, {conflicts} sent for dose review', { day: d.label, synced: d.synced, pending: d.pending, conflicts: d.conflicts }))
             .join('; ')}`}
         >
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
-              <CartesianGrid stroke={grid} vertical={false} />
-              <XAxis dataKey="label" stroke={axis} fontSize={14} tickLine={false} axisLine={false} />
-              <YAxis allowDecimals={false} stroke={axis} fontSize={14} tickLine={false} axisLine={false} />
-              <Tooltip
-                contentStyle={{ background: dark ? '#0f172a' : '#ffffff', border: `1px solid ${grid}`, borderRadius: 8, fontSize: 14 }}
-                cursor={{ fill: dark ? '#1e293b' : '#f1f5f9' }}
-              />
-              <Legend wrapperStyle={{ fontSize: 14 }} />
-              <Bar dataKey="synced" name={t('Sent')} stackId="a" fill={dark ? '#86acdb' : '#1f5fa6'} />
-              <Bar dataKey="conflicts" name={t('Sent for dose review')} stackId="a" fill={dark ? '#fbbf24' : '#b45309'} />
-              <Bar dataKey="pending" name={t('Not sent yet')} stackId="a" fill={dark ? '#94a3b8' : '#64748b'} />
+            <BarChart data={data} margin={{ top: 4, right: 0, left: -18, bottom: 0 }}>
+              <CartesianGrid stroke={rule} vertical={false} />
+              <XAxis dataKey="label" stroke={ink} fontSize={15} tickLine={false} />
+              <YAxis allowDecimals={false} stroke={ink} fontSize={15} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ background: dark ? '#111416' : '#fff', border: `2px solid ${ink}`, borderRadius: 0, fontSize: 15 }} cursor={{ fill: dark ? '#1d2124' : '#f3f2f1' }} />
+              <Legend wrapperStyle={{ fontSize: 15 }} iconType="square" />
+              <Bar dataKey="synced" name={t('Sent')} stackId="a" fill={dark ? '#6cc38f' : '#0a4f47'} />
+              <Bar dataKey="conflicts" name={t('Sent for dose review')} stackId="a" fill={dark ? '#f5c451' : '#b58105'} />
+              <Bar dataKey="pending" name={t('Not sent yet')} stackId="a" fill={dark ? '#b1b6ba' : '#505a5f'} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -145,58 +136,41 @@ function CentresTable() {
   const { t } = useI18n();
   const phcs = useApi<{ phcs: PhcSummary[] }>(connected ? '/phcs' : null, connected);
   return (
-    <section className="card p-0 sm:p-0" aria-labelledby="centres-h">
-      <div className="p-5 pb-0 sm:p-6 sm:pb-0">
-        <SectionHeading
-          id="centres-h"
-          icon="clinic"
-          aside={
-            <Link to="/phcs" className="link">
-              {t('See all health centres')}
-            </Link>
-          }
-        >
+    <section className="section" aria-labelledby="centres-h">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+        <h2 id="centres-h" className="heading-l">
           {t('Health centres')}
-        </SectionHeading>
+        </h2>
+        <Link to="/phcs" className="link">
+          {t('See all health centres')}
+        </Link>
       </div>
       {!connected ? (
-        <p className="px-5 pb-5 text-base sm:px-6">{t('Connect to the internet to see the health centres.')}</p>
+        <p className="mt-3">{t('Connect to the internet to see the health centres.')}</p>
       ) : !phcs.data ? (
-        <div className="px-5 sm:px-6">
-          <Loading />
-        </div>
+        <Loading />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px]">
+        <div className="mt-4 overflow-x-auto">
+          <table className="table min-w-[36rem]">
             <thead>
               <tr>
-                {['Health centre', 'Patients', 'Devices online', 'Doses waiting', 'Last update'].map((h) => (
-                  <th key={h} scope="col" className="table-head first:pl-5 sm:first:pl-6">
-                    {t(h)}
-                  </th>
-                ))}
+                <th scope="col">{t('Health centre')}</th>
+                <th scope="col" className="table-num">{t('Patients')}</th>
+                <th scope="col" className="table-num">{t('Tablets online')}</th>
+                <th scope="col" className="table-num">{t('Doses waiting')}</th>
+                <th scope="col">{t('Last update')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody>
               {phcs.data.phcs.map((p) => (
                 <tr key={p.name}>
-                  <th scope="row" className="table-cell pl-5 text-left font-bold sm:pl-6">{tFacility(p.name)}</th>
-                  <td className="table-cell tabular-nums">{p.patientCount}</td>
-                  <td className="table-cell tabular-nums">
-                    {p.devices.filter((d) => d.online).length} / {p.devices.length}
+                  <th scope="row" className="font-bold">{tFacility(p.name)}</th>
+                  <td className="table-num">{p.patientCount}</td>
+                  <td className="table-num">
+                    {p.devices.filter((d) => d.online).length} {t('of')} {p.devices.length}
                   </td>
-                  <td className="table-cell">
-                    {p.openConflicts.length ? (
-                      <span className="badge-warning">
-                        <Icon name="alert" className="h-4 w-4" /> {p.openConflicts.length}
-                      </span>
-                    ) : (
-                      <span className="badge-ok">
-                        <Icon name="check" className="h-4 w-4" /> {t('None')}
-                      </span>
-                    )}
-                  </td>
-                  <td className="table-cell whitespace-nowrap">{relativeTime(p.lastSyncAt)}</td>
+                  <td className={`table-num ${p.openConflicts.length ? 'font-bold text-warn' : ''}`}>{p.openConflicts.length}</td>
+                  <td>{relativeTime(p.lastSyncAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -212,199 +186,136 @@ export default function Dashboard() {
   const sync = useSyncEngine();
   const { user } = useAuth();
   const perms = usePermissions();
-  const { t, tp } = useI18n();
+  const { t, tp, locale } = useI18n();
   const district = Boolean(user && portalForRole(user.role) === 'district');
   const stats = useApi<StatsResponse>(sync.connected ? '/stats' : null, sync.lastSyncedAt);
   const openReviews = patients.filter((p) => p.hasOpenConflicts).length;
+  const today = new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const autoRate = stats.data
-    ? (() => {
-        const { automatic, manual } = stats.data.resolutions;
-        const total = automatic + manual + stats.data.conflicts.pending;
-        return total === 0 ? null : Math.round((automatic / total) * 100);
-      })()
-    : null;
+  const attention: { tone: 'warn' | 'ok'; text: string; link?: { to: string; label: string } }[] = [];
+  if (sync.pendingCount > 0)
+    attention.push({
+      tone: 'warn',
+      text: tp(
+        sync.pendingCount,
+        '{count} change is saved only on this device. It will be sent to the server when there is internet.',
+        '{count} changes are saved only on this device. They will be sent to the server when there is internet.',
+      ),
+    });
+  if (openReviews > 0)
+    attention.push({
+      tone: 'warn',
+      text: tp(
+        openReviews,
+        '{count} patient has a medicine dose waiting for a doctor to check it. Until then the earlier dose stays on the record.',
+        '{count} patients have a medicine dose waiting for a doctor to check it. Until then the earlier dose stays on the record.',
+      ),
+      link: perms.canReviewConflicts ? { to: '/conflicts', label: t('Review the doses') } : { to: '/patients', label: t('See which patients') },
+    });
 
   return (
-    <div className="space-y-8">
-      <PageHeader
-        title={t('Hello, {name}', { name: tName(greetingName(user?.name)) })}
-        subtitle={user ? `${tFacility(user.facility)} · ${t('What would you like to do today?')}` : undefined}
-      />
+    <div>
+      <header className="mb-10">
+        <span className="caption">{today}</span>
+        <h1 className="heading-xl">{user ? tFacility(user.facility) : 'HealthSync'}</h1>
+      </header>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        {perms.canEditPatients ? (
-          <Link to="/patients/new" className="card group flex items-center gap-4 border-2 border-brand-600 hover:bg-brand-50 dark:border-brand-400 dark:hover:bg-brand-950">
-            <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-white dark:bg-brand-400 dark:text-slate-950">
-              <Icon name="plus" className="h-7 w-7" />
-            </span>
-            <span>
-              <span className="block text-lg font-bold text-slate-900 group-hover:underline dark:text-white">{t('Add a new patient')}</span>
-              <span className="block text-base text-slate-700 dark:text-slate-300">{t('Register someone seen today.')}</span>
-            </span>
-          </Link>
-        ) : (
-          perms.canReviewConflicts && (
-            <Link to="/conflicts" className="card group flex items-center gap-4 border-2 border-brand-600 hover:bg-brand-50 dark:border-brand-400 dark:hover:bg-brand-950">
-              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-white dark:bg-brand-400 dark:text-slate-950">
-                <Icon name="pill" className="h-7 w-7" />
-              </span>
-              <span>
-                <span className="block text-lg font-bold text-slate-900 group-hover:underline dark:text-white">{t('Review medicine doses')}</span>
-                <span className="block text-base text-slate-700 dark:text-slate-300">{t('Choose the correct dose where two devices disagree.')}</span>
-              </span>
+      <div className="grid gap-10 md:grid-cols-[auto_1fr] md:items-end">
+        {perms.canEditPatients && (
+          <div>
+            <Link to="/patients/new" className="btn-start">
+              {t('Register a patient')} <span aria-hidden="true">›</span>
             </Link>
-          )
+            <p className="mt-2 text-muted">{t('For someone seen for the first time.')}</p>
+          </div>
         )}
         <FindPatient />
       </div>
 
-      {sync.pendingCount > 0 && (
-        <div className="notice-warning">
-          <Icon name="clock" className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p>
-            {tp(
-              sync.pendingCount,
-              '{count} change is saved only on this device. It will be sent to the server when there is internet.',
-              '{count} changes are saved only on this device. They will be sent to the server when there is internet.',
-            )}
-          </p>
-        </div>
-      )}
-      {openReviews > 0 && (
-        <div className="notice-info">
-          <Icon name="pill" className="mt-0.5 h-5 w-5 flex-shrink-0" />
-          <p className="flex-1">
-            {tp(
-              openReviews,
-              '{count} patient has a medicine dose waiting for a doctor to check it. Until then the earlier dose stays on the record.',
-              '{count} patients have a medicine dose waiting for a doctor to check it. Until then the earlier dose stays on the record.',
-            )}
-          </p>
-          {perms.canReviewConflicts && (
-            <Link to="/conflicts" className="link whitespace-nowrap">
-              {t('Review now')}
-            </Link>
-          )}
-        </div>
-      )}
-
-      <section aria-labelledby="numbers-h">
-        <h2 id="numbers-h" className="section-title mb-4">
-          {t('At a glance')}
+      <section className="section mt-12" aria-labelledby="attention-h">
+        <h2 id="attention-h" className="heading-l">
+          {t('Needs attention')}
         </h2>
+        {attention.length === 0 ? (
+          <p className="status-ok mt-3">{t('Nothing needs your attention. Every change has been sent.')}</p>
+        ) : (
+          <ul className="mt-3 border-t border-rule">
+            {attention.map((a) => (
+              <li key={a.text} className="flex flex-col gap-1 border-b border-rule py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+                <span className="border-l-[5px] border-warn pl-3">{a.text}</span>
+                {a.link && (
+                  <Link to={a.link.to} className="link whitespace-nowrap font-bold">
+                    {a.link.label}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="section mt-12" aria-labelledby="recent-h">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+          <h2 id="recent-h" className="heading-l">
+            {t('Recently updated patients')}
+          </h2>
+          <Link to="/patients" className="link">
+            {tp(patients.length, 'See all {count} patient', 'See all {count} patients')}
+          </Link>
+        </div>
         {loading ? (
           <Loading />
+        ) : patients.length === 0 ? (
+          <p className="mt-3">{t('No patients yet. Register a patient, or connect to the internet to get records from the server.')}</p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              icon="patients"
-              label={district ? t('Patients on this computer') : t('Patients on this device')}
-              value={patients.length}
-              to="/patients"
-              action={t('See patients')}
-            />
-            <StatCard
-              icon="clock"
-              label={t('Changes not sent yet')}
-              value={sync.pendingCount}
-              tone={sync.pendingCount ? 'warning' : 'ok'}
-              subLabel={sync.pendingCount ? t('They send when there is internet.') : t('Everything has been sent.')}
-            />
-            <StatCard
-              icon="pill"
-              label={t('Doses waiting for review')}
-              value={openReviews}
-              tone={openReviews ? 'warning' : 'ok'}
-              subLabel={openReviews ? t('A doctor at the district hospital checks these.') : t('Nothing waiting.')}
-              to={openReviews && perms.canReviewConflicts ? '/conflicts' : undefined}
-              action={t('Review now')}
-            />
-            <StatCard
-              icon="merge"
-              label={t('Edits merged automatically')}
-              value={autoRate === null ? '—' : `${autoRate}%`}
-              subLabel={
-                stats.data
-                  ? t('{auto} by the system, {manual} by a reviewer', { auto: stats.data.resolutions.automatic, manual: stats.data.resolutions.manual })
-                  : t('Connect to the internet to see this.')
-              }
-            />
-          </div>
+          <table className="table mt-4">
+            <thead>
+              <tr>
+                <th scope="col">{t('Name')}</th>
+                <th scope="col" className="max-sm:hidden">{t('Age')}</th>
+                <th scope="col">{t('Last change')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {patients.slice(0, 6).map((p) => (
+                <tr key={p.id}>
+                  <td>
+                    <Link to={`/patients/${p.id}`} className="link font-bold">
+                      {tName(p.name)}
+                    </Link>
+                    {p.hasOpenConflicts && <span className="status-warn mt-1 flex w-fit text-sm">{t('Dose waiting for review')}</span>}
+                  </td>
+                  <td className="max-sm:hidden">{ageFrom(p.dateOfBirth)}</td>
+                  <td>{relativeTime(p.updatedAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
 
       {district && <CentresTable />}
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <section className="card" aria-labelledby="recent-h">
-          <SectionHeading
-            id="recent-h"
-            icon="clock"
-            aside={
-              <Link to="/patients" className="link">
-                {t('See all patients')}
-              </Link>
-            }
-          >
-            {t('Recently updated patients')}
-          </SectionHeading>
-          {loading ? (
-            <Loading />
-          ) : patients.length === 0 ? (
-            <EmptyState
-              compact
-              icon="patients"
-              title={t('No patients yet')}
-              message={t('Add a patient, or connect to the internet to get records from the server.')}
-              action={
-                perms.canEditPatients && (
-                  <Link to="/patients/new" className="btn-primary">
-                    <Icon name="plus" className="h-5 w-5" /> {t('Add a new patient')}
-                  </Link>
-                )
-              }
-            />
-          ) : (
-            <ul className="-mx-2 divide-y divide-slate-200 dark:divide-slate-800">
-              {patients.slice(0, 6).map((p) => (
-                <li key={p.id}>
-                  <Link to={`/patients/${p.id}`} className="group flex min-h-[3.5rem] items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                    <Avatar name={tName(p.name)} />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-base font-bold text-slate-900 group-hover:underline dark:text-white">{tName(p.name)}</span>
-                      <span className="block text-sm text-slate-700 dark:text-slate-300">{t('Updated {when}', { when: relativeTime(p.updatedAt) })}</span>
-                    </span>
-                    {p.hasOpenConflicts && (
-                      <span className="badge-warning">
-                        <Icon name="alert" className="h-4 w-4" /> {t('Dose review')}
-                      </span>
-                    )}
-                    <Icon name="chevronRight" className="h-5 w-5 flex-shrink-0 text-slate-500" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        <WeekChart />
-      </div>
+      <WeekChart />
 
       {stats.data && (
-        <section className="card" aria-labelledby="system-h">
-          <SectionHeading id="system-h" icon="hospital">
-            {t('Whole district (from the server)')}
-          </SectionHeading>
-          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ['Patients on the server', stats.data.patients],
-              ['Doses waiting for review', stats.data.conflicts.pending],
-              ['Doses reviewed', stats.data.conflicts.resolved],
-              ['Registered devices', stats.data.devices],
-            ].map(([label, value]) => (
-              <div key={label as string}>
-                <dt className="text-base text-slate-700 dark:text-slate-300">{t(label as string)}</dt>
-                <dd className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{value}</dd>
+        <section className="section" aria-labelledby="district-h">
+          <h2 id="district-h" className="heading-l">
+            {t('Across the district')}
+          </h2>
+          <dl className="summary mt-4">
+            {(
+              [
+                ['Patients on the server', stats.data.patients],
+                ['Doses waiting for review', stats.data.conflicts.pending],
+                ['Doses reviewed', stats.data.conflicts.resolved],
+                ['Edits two devices made at the same time, combined automatically', stats.data.resolutions.automatic],
+                ['Registered devices', stats.data.devices],
+              ] as const
+            ).map(([label, value]) => (
+              <div key={label} className="summary-row sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                <dt>{t(label)}</dt>
+                <dd className="font-bold tabular-nums">{value}</dd>
               </div>
             ))}
           </dl>

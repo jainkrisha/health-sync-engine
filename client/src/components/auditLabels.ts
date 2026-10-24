@@ -1,11 +1,11 @@
 /** Display labels for merge outcomes and rules in the audit trail. */
 export const OUTCOME_STYLE: Record<string, string> = {
-  applied: 'badge-ok',
-  merged: 'badge-info',
-  kept_existing: 'badge-muted',
-  duplicate: 'badge-muted',
-  conflict: 'badge-warning',
-  resolved: 'badge-ok',
+  applied: 'status-ok',
+  merged: 'status-muted',
+  kept_existing: 'status-muted',
+  duplicate: 'status-muted',
+  conflict: 'status-warn',
+  resolved: 'status-ok',
 };
 
 export const OUTCOME_LABEL: Record<string, string> = {

@@ -59,7 +59,7 @@ test('patient list downloads as Excel and CSV', async ({ page, request }) => {
 
   // One patient of our own, so the file has a known row.
   const name = `Export Patient ${run}`;
-  await page.getByRole('link', { name: 'Add patient' }).first().click();
+  await page.getByRole('link', { name: 'Register a patient' }).first().click();
   await page.getByLabel('Full name').fill(name);
   await page.getByLabel('Date of birth').fill('1990-02-03');
   await page.getByRole('button', { name: 'Save patient' }).click();
@@ -67,16 +67,16 @@ test('patient list downloads as Excel and CSV', async ({ page, request }) => {
 
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Patients', exact: true }).click();
   await page.getByLabel('Search patients').fill(name);
-  await page.getByRole('button', { name: 'Download', exact: true }).click();
+  await page.getByText('Download patient list').click();
   await page.getByRole('radio', { name: /Only the 1 patient shown/ }).check();
 
-  const [xlsx] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Excel file/ }).click()]);
+  const [xlsx] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download file' }).click()]);
   expect(xlsx.suggestedFilename()).toMatch(/^patient-export-patient-.*\.xlsx$/);
   const bytes = await (await xlsx.createReadStream()).toArray();
   expect(Buffer.concat(bytes).subarray(0, 2).toString()).toBe('PK');
 
-  await page.getByRole('button', { name: 'Download', exact: true }).click();
-  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /CSV file/ }).click()]);
+  await page.getByRole('radio', { name: /CSV file/ }).check();
+  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download file' }).click()]);
   const text = Buffer.concat(await (await csv.createReadStream()).toArray()).toString('utf8');
   expect(text).toContain('Name,Date of birth,Age (years)');
   expect(text).toContain(`${name},1990-02-03`);

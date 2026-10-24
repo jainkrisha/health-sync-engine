@@ -1,67 +1,52 @@
-import React, { forwardRef } from 'react';
-import { Icon } from './Icon';
+import { forwardRef, type InputHTMLAttributes } from 'react';
 import { t } from '../i18n/i18n';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  /** Grey line under the label: an example or what the field is for. */
   helperText?: string;
   required?: boolean;
   containerClassName?: string;
-  icon?: React.ReactNode;
+  /** Width class that matches the expected answer, e.g. "w-chars-7" for a blood pressure. */
+  width?: string;
 }
 
+/** A labelled text field: label, hint, error message, then the box. */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      label,
-      error,
-      helperText,
-      required,
-      containerClassName = '',
-      className = '',
-      id,
-      icon,
-      ...props
-    },
-    ref
-  ) => {
+  ({ label, error, helperText, required, containerClassName = '', className = '', width = 'w-full', id, ...props }, ref) => {
     const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
-
+    const describedBy = [helperText && `${inputId}-hint`, error && `${inputId}-error`].filter(Boolean).join(' ') || undefined;
     return (
-      <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
+      <div className={`form-group ${error ? 'form-group-error' : ''} ${containerClassName}`}>
         {label && (
-          <label htmlFor={inputId} className="flex flex-wrap items-baseline gap-x-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
+          <label htmlFor={inputId} className="form-label">
             {label}
-            {required && <span className="text-sm font-normal text-slate-700 dark:text-slate-300">{t('(required)')}</span>}
+            {!required && <span className="font-normal text-muted"> {t('(optional)')}</span>}
           </label>
         )}
-        <div className="relative flex items-center">
-          {icon && (
-            <div className="absolute left-3 text-slate-500 pointer-events-none flex items-center justify-center">
-              {icon}
-            </div>
-          )}
-          <input
-            ref={ref}
-            id={inputId}
-            className={`form-input ${icon ? 'pl-10' : ''} ${error ? 'form-input-error' : ''} ${className}`}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error && inputId ? `${inputId}-error` : helperText && inputId ? `${inputId}-help` : undefined}
-            {...props}
-          />
-        </div>
-        {error ? (
-          <p className="form-error mt-0" role="alert" id={`${inputId}-error`}>
-            <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
-            <span>{t(error)}</span>
-          </p>
-        ) : helperText ? (
-          <p className="form-help mt-0" id={`${inputId}-help`}>{helperText}</p>
-        ) : null}
+        {helperText && (
+          <span className="form-hint" id={`${inputId}-hint`}>
+            {helperText}
+          </span>
+        )}
+        {error && (
+          <span className="form-error" id={`${inputId}-error`}>
+            <span className="sr-only">{t('Error:')} </span>
+            {t(error)}
+          </span>
+        )}
+        <input
+          ref={ref}
+          id={inputId}
+          className={`input ${width} ${error ? 'input-error' : ''} ${className}`}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          {...props}
+        />
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = 'Input';

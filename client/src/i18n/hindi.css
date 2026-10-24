@@ -19,21 +19,9 @@
 }
 
 html[lang='hi'] body * {
-  font-family: 'HS Devanagari', Inter, system-ui, sans-serif !important;
+  font-family: 'HS Devanagari', 'Atkinson Hyperlegible Next', system-ui, sans-serif !important;
   letter-spacing: normal !important;
 }
 html[lang='hi'] body :is(.font-mono, code, kbd, .bg-hash, .readout, .readout *) {
-  font-family: 'HS Devanagari', 'Geist Mono', ui-monospace, monospace !important;
-}
-
-/* Chrome cannot shape Devanagari in vertical writing, so the side menu tab's
-   label is set horizontally and turned; the margins give the turned word room. */
-html[lang='hi'] .nav-wheel-tab span {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
-  writing-mode: horizontal-tb;
-  white-space: nowrap;
-  transform: rotate(90deg);
-  margin: 6px -4px;
+  font-family: 'HS Devanagari', 'Atkinson Hyperlegible Mono', ui-monospace, monospace !important;
 }

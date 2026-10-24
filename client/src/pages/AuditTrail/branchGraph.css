@@ -100,7 +100,7 @@
   min-height: 50px;
   margin-left: calc(var(--graph-w) + 6px);
   padding: 10px 12px 12px;
-  border-radius: 12px;
+  border-radius: 0;
   outline: none;
   transition: background-color 0.2s;
 }
@@ -139,7 +139,7 @@
     Consolas,
     monospace;
   padding: 1px 6px;
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--bg-soft);
   border: 1px solid var(--bg-line);
   color: var(--bg-ink);
@@ -169,7 +169,7 @@
   gap: 6px;
   margin: 8px 0 0;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 0;
   font-size: 15px;
   color: var(--bg-ink);
   background: var(--bg-soft);
@@ -203,7 +203,7 @@
 /* The merge node: both sides of the clash, side by side. */
 .bg-merge {
   padding: 12px 14px 14px;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px solid var(--bg-line);
   background: var(--bg-surface);
   box-shadow: 0 1px 2px rgba(27, 24, 20, 0.06);
@@ -248,7 +248,7 @@
   gap: 3px;
   min-width: 0;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 0;
   border: 1px solid color-mix(in srgb, var(--lane) 40%, transparent);
   border-top: 4px solid var(--lane);
   background: color-mix(in srgb, var(--lane) 7%, var(--bg-surface));

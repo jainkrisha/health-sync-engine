@@ -45,7 +45,7 @@ Every decision (automatic or manual) is written to an append-only audit trail.
 - **Home**: what to do next (add or find a patient), changes not sent yet, doses waiting for review, a 7-day chart, and at the district hospital a table of every health centre.
 - **Download patients** as an Excel workbook (patients, allergies, medicines, check-ups) or a CSV file, made on the device so it works offline.
 - **Demo data from Synthea**: 99 realistic patients with real-shaped allergies, medicines and dated vitals (see `server/src/data/README.md`).
-- Plain-language, accessible design for staff with any level of computer experience: 17px base text, 48px buttons with words beside every icon, a menu that is always visible, a connection strip that says in words whether work is saved, yellow focus ring, high contrast, light and dark screens, English and Hindi.
+- Designed like a public health service, not an app dashboard: text on white with ruled tables instead of cards, one green button per page, underlined links, a yellow focus ring, forms that list every problem at the top, a patient banner and a red allergy band on every record, and check-up readings outside the usual adult range marked High or Low. Type is Atkinson Hyperlegible (made for readers with low vision); English and Hindi; light and dark screens.
 - **Demo mode**: "Simulate offline" switch, and `?device=B` in a second tab to act as a second device.
 
 ## Tech stack

@@ -18,7 +18,6 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
-import { Icon, type IconName } from './Icon'
 import { useI18n } from '../i18n/useI18n'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -76,11 +75,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      {/* Toast stack — bottom centre on phones (above the tab bar), bottom-right on larger screens */}
+      {/* Messages: bottom of the screen on phones, bottom-right on larger screens */}
       <div
         aria-live="polite"
         aria-label={translate('Notifications')}
-        className="pointer-events-none fixed inset-x-4 bottom-24 z-toast flex flex-col items-center gap-2 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:items-end lg:bottom-6"
+        className="pointer-events-none fixed inset-x-4 bottom-4 z-toast flex flex-col items-center gap-3 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:items-end"
       >
         {toasts.map(t => (
           <ToastItem key={t.id} item={t} onDismiss={dismiss} />
@@ -93,31 +92,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 // ─── Individual toast bubble ──────────────────────────────────────────────────
 
 function ToastItem({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
-  const styles: Record<ToastType, { bar: string; icon: string; name: IconName }> = {
-    success: { bar: 'bg-green-700', icon: 'text-green-700 dark:text-green-300', name: 'checkCircle' },
-    error: { bar: 'bg-red-700', icon: 'text-red-700 dark:text-red-300', name: 'xCircle' },
-    warning: { bar: 'bg-amber-600', icon: 'text-amber-700 dark:text-amber-300', name: 'alert' },
-    info: { bar: 'bg-brand-600', icon: 'text-brand-700 dark:text-brand-300', name: 'info' },
+  const edge: Record<ToastType, string> = {
+    success: 'border-ok',
+    error: 'border-alert',
+    warning: 'border-warn',
+    info: 'border-band',
   }
-  const s = styles[item.type]
   const { t: translate } = useI18n()
 
   return (
     <div
       role={item.type === 'error' ? 'alert' : 'status'}
-      className="pointer-events-auto relative flex w-full max-w-md items-start gap-3 overflow-hidden rounded-lg border border-slate-300
-                 bg-white py-3 pl-5 pr-2 text-base text-slate-900 shadow-pop sm:min-w-[320px]
-                 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+      className={`pointer-events-auto flex w-full max-w-md items-start gap-4 border-[3px] border-t-[8px] bg-paper px-4 py-3 text-base text-ink shadow-[0_4px_0_rgb(11_12_12/0.25)] sm:min-w-[340px] ${edge[item.type]}`}
     >
-      <span className={`absolute inset-y-0 left-0 w-1.5 ${s.bar}`} aria-hidden="true" />
-      <Icon name={s.name} className={`mt-0.5 h-6 w-6 flex-shrink-0 ${s.icon}`} />
-      <span className="flex-1 py-0.5 font-semibold leading-6">{item.message}</span>
-      <button
-        onClick={() => onDismiss(item.id)}
-        aria-label={translate('Dismiss notification')}
-        className="btn-icon -my-1 h-10 w-10 flex-shrink-0"
-      >
-        <Icon name="x" className="h-4 w-4" />
+      <span className="flex-1 font-bold">{item.message}</span>
+      <button onClick={() => onDismiss(item.id)} className="btn-text text-sm" aria-label={translate('Dismiss notification')}>
+        {translate('Close')}
       </button>
     </div>
   )

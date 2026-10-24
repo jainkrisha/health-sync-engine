@@ -66,7 +66,7 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   const a = await device(browser, users.a);
 
   // Device A creates the patient and syncs it.
-  await a.getByRole('link', { name: 'Add patient' }).first().click();
+  await a.getByRole('link', { name: 'Register a patient' }).first().click();
   await a.getByLabel('Full name').fill(patientName);
   await a.getByLabel('Date of birth').fill('1980-05-20');
   await a.getByLabel('Blood group').selectOption('B+');
@@ -125,10 +125,10 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   const card = reviewer.locator('article').filter({ hasText: patientName });
   await expect(card.getByText('850 mg · Twice daily').first()).toBeVisible();
   await expect(card.getByText('1000 mg · Twice daily').first()).toBeVisible();
-  await card.getByRole('button', { name: 'Neither: enter the correct dose' }).click();
-  await card.getByLabel('Correct dose').fill('750 mg');
+  await card.getByRole('radio', { name: /Neither/ }).check();
+  await card.getByLabel('Correct dose', { exact: true }).fill('750 mg');
   await card.getByLabel(/Note for the record/).fill('Confirmed with the doctor');
-  await card.getByRole('button', { name: 'Save the correct dose' }).click();
+  await card.getByRole('button', { name: 'Save decision' }).click();
   await expect(reviewer.getByText(`resolved`, { exact: false }).first()).toBeVisible();
 
   // Every device converges on the reviewed value.
