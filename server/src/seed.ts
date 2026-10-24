@@ -1,5 +1,5 @@
 /**
- * Seed demo users and sample patients.
+ * Seed demo users and patients.
  *
  *   npm run seed            # only if the database is empty
  *   npm run seed -- --reset # wipe everything first
@@ -12,6 +12,7 @@ import mongoose from 'mongoose';
 import { buildCreateMutation, buildUpdateMutations, type MutationContext, type PatientInput } from '@shared/diff';
 import { materialize } from '@shared/materialize';
 import { DISTRICT_FACILITY, type PatientDoc, type Role } from '@shared/types';
+import synthea from './data/synthea-patients.json' with { type: 'json' };
 import { connectDb, disconnectDb } from './db';
 import { config } from './config';
 import { User } from './models/User';
@@ -34,128 +35,40 @@ const demoUsers: { username: string; name: string; role: Role; facility: string 
   { username: 'auditor', name: 'Audit Officer', role: 'auditor', facility: DISTRICT_FACILITY },
 ];
 
-const patients: PatientInput[] = [
-  {
-    name: 'Asha Patil',
-    dateOfBirth: '1984-03-12',
-    gender: 'female',
-    bloodType: 'B+',
-    contactNumber: '9820012345',
-    allergies: [{ allergen: 'Penicillin', severity: 'severe', reaction: 'Hives, swelling' }],
-    medications: [{ name: 'Metformin', dosage: '500 mg', frequency: 'Twice daily', startDate: '2026-06-01', endDate: '' }],
-    newVitals: { heartRate: 78, bloodPressure: '128/84', temperature: 36.8, oxygenSaturation: 98 },
-  },
-  {
-    name: 'Ramesh Jadhav',
-    dateOfBirth: '1958-11-02',
-    gender: 'male',
-    bloodType: 'O+',
-    contactNumber: '9930045678',
-    allergies: [{ allergen: 'Sulfa drugs', severity: 'moderate', reaction: 'Rash' }],
-    medications: [
-      { name: 'Amlodipine', dosage: '5 mg', frequency: 'Once daily', startDate: '2026-01-15', endDate: '' },
-      { name: 'Aspirin', dosage: '75 mg', frequency: 'Once daily', startDate: '2026-01-15', endDate: '' },
-    ],
-    newVitals: { heartRate: 70, bloodPressure: '142/90', temperature: 36.6, respiratoryRate: 16 },
-  },
-  {
-    name: 'Fatima Shaikh',
-    dateOfBirth: '1997-07-21',
-    gender: 'female',
-    bloodType: 'A-',
-    contactNumber: '9867001122',
-    allergies: [],
-    medications: [{ name: 'Iron + Folic Acid', dosage: '1 tablet', frequency: 'Once daily', startDate: '2026-08-10', endDate: '2026-11-10' }],
-    newVitals: { heartRate: 88, bloodPressure: '110/70', temperature: 37.1 },
-  },
-  {
-    name: 'Kiran More',
-    dateOfBirth: '2016-02-05',
-    gender: 'male',
-    bloodType: 'AB+',
-    contactNumber: '9819988776',
-    allergies: [{ allergen: 'Peanuts', severity: 'severe', reaction: 'Anaphylaxis' }],
-    medications: [],
-    newVitals: { heartRate: 96, temperature: 38.4, respiratoryRate: 22 },
-  },
-  {
-    name: 'Sunil Gaikwad',
-    dateOfBirth: '1969-04-18',
-    gender: 'male',
-    bloodType: 'B-',
-    contactNumber: '9822213344',
-    allergies: [{ allergen: 'Codeine', severity: 'moderate', reaction: 'Nausea' }],
-    medications: [{ name: 'Atenolol', dosage: '25 mg', frequency: 'Once daily', startDate: '2026-03-02', endDate: '' }],
-    newVitals: { heartRate: 74, bloodPressure: '150/94', temperature: 36.7 },
-  },
-  {
-    name: 'Meera Kulkarni',
-    dateOfBirth: '1990-09-30',
-    gender: 'female',
-    bloodType: 'O-',
-    contactNumber: '9850076543',
-    allergies: [],
-    medications: [{ name: 'Levothyroxine', dosage: '50 mcg', frequency: 'Once daily', startDate: '2026-02-11', endDate: '' }],
-    newVitals: { heartRate: 68, bloodPressure: '118/76', temperature: 36.5 },
-  },
-  {
-    name: 'Prakash Shinde',
-    dateOfBirth: '1955-12-08',
-    gender: 'male',
-    bloodType: 'A+',
-    contactNumber: '9763322110',
-    allergies: [{ allergen: 'Aspirin', severity: 'severe', reaction: 'Wheezing' }],
-    medications: [{ name: 'Insulin glargine', dosage: '18 units', frequency: 'At night', startDate: '2026-05-20', endDate: '' }],
-    newVitals: { heartRate: 80, bloodPressure: '138/88', temperature: 36.9, oxygenSaturation: 96 },
-  },
-  {
-    name: 'Lata Pawar',
-    dateOfBirth: '1978-06-25',
-    gender: 'female',
-    bloodType: 'B+',
-    contactNumber: '9921456789',
-    allergies: [{ allergen: 'Dust', severity: 'mild', reaction: 'Sneezing' }],
-    medications: [{ name: 'Salbutamol inhaler', dosage: '2 puffs', frequency: 'As needed', startDate: '2026-04-01', endDate: '' }],
-    newVitals: { heartRate: 84, respiratoryRate: 20, oxygenSaturation: 95 },
-  },
-  {
-    name: 'Ganesh Bhosale',
-    dateOfBirth: '1986-01-14',
-    gender: 'male',
-    bloodType: 'O+',
-    contactNumber: '9604455667',
-    allergies: [],
-    medications: [{ name: 'Amoxicillin', dosage: '500 mg', frequency: 'Three times daily', startDate: '2026-09-28', endDate: '2026-10-05' }],
-    newVitals: { heartRate: 92, temperature: 38.1 },
-  },
-  {
-    name: 'Rukhsana Pathan',
-    dateOfBirth: '1963-03-03',
-    gender: 'female',
-    bloodType: 'AB-',
-    contactNumber: '9890011223',
-    allergies: [{ allergen: 'Shellfish', severity: 'severe', reaction: 'Swelling' }],
-    medications: [{ name: 'Losartan', dosage: '50 mg', frequency: 'Once daily', startDate: '2026-01-20', endDate: '' }],
-    newVitals: { heartRate: 76, bloodPressure: '146/92' },
-  },
-];
+interface SeedVitals {
+  recordedAt: string;
+  heartRate?: number;
+  bloodPressure?: string;
+  temperature?: number;
+  respiratoryRate?: number;
+  oxygenSaturation?: number;
+}
+type SeedPatient = Omit<PatientInput, 'newVitals'> & { syntheaId: string; vitals: SeedVitals[] };
 
-/** Concurrent dose edits from two PHC tablets, each of which becomes a review case. */
-const doseClashes: { patient: number; a: string; b: string }[] = [
-  { patient: 4, a: '50 mg', b: '12.5 mg' },
-  { patient: 5, a: '75 mcg', b: '62.5 mcg' },
-  { patient: 6, a: '22 units', b: '16 units' },
-  { patient: 7, a: '4 puffs', b: '1 puff' },
-  { patient: 9, a: '100 mg', b: '25 mg' },
-  { patient: 8, a: '875 mg', b: '250 mg' },
-];
+/**
+ * Patients come from Synthea's sample records (see src/data/README.md and
+ * scripts/import-synthea.mjs): real-world-shaped histories that belong to no
+ * real person. Patients with medicines come first in the file.
+ */
+const patients = (synthea as unknown as { patients: SeedPatient[] }).patients;
 
-function ctx(clientId: string, user: AuthUser, offsetMinutes: number): MutationContext {
+const vitalsOf = ({ recordedAt: _at, ...v }: SeedVitals): PatientInput['newVitals'] => v;
+
+/** "500 mg" -> ["1000 mg", "250 mg"]: two different doses a pair of tablets might type. */
+function clashingDoses(dosage: string): [string, string] {
+  const m = /^([\d.]+)\s*(.*)$/.exec(dosage);
+  if (!m) return [`2 x ${dosage}`, `half of ${dosage}`];
+  const n = Number(m[1]);
+  const fmt = (x: number) => `${Math.round(x * 1000) / 1000} ${m[2]}`.trim();
+  return [fmt(n * 2), fmt(n / 2)];
+}
+
+function ctx(clientId: string, user: AuthUser, offsetMinutes: number, at?: string): MutationContext {
   return {
     clientId,
     userId: user.userId,
     userName: user.name,
-    now: new Date(Date.now() - offsetMinutes * 60_000).toISOString(),
+    now: at ? new Date(at).toISOString() : new Date(Date.now() - offsetMinutes * 60_000).toISOString(),
     newId: randomUUID,
   };
 }
@@ -193,40 +106,42 @@ async function main() {
     created[u.username] = { userId: doc._id, username: u.username, name: u.name, role: u.role, facility: u.facility };
   }
 
-  const worker1 = created.worker1;
-  const worker2 = created.worker2;
-  const deviceA = 'seed-tablet-a';
-  const deviceB = 'seed-tablet-b';
-
-  // One tablet per PHC; new patients are spread across them.
+  // One tablet per PHC; patients are spread across them.
   const tablets = [
-    { clientId: deviceA, user: worker1, name: 'PHC Wagholi tablet' },
-    { clientId: deviceB, user: worker2, name: 'PHC Lonikand tablet' },
+    { clientId: 'seed-tablet-a', user: created.worker1, name: 'PHC Wagholi tablet' },
+    { clientId: 'seed-tablet-b', user: created.worker2, name: 'PHC Lonikand tablet' },
     { clientId: 'seed-tablet-c', user: created.worker3, name: 'PHC Hadapsar tablet' },
     { clientId: 'seed-tablet-d', user: created.worker4, name: 'PHC Uruli Kanchan tablet' },
     { clientId: 'seed-tablet-e', user: created.worker5, name: 'PHC Khed tablet' },
   ];
-  const ids: string[] = [];
-  for (const [i, p] of patients.entries()) {
-    const id = randomUUID();
-    ids.push(id);
-    const t = i < 4 ? tablets[0] : tablets[(i - 4) % tablets.length];
-    await processMutations([buildCreateMutation(id, p, ctx(t.clientId, t.user, 600 - i * 10))], {
-      user: t.user,
-      clientId: t.clientId,
-      deviceName: t.name,
-    });
-  }
-
-  // Every record gets a history worth reading in the audit trail's branch graph:
-  // follow-up visits from other PHCs (each one has seen the earlier edits) and
-  // offline edits that never saw each other and merged on their own.
   type Tablet = (typeof tablets)[number];
   type Change = (b: PatientInput) => PatientInput;
   const push = async (t: Tablet, mutations: ReturnType<typeof buildUpdateMutations>) => {
     const { results } = await processMutations(mutations, { user: t.user, clientId: t.clientId, deviceName: t.name });
     for (const r of results) if (r.status === 'rejected') console.warn(`Seed edit rejected: ${r.reason}`);
   };
+
+  // Each patient is registered at one PHC on the date of their first recorded
+  // visit; later visits add their readings on the dates Synthea gives.
+  const ids: string[] = [];
+  for (const [i, p] of patients.entries()) {
+    const id = randomUUID();
+    ids.push(id);
+    const t = tablets[i % tablets.length];
+    const [first, ...later] = p.vitals;
+    const { syntheaId: _sid, vitals: _v, ...input } = p;
+    await push(t, [buildCreateMutation(id, { ...input, newVitals: vitalsOf(first) }, ctx(t.clientId, t.user, 0, first.recordedAt))]);
+    for (const v of later) {
+      const doc = (await loadDoc(id))!;
+      await push(t, buildUpdateMutations(doc, { ...inputOf(doc), newVitals: vitalsOf(v) }, ctx(t.clientId, t.user, 0, v.recordedAt)));
+    }
+  }
+
+  // The merge stories below happen today, on records that have medicines.
+  const withMeds = patients.flatMap((p, i) => (p.medications.length ? [i] : []));
+  const story = (k: number) => withMeds[k % withMeds.length];
+  const doses = (i: number) => clashingDoses(patients[i].medications[0].dosage);
+
   /** One tablet edits the latest copy of the record. */
   const visit = async (i: number, t: Tablet, minutesAgo: number, change: Change) => {
     const doc = (await loadDoc(ids[i]))!;
@@ -252,83 +167,83 @@ async function main() {
   });
   const [wagholi, lonikand, hadapsar, uruli, khed] = tablets;
 
-  // Asha: a Lonikand follow-up, then Wagholi updates her phone having seen it.
-  await visit(0, lonikand, 470, vitals({ heartRate: 78, bloodPressure: '128/84', temperature: 36.8 }));
-  await visit(0, wagholi, 430, (b) => ({ ...b, contactNumber: '+91 98220 11223' }));
+  // Seen at a second PHC: that PHC records vitals, then the home PHC updates
+  // the phone number having seen the visit.
+  await visit(story(0), lonikand, 470, vitals({ heartRate: 78, bloodPressure: '128/84', temperature: 36.8 }));
+  await visit(story(0), wagholi, 430, (b) => ({ ...b, contactNumber: '98220 11223' }));
 
-  // Ramesh: two PHCs add different allergies offline (both kept), Hadapsar then
-  // records vitals having seen both, and later both change his Amlodipine dose.
-  await offlinePair(1, [wagholi, 460, allergy('Penicillin', 'severe', 'Hives')], [hadapsar, 455, allergy('Shellfish', 'severe', 'Swelling')]);
-  await visit(1, hadapsar, 400, vitals({ heartRate: 74, bloodPressure: '142/90', oxygenSaturation: 97 }));
-  await offlinePair(1, [wagholi, 330, firstDose('10 mg')], [hadapsar, 320, firstDose('7.5 mg')]);
+  // Two PHCs add different allergies offline (both kept), one records vitals
+  // having seen both, and later both change the same dose.
+  await offlinePair(story(1), [wagholi, 460, allergy('Sulfa drugs', 'moderate', 'Rash')], [hadapsar, 455, allergy('Shellfish', 'severe', 'Swelling')]);
+  await visit(story(1), hadapsar, 400, vitals({ heartRate: 74, bloodPressure: '142/90', oxygenSaturation: 97 }));
+  await offlinePair(story(1), [wagholi, 330, firstDose(doses(story(1))[0])], [hadapsar, 320, firstDose(doses(story(1))[1])]);
 
-  // Fatima: two phone numbers typed offline (the later one wins), then two doses.
-  await offlinePair(2, [wagholi, 450, (b) => ({ ...b, contactNumber: '+91 90110 44556' })], [uruli, 440, (b) => ({ ...b, contactNumber: '+91 90110 44665' })]);
-  await visit(2, uruli, 380, vitals({ heartRate: 88, bloodPressure: '110/72', temperature: 37.1 }));
-  await offlinePair(2, [uruli, 300, firstDose('2 tablets')], [khed, 290, firstDose('1 tablet', 'Twice daily')]);
+  // Two phone numbers typed offline (the later one wins), then two doses.
+  await offlinePair(story(2), [wagholi, 450, (b) => ({ ...b, contactNumber: '90110 44556' })], [uruli, 440, (b) => ({ ...b, contactNumber: '90110 44665' })]);
+  await visit(story(2), uruli, 380, vitals({ heartRate: 88, bloodPressure: '110/72', temperature: 37.1 }));
+  await offlinePair(story(2), [uruli, 300, firstDose(doses(story(2))[0])], [khed, 290, firstDose(doses(story(2))[1], 'Twice daily')]);
 
-  // Kiran: vitals from two camps on the same day (both kept), then a new prescription.
-  await offlinePair(3, [lonikand, 465, vitals({ heartRate: 92, temperature: 38.4 })], [khed, 460, vitals({ heartRate: 90, temperature: 38.2, oxygenSaturation: 96 })]);
-  await visit(3, wagholi, 410, (b) => ({
-    ...b,
-    medications: [...b.medications, { name: 'Paracetamol', dosage: '500 mg', frequency: 'Every 6 hours', startDate: '2026-10-01', endDate: '2026-10-05' }],
-  }));
-  await visit(3, khed, 350, allergy('Dust', 'mild', 'Sneezing'));
+  // Vitals from two health camps on the same day: both readings are kept.
+  await offlinePair(story(3), [lonikand, 465, vitals({ heartRate: 92, temperature: 38.4 })], [khed, 460, vitals({ heartRate: 90, temperature: 38.2, oxygenSaturation: 96 })]);
+  await visit(story(3), khed, 350, allergy('Dust', 'mild', 'Sneezing'));
 
-  // The records that end in a dose clash get a follow-up visit first.
-  for (const [k, i] of [4, 5, 6, 7, 9, 8].entries()) {
-    const t = tablets[(k + 2) % tablets.length];
-    await visit(i, t, 420 - k * 12, vitals({ heartRate: 70 + k * 3, bloodPressure: `${120 + k * 4}/${78 + k}` }));
-  }
-
-  // Demo: both tablets edited Asha's record while offline.
-  const asha = (await loadDoc(ids[0]))!;
-  const base = inputOf(asha);
-  const fromA = buildUpdateMutations(
-    asha,
-    {
-      ...base,
-      allergies: [...base.allergies, { allergen: 'Latex', severity: 'mild', reaction: 'Itching' }],
-      medications: [{ ...base.medications[0], dosage: '850 mg' }],
-    },
-    ctx(deviceA, worker1, 120),
+  // Both tablets edited one record while offline: different allergies (both
+  // kept), different doses of the same medicine (sent to review), and vitals.
+  const demo = story(0);
+  const record = (await loadDoc(ids[demo]))!;
+  const base = inputOf(record);
+  const [doseA, doseB] = doses(demo);
+  await push(
+    wagholi,
+    buildUpdateMutations(
+      record,
+      {
+        ...base,
+        allergies: [...base.allergies, { allergen: 'Latex', severity: 'mild', reaction: 'Itching' }],
+        medications: [{ ...base.medications[0], dosage: doseA }, ...base.medications.slice(1)],
+      },
+      ctx(wagholi.clientId, wagholi.user, 120),
+    ),
   );
-  const fromB = buildUpdateMutations(
-    asha,
-    {
-      ...base,
-      allergies: [...base.allergies, { allergen: 'Ibuprofen', severity: 'moderate', reaction: 'Stomach pain' }],
-      medications: [{ ...base.medications[0], dosage: '1000 mg' }],
-      newVitals: { heartRate: 82, bloodPressure: '132/86' },
-    },
-    ctx(deviceB, worker2, 90),
+  await push(
+    lonikand,
+    buildUpdateMutations(
+      record,
+      {
+        ...base,
+        allergies: [...base.allergies, { allergen: 'Ibuprofen', severity: 'moderate', reaction: 'Stomach pain' }],
+        medications: [{ ...base.medications[0], dosage: doseB }, ...base.medications.slice(1)],
+        newVitals: { heartRate: 82, bloodPressure: '132/86' },
+      },
+      ctx(lonikand.clientId, lonikand.user, 90),
+    ),
   );
-  await processMutations(fromA, { user: worker1, clientId: deviceA, deviceName: 'PHC Wagholi tablet' });
-  await processMutations(fromB, { user: worker2, clientId: deviceB, deviceName: 'PHC Lonikand tablet' });
 
-  // More review cases: two tablets change the same dose while both are offline.
-  for (const [k, clash] of doseClashes.entries()) {
-    const doc = (await loadDoc(ids[clash.patient]))!;
-    const b0 = inputOf(doc);
+  // More review cases: a follow-up visit, then two tablets change the same dose
+  // while both are offline.
+  for (let k = 4; k < 10; k++) {
+    const i = story(k);
+    await visit(i, tablets[(k + 2) % tablets.length], 420 - k * 12, vitals({ heartRate: 70 + k * 3, bloodPressure: `${120 + k * 4}/${78 + k}` }));
     const one = tablets[(k + 1) % tablets.length];
     const two = tablets[(k + 3) % tablets.length];
-    const editA = buildUpdateMutations(doc, { ...b0, medications: [{ ...b0.medications[0], dosage: clash.a }] }, ctx(one.clientId, one.user, 80 - k * 7));
-    const editB = buildUpdateMutations(doc, { ...b0, medications: [{ ...b0.medications[0], dosage: clash.b }] }, ctx(two.clientId, two.user, 70 - k * 7));
-    await processMutations(editA, { user: one.user, clientId: one.clientId, deviceName: one.name });
-    await processMutations(editB, { user: two.user, clientId: two.clientId, deviceName: two.name });
+    await offlinePair(i, [one, 80 - k * 7, firstDose(doses(i)[0])], [two, 70 - k * 7, firstDose(doses(i)[1])]);
   }
 
-  // A reviewer has already settled Ramesh's and Fatima's dose clashes.
+  // A reviewer has already settled two of the dose clashes.
   const reviewer = created.reviewer;
   const settle = async (i: number, choice: 'current' | 'incoming' | 'custom', note: string, value?: { dosage: string; frequency: string; active: boolean }) => {
     const row = await ConflictModel.findOne({ patientId: ids[i], status: 'pending_review' }).lean();
     if (row) await resolveConflict(String(row._id), { choice, note, value }, reviewer);
   };
-  await settle(1, 'incoming', 'BP still high on 7.5 mg at review; keep the Hadapsar dose.');
-  await settle(2, 'custom', 'Haemoglobin 9.8; agreed with the medical officer.', { dosage: '1 tablet', frequency: 'Twice daily', active: true });
+  await settle(story(1), 'incoming', 'BP still high on the lower dose at review; keep the Hadapsar dose.');
+  await settle(story(2), 'custom', 'Agreed with the medical officer by phone.', {
+    dosage: patients[story(2)].medications[0].dosage,
+    frequency: 'Twice daily',
+    active: true,
+  });
 
   const open = await ConflictModel.countDocuments({ status: 'pending_review' });
-  console.log(`Seeded ${demoUsers.length} users and ${patients.length} patients (${open} pending medication conflicts, 2 already resolved).`);
+  console.log(`Seeded ${demoUsers.length} users and ${patients.length} patients from Synthea (${open} pending medication conflicts, 2 already resolved).`);
   console.log(`Demo logins (password "${DEMO_PASSWORD}"): ${demoUsers.map((u) => `${u.username} [${u.role}]`).join(', ')}`);
   await disconnectDb();
 }

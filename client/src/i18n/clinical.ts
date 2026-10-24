@@ -45,6 +45,19 @@ const PHRASES: Record<string, string> = {
   dizziness: 'चक्कर',
   fever: 'बुख़ार',
   cough: 'खाँसी',
+  'skin rash': 'त्वचा पर चकत्ते',
+  'skin reaction': 'त्वचा पर प्रतिक्रिया',
+  'runny nose': 'नाक बहना',
+  'watery eyes': 'आँखों से पानी आना',
+  'once weekly': 'हफ़्ते में एक बार',
+  'once monthly': 'महीने में एक बार',
+  monthly: 'महीने में एक बार',
+  'as needed (emergency)': 'ज़रूरत होने पर (आपातकाल में)',
+  'as needed for pain': 'दर्द होने पर',
+  'as needed for chest pain': 'सीने में दर्द होने पर',
+  'twice daily before meals': 'दिन में दो बार, खाने से पहले',
+  'twice daily (apply)': 'दिन में दो बार (लगाएँ)',
+  'every 3 days (patch)': 'हर 3 दिन (पैच)',
 };
 
 const UNITS: Record<string, string> = {

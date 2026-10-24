@@ -1,0 +1,4627 @@
+{
+ "source": "Synthea sample data (synthea_sample_data_csv_latest.zip), https://synthea.mitre.org/downloads, Apache-2.0",
+ "note": "Clinical details are from Synthea. Names, phone numbers and blood groups are localised by scripts/import-synthea.mjs.",
+ "patients": [
+  {
+   "syntheaId": "a88d8253-7b27-4746-bc0f-c41e671b6237",
+   "name": "Rukhsana Khan",
+   "dateOfBirth": "1925-12-06",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "85783 34030",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-05-03",
+     "endDate": ""
+    },
+    {
+     "name": "Tacrolimus",
+     "dosage": "1 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-05-03",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-05-03",
+     "endDate": ""
+    },
+    {
+     "name": "Amlodipine",
+     "dosage": "2.5 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-05-03",
+     "endDate": ""
+    },
+    {
+     "name": "Alendronic Acid",
+     "dosage": "10 mg",
+     "frequency": "Once weekly",
+     "startDate": "2026-05-03",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-21T07:42:47Z",
+     "heartRate": 64,
+     "bloodPressure": "94/52",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-04-27T07:42:47Z",
+     "heartRate": 86,
+     "bloodPressure": "88/55",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-05-03T07:42:47Z",
+     "heartRate": 73,
+     "bloodPressure": "87/58",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "007a32fb-33a3-6f75-2161-15a2ea6ed2bf",
+   "name": "Sachin Lokhande",
+   "dateOfBirth": "1931-08-28",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "70019 40158",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Insulin (Humulin 70/30)",
+     "dosage": "70 units/mL",
+     "frequency": "Twice daily before meals",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    },
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    },
+    {
+     "name": "Aspirin",
+     "dosage": "81 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    },
+    {
+     "name": "Amlodipine",
+     "dosage": "2.5 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2026-08-28T03:19:15Z",
+     "heartRate": 90,
+     "bloodPressure": "87/57",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-09-11T03:19:15Z",
+     "heartRate": 87,
+     "bloodPressure": "81/56",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-10-09T03:19:15Z",
+     "heartRate": 94,
+     "bloodPressure": "79/56",
+     "respiratoryRate": 16
+    }
+   ]
+  },
+  {
+   "syntheaId": "c0f85a14-440d-79b8-1a24-9792cf230f87",
+   "name": "Manisha Deshmukh",
+   "dateOfBirth": "1949-09-03",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "97169 79849",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-02-28",
+     "endDate": ""
+    },
+    {
+     "name": "Alendronic Acid",
+     "dosage": "10 mg",
+     "frequency": "Once weekly",
+     "startDate": "2026-02-28",
+     "endDate": ""
+    },
+    {
+     "name": "Clopidogrel",
+     "dosage": "75 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-02-24",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-02-24",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "100 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-02-24",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-17T19:16:53Z",
+     "heartRate": 77,
+     "bloodPressure": "139/81",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-02-22T19:16:53Z",
+     "heartRate": 68,
+     "bloodPressure": "127/66",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-02-28T19:16:53Z",
+     "heartRate": 97,
+     "bloodPressure": "127/68",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "7fc5a38e-c3da-07c2-2015-d9802d305f0a",
+   "name": "Rupali Lokhande",
+   "dateOfBirth": "1950-04-08",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "80174 65500",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-03-07",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-03-07",
+     "endDate": ""
+    },
+    {
+     "name": "Clopidogrel",
+     "dosage": "75 mg",
+     "frequency": "Once daily",
+     "startDate": "2014-01-04",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2014-01-04",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "100 mg",
+     "frequency": "Once daily",
+     "startDate": "2014-01-04",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-24T03:46:18Z",
+     "heartRate": 93,
+     "bloodPressure": "114/63",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-03-01T03:46:18Z",
+     "heartRate": 76,
+     "bloodPressure": "118/69",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-03-07T03:46:18Z",
+     "heartRate": 70,
+     "bloodPressure": "110/62",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "88deb12c-4d82-d1bc-6298-7cee4e3c3d0d",
+   "name": "Sagar Gaikwad",
+   "dateOfBirth": "1952-10-05",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "90489 34501",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Alendronic Acid",
+     "dosage": "10 mg",
+     "frequency": "Once weekly",
+     "startDate": "2026-02-15",
+     "endDate": ""
+    },
+    {
+     "name": "Carvedilol",
+     "dosage": "25 mg",
+     "frequency": "Twice daily",
+     "startDate": "2025-02-14",
+     "endDate": ""
+    },
+    {
+     "name": "Rosuvastatin",
+     "dosage": "40 mg",
+     "frequency": "Once daily",
+     "startDate": "2025-02-14",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "40 mg",
+     "frequency": "Once daily",
+     "startDate": "2025-02-14",
+     "endDate": ""
+    },
+    {
+     "name": "Prasugrel",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2025-02-14",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-04T03:19:35Z",
+     "heartRate": 79,
+     "bloodPressure": "136/80",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-02-09T03:19:35Z",
+     "heartRate": 65,
+     "bloodPressure": "126/80",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-02-15T03:19:35Z",
+     "heartRate": 72,
+     "bloodPressure": "122/80",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "3f0c90c7-2489-1306-ff69-868509c56635",
+   "name": "Sunita Nimbalkar",
+   "dateOfBirth": "1959-01-10",
+   "gender": "female",
+   "bloodType": "AB+",
+   "contactNumber": "70611 61738",
+   "allergies": [
+    {
+     "allergen": "Penicillin",
+     "severity": "moderate",
+     "reaction": "Cough"
+    },
+    {
+     "allergen": "Peanut",
+     "severity": "moderate",
+     "reaction": "Swelling"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-04-18",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-04-18",
+     "endDate": ""
+    },
+    {
+     "name": "Amlodipine",
+     "dosage": "2.5 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-04-18",
+     "endDate": ""
+    },
+    {
+     "name": "Alendronic Acid",
+     "dosage": "10 mg",
+     "frequency": "Once weekly",
+     "startDate": "2026-04-18",
+     "endDate": ""
+    },
+    {
+     "name": "Doxycycline",
+     "dosage": "100 mg",
+     "frequency": "Twice daily",
+     "startDate": "1967-01-14",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-09-03T15:06:52Z",
+     "bloodPressure": "113/62"
+    },
+    {
+     "recordedAt": "2025-04-12T15:06:52Z",
+     "heartRate": 69,
+     "bloodPressure": "114/63",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-04-18T15:06:52Z",
+     "heartRate": 92,
+     "bloodPressure": "116/58",
+     "respiratoryRate": 16
+    }
+   ]
+  },
+  {
+   "syntheaId": "3becd134-79d8-dc95-1d60-a9255e9e210b",
+   "name": "Mahesh Bhosale",
+   "dateOfBirth": "1960-08-15",
+   "gender": "male",
+   "bloodType": "AB+",
+   "contactNumber": "88090 86240",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Aspirin",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Eggs",
+     "severity": "unknown",
+     "reaction": ""
+    }
+   ],
+   "medications": [
+    {
+     "name": "Fluticasone",
+     "dosage": "44 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2026-07-06",
+     "endDate": ""
+    },
+    {
+     "name": "Albuterol",
+     "dosage": "90 mcg/puff",
+     "frequency": "As needed",
+     "startDate": "2026-07-06",
+     "endDate": ""
+    },
+    {
+     "name": "Clopidogrel",
+     "dosage": "75 mg",
+     "frequency": "Once daily",
+     "startDate": "2014-05-05",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2014-05-05",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "100 mg",
+     "frequency": "Once daily",
+     "startDate": "2014-05-05",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-24T02:03:51Z",
+     "heartRate": 91,
+     "bloodPressure": "139/68",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-06-30T02:03:51Z",
+     "heartRate": 71,
+     "bloodPressure": "133/70",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-07-06T02:03:51Z",
+     "heartRate": 89,
+     "bloodPressure": "136/76",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "3428c73d-cb8d-c081-e31c-bfee397eb4bb",
+   "name": "Deepak Joshi",
+   "dateOfBirth": "1961-05-29",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "70899 46504",
+   "allergies": [
+    {
+     "allergen": "Bee venom",
+     "severity": "unknown",
+     "reaction": ""
+    }
+   ],
+   "medications": [
+    {
+     "name": "Aspirin",
+     "dosage": "81 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-12-24",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "50 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-12-24",
+     "endDate": ""
+    },
+    {
+     "name": "Rosuvastatin",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-12-24",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-12-24",
+     "endDate": ""
+    },
+    {
+     "name": "Prasugrel",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-12-24",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-08-12T01:54:08Z",
+     "heartRate": 100,
+     "bloodPressure": "118/75",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-08-18T01:54:08Z",
+     "heartRate": 74,
+     "bloodPressure": "120/76",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-08-24T01:54:08Z",
+     "heartRate": 86,
+     "bloodPressure": "129/79",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "3a58586c-0394-ac00-30cd-00ca8708ca39",
+   "name": "Anita Shinde",
+   "dateOfBirth": "1961-12-05",
+   "gender": "female",
+   "bloodType": "AB-",
+   "contactNumber": "88148 62379",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-02-24",
+     "endDate": ""
+    },
+    {
+     "name": "Amlodipine",
+     "dosage": "2.5 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-02-24",
+     "endDate": ""
+    },
+    {
+     "name": "Aspirin",
+     "dosage": "81 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-05-08",
+     "endDate": ""
+    },
+    {
+     "name": "Carvedilol",
+     "dosage": "3.125 mg",
+     "frequency": "Twice daily",
+     "startDate": "2024-05-08",
+     "endDate": ""
+    },
+    {
+     "name": "Rosuvastatin",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-05-08",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-13T03:41:07Z",
+     "heartRate": 89,
+     "bloodPressure": "134/99",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-02-18T03:41:07Z",
+     "heartRate": 72,
+     "bloodPressure": "132/94",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-02-24T03:41:07Z",
+     "heartRate": 81,
+     "bloodPressure": "131/91",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "492dfa32-d7b8-faf8-c7d9-ba12d95f82cd",
+   "name": "Kiran Satpute",
+   "dateOfBirth": "1963-07-21",
+   "gender": "male",
+   "bloodType": "AB+",
+   "contactNumber": "90326 06681",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2025-11-02",
+     "endDate": ""
+    },
+    {
+     "name": "Naproxen",
+     "dosage": "220 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2011-07-20",
+     "endDate": ""
+    },
+    {
+     "name": "Clopidogrel",
+     "dosage": "75 mg",
+     "frequency": "Once daily",
+     "startDate": "2009-08-16",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2009-08-16",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "100 mg",
+     "frequency": "Once daily",
+     "startDate": "2009-08-16",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-10-27T19:12:06Z",
+     "heartRate": 62,
+     "bloodPressure": "123/92",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-05-11T19:12:06Z",
+     "heartRate": 77,
+     "bloodPressure": "124/91",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-11-02T19:12:06Z",
+     "heartRate": 98,
+     "bloodPressure": "124/86",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "abbe7ce8-820b-cb76-8d0c-02fe9d9decb0",
+   "name": "Shalini Bhosale",
+   "dateOfBirth": "1965-11-10",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "80545 81945",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-14",
+     "endDate": ""
+    },
+    {
+     "name": "Insulin (Humulin 70/30)",
+     "dosage": "70 units/mL",
+     "frequency": "Twice daily before meals",
+     "startDate": "2026-10-14",
+     "endDate": ""
+    },
+    {
+     "name": "Metformin",
+     "dosage": "500 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-14",
+     "endDate": ""
+    },
+    {
+     "name": "Amlodipine",
+     "dosage": "2.5 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-10-14",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-02-28",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2026-08-05T08:09:41Z",
+     "heartRate": 72,
+     "bloodPressure": "126/83",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-09-02T08:09:41Z",
+     "heartRate": 89,
+     "bloodPressure": "118/77",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-10-14T08:09:41Z",
+     "heartRate": 83,
+     "bloodPressure": "120/81",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+   "name": "Suresh Satpute",
+   "dateOfBirth": "1966-02-18",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "92869 23971",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Metformin",
+     "dosage": "500 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-06-12",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-06-12",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "50 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-04-14",
+     "endDate": ""
+    },
+    {
+     "name": "Aspirin",
+     "dosage": "81 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-04-14",
+     "endDate": ""
+    },
+    {
+     "name": "Atorvastatin",
+     "dosage": "40 mg",
+     "frequency": "Once daily",
+     "startDate": "2024-04-14",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-10-18T01:36:21Z",
+     "heartRate": 93,
+     "bloodPressure": "114/74",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-06-06T01:36:21Z",
+     "heartRate": 100,
+     "bloodPressure": "107/72",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-06-12T01:36:21Z",
+     "heartRate": 80,
+     "bloodPressure": "123/73",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "0c68cf3c-de5c-e2b6-04e0-0d8ccf4ca76d",
+   "name": "Shabana Sayyed",
+   "dateOfBirth": "1971-05-28",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "92887 67880",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-06-26",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-06-26",
+     "endDate": ""
+    },
+    {
+     "name": "Amlodipine",
+     "dosage": "2.5 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-06-26",
+     "endDate": ""
+    },
+    {
+     "name": "Clopidogrel",
+     "dosage": "75 mg",
+     "frequency": "Once daily",
+     "startDate": "2025-06-27",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2025-06-27",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-14T06:57:59Z",
+     "heartRate": 86,
+     "bloodPressure": "113/71",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-06-20T06:57:59Z",
+     "heartRate": 95,
+     "bloodPressure": "113/61",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-06-26T06:57:59Z",
+     "heartRate": 93,
+     "bloodPressure": "101/59",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "4ecd0e49-cbdb-31b8-06ae-258290d6c788",
+   "name": "Sneha Lokhande",
+   "dateOfBirth": "1971-07-13",
+   "gender": "female",
+   "bloodType": "AB+",
+   "contactNumber": "99969 09064",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Acetaminophen + Codeine",
+     "dosage": "300 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-09-22",
+     "endDate": ""
+    },
+    {
+     "name": "Albuterol",
+     "dosage": "5 mg/mL",
+     "frequency": "As needed",
+     "startDate": "2026-09-22",
+     "endDate": ""
+    },
+    {
+     "name": "Fluticasone + Salmeterol",
+     "dosage": "250 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2026-09-22",
+     "endDate": ""
+    },
+    {
+     "name": "Levothyroxine",
+     "dosage": "75 mcg",
+     "frequency": "Once daily",
+     "startDate": "2022-02-26",
+     "endDate": ""
+    },
+    {
+     "name": "Clopidogrel",
+     "dosage": "75 mg",
+     "frequency": "Once daily",
+     "startDate": "2020-08-25",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-09-10T01:15:42Z",
+     "heartRate": 71,
+     "bloodPressure": "103/79",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-09-16T01:15:42Z",
+     "heartRate": 82,
+     "bloodPressure": "101/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-09-22T01:15:42Z",
+     "heartRate": 84,
+     "bloodPressure": "100/72",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "73982c5e-bf00-2a88-6a08-26a3030898c8",
+   "name": "Rekha Satpute",
+   "dateOfBirth": "1980-08-22",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "86003 20821",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Naproxen",
+     "dosage": "500 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2014-08-08",
+     "endDate": ""
+    },
+    {
+     "name": "Vitamin B12",
+     "dosage": "5 mg/mL",
+     "frequency": "Once monthly",
+     "startDate": "2006-10-28",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2005-12-06",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2005-12-06",
+     "endDate": ""
+    },
+    {
+     "name": "Hydrocortisone",
+     "dosage": "10 mg/mL",
+     "frequency": "Twice daily (apply)",
+     "startDate": "2005-11-24",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2022-09-02T14:36:18Z",
+     "heartRate": 68,
+     "bloodPressure": "99/71",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-09-06T14:36:18Z",
+     "heartRate": 96,
+     "bloodPressure": "112/76",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-09-11T14:36:18Z",
+     "heartRate": 90,
+     "bloodPressure": "112/77",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "ca4b7b2c-21a2-ec9e-5b86-d9fad9d45de0",
+   "name": "Vijay Kulkarni",
+   "dateOfBirth": "1991-01-06",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "86257 46149",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Skin reaction"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Aspirin",
+     "severity": "moderate",
+     "reaction": "Stomach pain"
+    },
+    {
+     "allergen": "Fish",
+     "severity": "mild",
+     "reaction": "Skin rash"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Budesonide",
+     "dosage": "250 mcg/mL",
+     "frequency": "Twice daily",
+     "startDate": "2026-06-14",
+     "endDate": ""
+    },
+    {
+     "name": "Tramadol",
+     "dosage": "50 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-06-14",
+     "endDate": ""
+    },
+    {
+     "name": "Albuterol",
+     "dosage": "210 mcg/mL",
+     "frequency": "As needed",
+     "startDate": "2026-06-14",
+     "endDate": ""
+    },
+    {
+     "name": "Chlorpheniramine",
+     "dosage": "2 mg/mL",
+     "frequency": "As needed",
+     "startDate": "1991-10-30",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "1991-10-30",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-02T06:03:52Z",
+     "heartRate": 74,
+     "bloodPressure": "141/74",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-06-08T06:03:52Z",
+     "heartRate": 60,
+     "bloodPressure": "151/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-06-14T06:03:52Z",
+     "heartRate": 87,
+     "bloodPressure": "142/78",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "b177c33a-b882-ad97-1865-1803f643116a",
+   "name": "Ramesh Shirke",
+   "dateOfBirth": "2000-04-03",
+   "gender": "male",
+   "bloodType": "A+",
+   "contactNumber": "76148 35965",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Acetaminophen + Codeine",
+     "dosage": "300 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-07-13",
+     "endDate": ""
+    },
+    {
+     "name": "Oxycodone",
+     "dosage": "10 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-07-13",
+     "endDate": ""
+    },
+    {
+     "name": "Fentanyl",
+     "dosage": "25 mcg/hr",
+     "frequency": "Every 3 days (patch)",
+     "startDate": "2026-07-13",
+     "endDate": ""
+    },
+    {
+     "name": "Tramadol",
+     "dosage": "50 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-07-13",
+     "endDate": ""
+    },
+    {
+     "name": "Hydrocodone",
+     "dosage": "10 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-07-13",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-07-01T09:10:23Z",
+     "heartRate": 93,
+     "bloodPressure": "114/90",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-07-07T09:10:23Z",
+     "heartRate": 68,
+     "bloodPressure": "127/91",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-07-13T09:10:23Z",
+     "heartRate": 76,
+     "bloodPressure": "116/85",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "ea20ca42-d23e-df84-54aa-4e011c777025",
+   "name": "Javed Sayyed",
+   "dateOfBirth": "1967-03-04",
+   "gender": "male",
+   "bloodType": "O-",
+   "contactNumber": "79441 95073",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Aspirin",
+     "dosage": "81 mg",
+     "frequency": "Once daily",
+     "startDate": "2018-02-04",
+     "endDate": ""
+    },
+    {
+     "name": "Metoprolol",
+     "dosage": "50 mg",
+     "frequency": "Once daily",
+     "startDate": "2018-02-04",
+     "endDate": ""
+    },
+    {
+     "name": "Simvastatin",
+     "dosage": "40 mg",
+     "frequency": "Once daily",
+     "startDate": "2018-02-04",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "20 mg",
+     "frequency": "Once daily",
+     "startDate": "2018-02-04",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-13T02:54:53Z",
+     "heartRate": 82,
+     "bloodPressure": "149/92",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-04-19T02:54:53Z",
+     "heartRate": 61,
+     "bloodPressure": "147/93",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-04-25T02:54:53Z",
+     "heartRate": 98,
+     "bloodPressure": "138/90",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "d90eef0c-f760-8eca-3edc-e289e9b1ff52",
+   "name": "Vandana Salunkhe",
+   "dateOfBirth": "1967-04-01",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "85027 20899",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Albuterol",
+     "dosage": "5 mg/mL",
+     "frequency": "As needed",
+     "startDate": "2026-06-13",
+     "endDate": ""
+    },
+    {
+     "name": "Fluticasone",
+     "dosage": "110 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2026-06-13",
+     "endDate": ""
+    },
+    {
+     "name": "Acetaminophen + Hydrocodone",
+     "dosage": "300 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-06-13",
+     "endDate": ""
+    },
+    {
+     "name": "Naproxen",
+     "dosage": "220 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2014-01-07",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2026-01-10T15:34:28Z",
+     "heartRate": 64,
+     "bloodPressure": "98/68",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-04-18T15:34:28Z",
+     "heartRate": 66,
+     "bloodPressure": "99/75",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-06-13T15:34:28Z",
+     "heartRate": 83,
+     "bloodPressure": "99/71",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "be9df765-800a-5061-e0ff-34f9d0f79a95",
+   "name": "Sneha Kadam",
+   "dateOfBirth": "1974-02-10",
+   "gender": "female",
+   "bloodType": "B-",
+   "contactNumber": "95971 86738",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Simvastatin",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-04-26",
+     "endDate": ""
+    },
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-04-19",
+     "endDate": ""
+    },
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-04-19",
+     "endDate": ""
+    },
+    {
+     "name": "Vitamin B12",
+     "dosage": "5 mg/mL",
+     "frequency": "Once monthly",
+     "startDate": "2005-05-01",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-07T04:43:51Z",
+     "heartRate": 77,
+     "bloodPressure": "137/84",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-04-13T04:43:51Z",
+     "heartRate": 81,
+     "bloodPressure": "131/77",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-04-19T04:43:51Z",
+     "heartRate": 68,
+     "bloodPressure": "135/80",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "7dd14aa8-7b82-4f0f-41a6-462265709b20",
+   "name": "Nitin Deshmukh",
+   "dateOfBirth": "1993-04-04",
+   "gender": "male",
+   "bloodType": "A+",
+   "contactNumber": "77780 70733",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Runny nose"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Wheat",
+     "severity": "moderate",
+     "reaction": "Skin rash"
+    },
+    {
+     "allergen": "Fish",
+     "severity": "mild",
+     "reaction": "Skin rash"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Ibuprofen",
+     "dosage": "400 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-04-26",
+     "endDate": ""
+    },
+    {
+     "name": "Vitamin B12",
+     "dosage": "5 mg/mL",
+     "frequency": "Once monthly",
+     "startDate": "2016-03-06",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "1994-06-14",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "1994-06-14",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-14T08:13:04Z",
+     "heartRate": 61,
+     "bloodPressure": "118/79",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-04-20T08:13:04Z",
+     "heartRate": 62,
+     "bloodPressure": "113/80",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-04-26T08:13:04Z",
+     "heartRate": 81,
+     "bloodPressure": "113/86",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "1c71f4c4-c4a6-47fd-6d52-182f2a8d0cf0",
+   "name": "Rukhsana Shaikh",
+   "dateOfBirth": "1994-12-18",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "76173 40799",
+   "allergies": [
+    {
+     "allergen": "Latex",
+     "severity": "mild",
+     "reaction": "Hives"
+    },
+    {
+     "allergen": "Mould",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Milk",
+     "severity": "mild",
+     "reaction": "Hives"
+    },
+    {
+     "allergen": "Wheat",
+     "severity": "severe",
+     "reaction": "Anaphylaxis"
+    },
+    {
+     "allergen": "Fish",
+     "severity": "mild",
+     "reaction": "Skin rash"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Fluticasone",
+     "dosage": "44 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2026-04-26",
+     "endDate": ""
+    },
+    {
+     "name": "Albuterol",
+     "dosage": "830 mcg/mL",
+     "frequency": "As needed",
+     "startDate": "2026-04-26",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "1995-07-13",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "1995-07-13",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-14T03:19:14Z",
+     "heartRate": 86,
+     "bloodPressure": "146/73",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-04-20T03:19:14Z",
+     "heartRate": 70,
+     "bloodPressure": "140/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-04-26T03:19:14Z",
+     "heartRate": 71,
+     "bloodPressure": "135/76",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "337f0745-95ef-af89-6f88-e00fe0e29b6d",
+   "name": "Nitin Dhumal",
+   "dateOfBirth": "2008-01-22",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "87853 95100",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Sneezing"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "mild",
+     "reaction": "Hives"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Wheat",
+     "severity": "moderate",
+     "reaction": "Skin rash"
+    },
+    {
+     "allergen": "Tree nut",
+     "severity": "severe",
+     "reaction": "Anaphylaxis"
+    },
+    {
+     "allergen": "Peanut",
+     "severity": "moderate",
+     "reaction": "Hives"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Albuterol",
+     "dosage": "90 mcg/puff",
+     "frequency": "As needed",
+     "startDate": "2026-03-17",
+     "endDate": ""
+    },
+    {
+     "name": "Fluticasone",
+     "dosage": "44 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2026-03-17",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "2009-05-04",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2009-05-04",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-03-05T21:38:10Z",
+     "heartRate": 82,
+     "bloodPressure": "119/70",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-03-11T21:38:10Z",
+     "heartRate": 82,
+     "bloodPressure": "108/69",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-03-17T21:38:10Z",
+     "heartRate": 85,
+     "bloodPressure": "114/72",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "37cd4685-45ad-8602-7fff-2b04af9bc008",
+   "name": "Rukhsana Mulla",
+   "dateOfBirth": "1978-01-06",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "92519 06959",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Hydrochlorothiazide",
+     "dosage": "25 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-02-27",
+     "endDate": ""
+    },
+    {
+     "name": "Metformin",
+     "dosage": "500 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-02-27",
+     "endDate": ""
+    },
+    {
+     "name": "Ferrous Sulfate",
+     "dosage": "325 mg",
+     "frequency": "Once daily",
+     "startDate": "1995-06-02",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-16T07:25:00Z",
+     "heartRate": 63,
+     "bloodPressure": "130/94",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-02-21T07:25:00Z",
+     "heartRate": 88,
+     "bloodPressure": "136/89",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-02-27T07:25:00Z",
+     "heartRate": 71,
+     "bloodPressure": "130/94",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "242e8aeb-c9c2-0594-a1f3-15ce7014698e",
+   "name": "Suman Kadam",
+   "dateOfBirth": "1998-06-26",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "75672 89305",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Acetaminophen + Oxycodone",
+     "dosage": "325 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    },
+    {
+     "name": "Acetaminophen",
+     "dosage": "325 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-10-16",
+     "endDate": ""
+    },
+    {
+     "name": "Acetaminophen + Hydrocodone",
+     "dosage": "300 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2017-06-13",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-10-04T17:51:16Z",
+     "heartRate": 73,
+     "bloodPressure": "106/79",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-10-10T17:51:16Z",
+     "heartRate": 82,
+     "bloodPressure": "105/76",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-10-16T17:51:16Z",
+     "heartRate": 74,
+     "bloodPressure": "105/76",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "2b6ff529-5434-6e3f-f7bb-2135c44dce07",
+   "name": "Ramesh Wagh",
+   "dateOfBirth": "2003-08-23",
+   "gender": "male",
+   "bloodType": "AB-",
+   "contactNumber": "72219 32304",
+   "allergies": [
+    {
+     "allergen": "Peanut",
+     "severity": "moderate",
+     "reaction": "Hives"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Acetaminophen + Oxycodone",
+     "dosage": "325 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2025-11-08",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "2005-01-31",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2005-01-31",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2023-10-28T07:39:45Z",
+     "heartRate": 83,
+     "bloodPressure": "112/74",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2024-11-02T07:39:45Z",
+     "heartRate": 76,
+     "bloodPressure": "117/80",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-11-08T07:39:45Z",
+     "heartRate": 83,
+     "bloodPressure": "102/79",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "16f7e7d8-91f7-81f6-505f-5f94988e8437",
+   "name": "Bharati Bhosale",
+   "dateOfBirth": "2010-09-22",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "73792 15706",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Lisinopril",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Fish",
+     "severity": "mild",
+     "reaction": "Runny nose, watery eyes"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Levora 0.15/30)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2026-09-11",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "2011-09-07",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2011-09-07",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2023-10-18T11:38:56Z",
+     "heartRate": 82,
+     "bloodPressure": "112/89",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2024-10-23T11:38:56Z",
+     "heartRate": 63,
+     "bloodPressure": "120/84",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-10-29T11:38:56Z",
+     "heartRate": 69,
+     "bloodPressure": "117/83",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "34dd4106-4635-e94b-c4b1-640b0ea3c80d",
+   "name": "Dilip Mane",
+   "dateOfBirth": "2018-09-02",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "81481 58406",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Sneezing"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Penicillin",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Eggs",
+     "severity": "moderate",
+     "reaction": "Hives"
+    },
+    {
+     "allergen": "Peanut",
+     "severity": "moderate",
+     "reaction": "Swelling"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Doxycycline",
+     "dosage": "100 mg",
+     "frequency": "Twice daily",
+     "startDate": "2021-05-11",
+     "endDate": ""
+    },
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "2019-06-04",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2019-06-04",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-08-18T18:54:21Z",
+     "heartRate": 81,
+     "bloodPressure": "123/77",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-08-24T18:54:21Z",
+     "heartRate": 75,
+     "bloodPressure": "126/74",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-08-30T18:54:21Z",
+     "heartRate": 88,
+     "bloodPressure": "127/79",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "10f38e84-4e7a-02a0-5500-ba5a7611b583",
+   "name": "Nikhil Shinde",
+   "dateOfBirth": "1971-04-26",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "94452 65285",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Acetaminophen + Hydrocodone",
+     "dosage": "300 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-07-20",
+     "endDate": ""
+    },
+    {
+     "name": "Naproxen",
+     "dosage": "220 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2023-10-23",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-07-08T22:25:07Z",
+     "heartRate": 88,
+     "bloodPressure": "119/65",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-07-14T22:25:07Z",
+     "heartRate": 87,
+     "bloodPressure": "120/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-07-20T22:25:07Z",
+     "heartRate": 82,
+     "bloodPressure": "120/67",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "b76d5c14-f629-cf57-5d6d-93fb3ab63dce",
+   "name": "Rohan Kale",
+   "dateOfBirth": "1972-10-04",
+   "gender": "male",
+   "bloodType": "A-",
+   "contactNumber": "73885 06795",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Albuterol",
+     "dosage": "5 mg/mL",
+     "frequency": "As needed",
+     "startDate": "2025-11-26",
+     "endDate": ""
+    },
+    {
+     "name": "Fluticasone + Salmeterol",
+     "dosage": "250 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2025-11-26",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-11-20T15:01:23Z",
+     "heartRate": 84,
+     "bloodPressure": "100/75",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-12-11T15:01:23Z",
+     "heartRate": 78,
+     "bloodPressure": "109/81",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-11-26T15:01:23Z",
+     "heartRate": 86,
+     "bloodPressure": "108/78",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "96cbbb7a-3996-8d07-80f3-f9dadd3cfec7",
+   "name": "Archana Chavan",
+   "dateOfBirth": "1976-04-21",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "95596 54681",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Albuterol",
+     "dosage": "5 mg/mL",
+     "frequency": "As needed",
+     "startDate": "2025-12-03",
+     "endDate": ""
+    },
+    {
+     "name": "Fluticasone + Salmeterol",
+     "dosage": "250 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2025-12-03",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2023-11-22T10:01:13Z",
+     "heartRate": 76,
+     "bloodPressure": "139/89",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2024-11-27T10:01:13Z",
+     "heartRate": 61,
+     "bloodPressure": "127/91",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-12-03T10:01:13Z",
+     "heartRate": 93,
+     "bloodPressure": "129/88",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "3f1cdc02-cefc-7d35-e532-d1db16745688",
+   "name": "Shalini Jadhav",
+   "dateOfBirth": "1977-03-07",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "91261 30903",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Albuterol",
+     "dosage": "5 mg/mL",
+     "frequency": "As needed",
+     "startDate": "2026-09-28",
+     "endDate": ""
+    },
+    {
+     "name": "Fluticasone + Salmeterol",
+     "dosage": "250 mcg/puff",
+     "frequency": "Twice daily",
+     "startDate": "2026-09-28",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-09-16T17:47:01Z",
+     "heartRate": 88,
+     "bloodPressure": "105/77",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-09-22T17:47:01Z",
+     "heartRate": 86,
+     "bloodPressure": "105/75",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-09-28T17:47:01Z",
+     "heartRate": 75,
+     "bloodPressure": "100/78",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "9345aa1d-acef-eea9-4904-f19b56249e76",
+   "name": "Swati Shirke",
+   "dateOfBirth": "1977-12-31",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "75594 96771",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Simvastatin",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-05-02",
+     "endDate": ""
+    },
+    {
+     "name": "Ibuprofen",
+     "dosage": "400 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-04-25",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-13T01:28:53Z",
+     "heartRate": 79,
+     "bloodPressure": "118/82",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-04-19T01:28:53Z",
+     "heartRate": 81,
+     "bloodPressure": "121/82",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-04-25T01:28:53Z",
+     "heartRate": 86,
+     "bloodPressure": "118/86",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "7552a042-626c-d9fa-ccc1-523d94adc321",
+   "name": "Rupali Jagtap",
+   "dateOfBirth": "1978-08-04",
+   "gender": "female",
+   "bloodType": "A-",
+   "contactNumber": "93106 56542",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Errin)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2026-09-04",
+     "endDate": ""
+    },
+    {
+     "name": "Naproxen",
+     "dosage": "220 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2024-07-23",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-03-29T17:58:36Z",
+     "heartRate": 60,
+     "bloodPressure": "128/78",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-08-23T17:58:36Z",
+     "heartRate": 89,
+     "bloodPressure": "135/85",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-08-28T17:58:36Z",
+     "heartRate": 70,
+     "bloodPressure": "134/79",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "472230dc-418a-5d70-da36-9e9e320dcaec",
+   "name": "Rekha Kadam",
+   "dateOfBirth": "1978-09-11",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "88201 16430",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Jolivette)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2025-12-24",
+     "endDate": ""
+    },
+    {
+     "name": "Vitamin B12",
+     "dosage": "5 mg/mL",
+     "frequency": "Once monthly",
+     "startDate": "2015-04-13",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2022-09-26T00:33:41Z",
+     "heartRate": 87,
+     "bloodPressure": "110/86",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2024-09-30T00:33:41Z",
+     "heartRate": 80,
+     "bloodPressure": "107/87",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-10-05T00:33:41Z",
+     "heartRate": 94,
+     "bloodPressure": "102/85",
+     "respiratoryRate": 16
+    }
+   ]
+  },
+  {
+   "syntheaId": "166840bf-b4f9-b8f0-d1ab-010f8cba3f31",
+   "name": "Nasreen Inamdar",
+   "dateOfBirth": "1985-03-21",
+   "gender": "female",
+   "bloodType": "A-",
+   "contactNumber": "89969 72377",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Camila)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2025-12-05",
+     "endDate": ""
+    },
+    {
+     "name": "Vitamin B12",
+     "dosage": "5 mg/mL",
+     "frequency": "Once monthly",
+     "startDate": "2015-07-09",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2019-06-06T15:12:43Z",
+     "heartRate": 98,
+     "bloodPressure": "116/64",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2022-06-09T15:12:43Z",
+     "heartRate": 87,
+     "bloodPressure": "117/71",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-03-27T15:12:43Z",
+     "heartRate": 87,
+     "bloodPressure": "114/69",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "f20d33c2-0ef0-d1a8-d646-5a0b029097b1",
+   "name": "Shabana Mulla",
+   "dateOfBirth": "1988-12-29",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "87859 72011",
+   "allergies": [
+    {
+     "allergen": "Mould",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Ibuprofen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Milk",
+     "severity": "moderate",
+     "reaction": "Vomiting"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Terfenadine",
+     "dosage": "60 mg",
+     "frequency": "Once daily",
+     "startDate": "1990-05-13",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "1990-05-13",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2020-08-27T05:48:44Z",
+     "heartRate": 87,
+     "bloodPressure": "114/77",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2023-08-31T05:48:44Z",
+     "heartRate": 95,
+     "bloodPressure": "115/74",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-09-03T05:48:44Z",
+     "heartRate": 95,
+     "bloodPressure": "112/74",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "765b0c56-0d24-6ccc-57ca-ec77b23b8f20",
+   "name": "Suman Bhosale",
+   "dateOfBirth": "1990-12-03",
+   "gender": "female",
+   "bloodType": "AB+",
+   "contactNumber": "78562 88681",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oxycodone",
+     "dosage": "10 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-04-27",
+     "endDate": ""
+    },
+    {
+     "name": "Tramadol",
+     "dosage": "50 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-04-27",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-15T14:29:21Z",
+     "heartRate": 82,
+     "bloodPressure": "109/70",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-04-21T14:29:21Z",
+     "heartRate": 99,
+     "bloodPressure": "108/72",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-04-27T14:29:21Z",
+     "heartRate": 62,
+     "bloodPressure": "106/69",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "1c51694e-3b0d-eb59-c08c-62414aeba810",
+   "name": "Nasreen Shaikh",
+   "dateOfBirth": "2001-12-01",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "87510 31751",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Trinessa)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2025-10-25",
+     "endDate": ""
+    },
+    {
+     "name": "Meperidine",
+     "dosage": "50 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2019-08-07",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2020-01-25T12:52:12Z",
+     "heartRate": 72,
+     "bloodPressure": "102/72",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2021-01-30T12:52:12Z",
+     "heartRate": 71,
+     "bloodPressure": "100/69",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-02-03T12:52:12Z",
+     "heartRate": 97,
+     "bloodPressure": "106/73",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "1c9ea0cc-8cef-5c42-9b2a-ecf6fb2a4627",
+   "name": "Manisha Nimbalkar",
+   "dateOfBirth": "2009-09-12",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "87213 44793",
+   "allergies": [
+    {
+     "allergen": "Bee venom",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Skin reaction"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "mild",
+     "reaction": "Hives"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Milk",
+     "severity": "unknown",
+     "reaction": ""
+    }
+   ],
+   "medications": [
+    {
+     "name": "Fexofenadine",
+     "dosage": "30 mg",
+     "frequency": "Once daily",
+     "startDate": "2010-09-22",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2010-09-22",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-10-19T07:03:33Z",
+     "heartRate": 66,
+     "bloodPressure": "117/71",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-10-25T07:03:33Z",
+     "heartRate": 75,
+     "bloodPressure": "112/69",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-02-07T07:03:33Z",
+     "heartRate": 68,
+     "bloodPressure": "116/78",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "504af6a2-451e-d45e-cbc9-c8d7e3a34f2f",
+   "name": "Bharati More",
+   "dateOfBirth": "2012-08-22",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "82596 67687",
+   "allergies": [
+    {
+     "allergen": "Bee venom",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Skin reaction"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Lisinopril",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree nut",
+     "severity": "severe",
+     "reaction": "Anaphylaxis"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Fexofenadine",
+     "dosage": "30 mg",
+     "frequency": "Once daily",
+     "startDate": "2013-05-28",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2013-05-28",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2026-02-18T14:59:48Z",
+     "heartRate": 98,
+     "bloodPressure": "118/77",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-03-04T14:59:48Z",
+     "heartRate": 91,
+     "bloodPressure": "127/79",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-09-30T14:59:48Z",
+     "heartRate": 68,
+     "bloodPressure": "129/71",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "9e4e42fd-f967-3b5a-5134-8402b1f12b6c",
+   "name": "Rukhsana Pathan",
+   "dateOfBirth": "2015-02-13",
+   "gender": "female",
+   "bloodType": "O-",
+   "contactNumber": "94499 88775",
+   "allergies": [
+    {
+     "allergen": "Bee venom",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Mould",
+     "severity": "mild",
+     "reaction": "Runny nose"
+    },
+    {
+     "allergen": "Dust mite",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Animal dander",
+     "severity": "moderate",
+     "reaction": "Runny nose, watery eyes"
+    },
+    {
+     "allergen": "Grass pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree pollen",
+     "severity": "unknown",
+     "reaction": ""
+    },
+    {
+     "allergen": "Tree nut",
+     "severity": "moderate",
+     "reaction": "Hives"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Loratadine",
+     "dosage": "5 mg",
+     "frequency": "Once daily",
+     "startDate": "2015-12-03",
+     "endDate": ""
+    },
+    {
+     "name": "Epinephrine",
+     "dosage": "1 mg/mL",
+     "frequency": "As needed (emergency)",
+     "startDate": "2015-12-03",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2025-02-21T16:16:26Z",
+     "heartRate": 85,
+     "bloodPressure": "102/77",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-09-05T16:16:26Z",
+     "heartRate": 62,
+     "bloodPressure": "105/79",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-02-27T16:16:26Z",
+     "heartRate": 92,
+     "bloodPressure": "109/75",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "4bfbd4ee-8869-b526-ecd0-f889f83e0d7c",
+   "name": "Rohit Jadhav",
+   "dateOfBirth": "1959-06-14",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "97770 17526",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Simvastatin",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-09-21",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2025-09-14T22:00:13Z",
+     "heartRate": 99,
+     "bloodPressure": "108/85",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-05-24T22:00:13Z",
+     "heartRate": 70,
+     "bloodPressure": "114/81",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-09-20T22:00:13Z",
+     "heartRate": 75,
+     "bloodPressure": "119/85",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "fd51467b-6db3-bca2-66fc-f19eeaaa7e33",
+   "name": "Vijay Gaikwad",
+   "dateOfBirth": "1966-03-01",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "74239 00980",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-06-30",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-18T05:38:49Z",
+     "heartRate": 77,
+     "bloodPressure": "138/108",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-06-24T05:38:49Z",
+     "heartRate": 65,
+     "bloodPressure": "138/107",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-06-30T05:38:49Z",
+     "heartRate": 70,
+     "bloodPressure": "136/104",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "ad7717a7-c19a-ec34-0d65-121bc7b9335b",
+   "name": "Pallavi Tambe",
+   "dateOfBirth": "1966-07-08",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "76764 36615",
+   "allergies": [
+    {
+     "allergen": "Fish",
+     "severity": "moderate",
+     "reaction": "Breathing difficulty"
+    }
+   ],
+   "medications": [
+    {
+     "name": "Alendronic Acid",
+     "dosage": "10 mg",
+     "frequency": "Once weekly",
+     "startDate": "2026-09-04",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-08-23T21:44:08Z",
+     "heartRate": 100,
+     "bloodPressure": "114/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-08-29T21:44:08Z",
+     "heartRate": 66,
+     "bloodPressure": "113/70",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-09-04T21:44:08Z",
+     "heartRate": 81,
+     "bloodPressure": "111/70",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "bb494bf8-339d-d47a-e819-b9cd2a11f248",
+   "name": "Radha Jagtap",
+   "dateOfBirth": "1970-05-27",
+   "gender": "female",
+   "bloodType": "AB+",
+   "contactNumber": "75661 31111",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Acetaminophen",
+     "dosage": "325 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-04-22",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-10T23:34:33Z",
+     "heartRate": 90,
+     "bloodPressure": "99/75",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-04-16T23:34:33Z",
+     "heartRate": 72,
+     "bloodPressure": "100/70",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-04-22T23:34:33Z",
+     "heartRate": 72,
+     "bloodPressure": "103/74",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "0f5801b2-5a83-6af7-c532-d96b5b8af729",
+   "name": "Pallavi Gawade",
+   "dateOfBirth": "1972-08-13",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "96472 75883",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Naproxen",
+     "dosage": "220 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2019-02-13",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-09-01T19:39:18Z",
+     "heartRate": 70,
+     "bloodPressure": "97/63",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-09-07T19:39:18Z",
+     "heartRate": 84,
+     "bloodPressure": "92/62",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-09-13T19:39:18Z",
+     "heartRate": 67,
+     "bloodPressure": "99/70",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "d5d05a24-dcb7-6e73-aa1f-102d511fb290",
+   "name": "Ramesh Kulkarni",
+   "dateOfBirth": "1974-12-15",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "85023 16613",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Simvastatin",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-01-23",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2023-01-08T16:12:51Z",
+     "heartRate": 62,
+     "bloodPressure": "110/74",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2024-12-15T16:12:51Z",
+     "heartRate": 88,
+     "bloodPressure": "108/73",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-12-21T16:12:51Z",
+     "heartRate": 91,
+     "bloodPressure": "107/74",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "5558c6b0-d8ba-1121-802b-45b77a0b2215",
+   "name": "Usha Satpute",
+   "dateOfBirth": "1979-03-04",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "74483 58664",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Lisinopril",
+     "dosage": "10 mg",
+     "frequency": "Once daily",
+     "startDate": "2026-08-02",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2025-07-27T05:22:01Z",
+     "heartRate": 62,
+     "bloodPressure": "136/98",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-11-02T05:22:01Z",
+     "heartRate": 75,
+     "bloodPressure": "144/102",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-08-02T05:22:01Z",
+     "heartRate": 85,
+     "bloodPressure": "137/99",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "38ff4835-fbc3-9099-7614-4f1499549dfe",
+   "name": "Suman Jagtap",
+   "dateOfBirth": "1983-06-26",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "94514 96525",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Naproxen",
+     "dosage": "220 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2017-02-06",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2020-09-13T03:32:34Z",
+     "heartRate": 82,
+     "bloodPressure": "132/78",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2023-07-02T03:32:34Z",
+     "heartRate": 66,
+     "bloodPressure": "139/82",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-07-06T03:32:34Z",
+     "heartRate": 95,
+     "bloodPressure": "131/80",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "49dfe873-b7aa-0c75-5a43-4bcc125bc3e9",
+   "name": "Jyoti Mane",
+   "dateOfBirth": "1985-01-14",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "72042 52532",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Yaz)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2026-08-19",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2021-01-09T21:17:09Z",
+     "heartRate": 70,
+     "bloodPressure": "106/73",
+     "temperature": 38.3,
+     "respiratoryRate": 18,
+     "oxygenSaturation": 79
+    },
+    {
+     "recordedAt": "2022-04-04T21:17:09Z",
+     "heartRate": 76,
+     "bloodPressure": "114/68",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-01-20T21:17:09Z",
+     "heartRate": 97,
+     "bloodPressure": "112/71",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "97dec775-c4a9-6bb3-f645-63542e24ad07",
+   "name": "Sangita Kulkarni",
+   "dateOfBirth": "1985-11-01",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "73886 11592",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Vitamin B12",
+     "dosage": "5 mg/mL",
+     "frequency": "Once monthly",
+     "startDate": "2014-01-17",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2023-01-20T12:23:39Z",
+     "heartRate": 81,
+     "bloodPressure": "113/71",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2023-06-16T12:23:39Z",
+     "heartRate": 65,
+     "bloodPressure": "106/75",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-11-07T12:23:39Z",
+     "heartRate": 89,
+     "bloodPressure": "101/71",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "111cdc71-87ec-e924-559b-09417c3bef49",
+   "name": "Suman Nimbalkar",
+   "dateOfBirth": "1990-10-27",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "76757 96290",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Natazia)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2026-07-11",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2019-01-05T04:49:41Z",
+     "heartRate": 70,
+     "bloodPressure": "108/77",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2022-01-08T04:49:41Z",
+     "heartRate": 96,
+     "bloodPressure": "120/79",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-01-11T04:49:41Z",
+     "heartRate": 89,
+     "bloodPressure": "112/77",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "2d2b5b8c-4a13-4ca9-c867-64c8dbed0471",
+   "name": "Bharati Deshpande",
+   "dateOfBirth": "1997-08-31",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "81289 06304",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Contraceptive ring (NuvaRing)",
+     "dosage": "1 ring",
+     "frequency": "Monthly",
+     "startDate": "2026-03-01",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2019-11-03T07:10:55Z",
+     "heartRate": 94,
+     "bloodPressure": "140/87",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2022-11-06T07:10:55Z",
+     "heartRate": 99,
+     "bloodPressure": "134/87",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-11-09T07:10:55Z",
+     "heartRate": 69,
+     "bloodPressure": "130/84",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "e867c605-5382-756c-1d1f-a012fbc8d3b5",
+   "name": "Rupali Kadam",
+   "dateOfBirth": "2000-05-20",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "82040 31673",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Trinessa)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2026-03-18",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2022-07-15T03:46:00Z",
+     "heartRate": 95,
+     "bloodPressure": "152/83",
+     "temperature": 38.1,
+     "respiratoryRate": 20,
+     "oxygenSaturation": 99
+    },
+    {
+     "recordedAt": "2022-07-23T03:12:05Z",
+     "heartRate": 92,
+     "bloodPressure": "115/83",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-07-26T03:12:05Z",
+     "heartRate": 73,
+     "bloodPressure": "117/87",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "24063415-797f-9c67-c94c-067c97345275",
+   "name": "Sanjana Gaikwad",
+   "dateOfBirth": "2000-06-11",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "84791 65192",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Contraceptive ring (NuvaRing)",
+     "dosage": "1 ring",
+     "frequency": "Monthly",
+     "startDate": "2026-04-22",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2022-08-14T11:07:24Z",
+     "heartRate": 82,
+     "bloodPressure": "123/84",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-04-20T11:07:24Z",
+     "heartRate": 64,
+     "bloodPressure": "118/83",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2025-08-17T11:07:24Z",
+     "heartRate": 77,
+     "bloodPressure": "122/83",
+     "respiratoryRate": 16
+    }
+   ]
+  },
+  {
+   "syntheaId": "89316910-0675-d580-ea7d-2b516045ad3e",
+   "name": "Shalini Deshpande",
+   "dateOfBirth": "2003-10-26",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "84534 01408",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Oral contraceptive (Seasonique)",
+     "dosage": "1 tablet",
+     "frequency": "Once daily",
+     "startDate": "2025-12-03",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2022-11-06T14:39:18Z",
+     "heartRate": 72,
+     "bloodPressure": "107/72",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2022-12-25T14:39:18Z",
+     "heartRate": 100,
+     "bloodPressure": "104/74",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-12-28T14:39:18Z",
+     "heartRate": 64,
+     "bloodPressure": "109/73",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "815ff645-c396-834b-d0ee-0620a11710cf",
+   "name": "Geeta Shirke",
+   "dateOfBirth": "2005-12-26",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "72887 18482",
+   "allergies": [],
+   "medications": [
+    {
+     "name": "Acetaminophen",
+     "dosage": "325 mg",
+     "frequency": "As needed for pain",
+     "startDate": "2026-03-02",
+     "endDate": ""
+    }
+   ],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-19T20:13:13Z",
+     "heartRate": 68,
+     "bloodPressure": "119/78",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-02-24T20:13:13Z",
+     "heartRate": 68,
+     "bloodPressure": "115/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-03-02T20:13:13Z",
+     "heartRate": 97,
+     "bloodPressure": "114/80",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "93547944-a253-d0bb-fffe-68a8adee95da",
+   "name": "Prakash Jadhav",
+   "dateOfBirth": "1957-03-08",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "79511 20072",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-14T21:49:07Z",
+     "heartRate": 98,
+     "bloodPressure": "128/80",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-06-20T21:49:07Z",
+     "heartRate": 78,
+     "bloodPressure": "127/77",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-06-26T21:49:07Z",
+     "heartRate": 98,
+     "bloodPressure": "123/80",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "091a4b71-31ee-8d39-c0a6-c021b3951aed",
+   "name": "Kavita Kolhe",
+   "dateOfBirth": "1970-02-22",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "76806 10444",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-03-17T03:16:30Z",
+     "heartRate": 94,
+     "bloodPressure": "111/74",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-03-23T03:16:30Z",
+     "heartRate": 82,
+     "bloodPressure": "112/72",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-03-29T03:16:30Z",
+     "heartRate": 86,
+     "bloodPressure": "115/81",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "51bda7a1-3926-7bdb-b251-d602cf6ed79e",
+   "name": "Imran Pathan",
+   "dateOfBirth": "1973-01-06",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "91103 40242",
+   "allergies": [
+    {
+     "allergen": "Eggs",
+     "severity": "unknown",
+     "reaction": ""
+    }
+   ],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-01-13T02:43:54Z",
+     "heartRate": 69,
+     "bloodPressure": "126/73",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-01-18T02:43:54Z",
+     "heartRate": 96,
+     "bloodPressure": "136/80",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-01-24T02:43:54Z",
+     "heartRate": 62,
+     "bloodPressure": "123/79",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "ec084d82-e517-88af-cc1d-a0881be0f970",
+   "name": "Prashant Pawar",
+   "dateOfBirth": "1973-01-26",
+   "gender": "male",
+   "bloodType": "AB+",
+   "contactNumber": "90599 07766",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-02T10:16:22Z",
+     "heartRate": 89,
+     "bloodPressure": "110/77",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-02-07T10:16:22Z",
+     "heartRate": 66,
+     "bloodPressure": "116/77",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-02-13T10:16:22Z",
+     "heartRate": 70,
+     "bloodPressure": "109/82",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "068177c1-8d2f-d13f-6a1d-227d04383923",
+   "name": "Smita Shinde",
+   "dateOfBirth": "1974-04-02",
+   "gender": "female",
+   "bloodType": "B-",
+   "contactNumber": "94329 11954",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-04-02T06:04:17Z",
+     "heartRate": 76,
+     "bloodPressure": "129/73",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-04-08T06:04:17Z",
+     "heartRate": 73,
+     "bloodPressure": "140/75",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-04-14T06:04:17Z",
+     "heartRate": 99,
+     "bloodPressure": "128/74",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "69bacca4-0807-043d-cf29-3bcdd444566a",
+   "name": "Nirmala Kamble",
+   "dateOfBirth": "1979-09-03",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "91369 02537",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-09-13T20:01:27Z",
+     "heartRate": 61,
+     "bloodPressure": "113/68",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2023-09-18T20:01:27Z",
+     "heartRate": 99,
+     "bloodPressure": "105/70",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-09-22T20:01:27Z",
+     "heartRate": 98,
+     "bloodPressure": "112/69",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "8034b960-0ebd-4e25-e008-d3f60d1b51fe",
+   "name": "Mahesh Gaikwad",
+   "dateOfBirth": "1987-03-24",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "83860 92531",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2018-06-12T20:29:24Z",
+     "heartRate": 75,
+     "bloodPressure": "112/87",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2021-06-15T20:29:24Z",
+     "heartRate": 92,
+     "bloodPressure": "123/88",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-06-18T20:29:24Z",
+     "heartRate": 95,
+     "bloodPressure": "118/85",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "dbfd10e4-5882-fd43-1dfe-6b95d943bd1b",
+   "name": "Sanjana Deshpande",
+   "dateOfBirth": "1987-04-22",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "80144 91094",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2018-07-04T02:32:55Z",
+     "heartRate": 76,
+     "bloodPressure": "136/78",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2021-07-07T02:32:55Z",
+     "heartRate": 86,
+     "bloodPressure": "126/83",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2024-07-10T02:32:55Z",
+     "heartRate": 98,
+     "bloodPressure": "120/79",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "868f2c18-1210-e4f6-d471-4b0b2e370225",
+   "name": "Rohit Pawar",
+   "dateOfBirth": "1990-04-18",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "90060 24831",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-06-30T04:02:46Z",
+     "heartRate": 80,
+     "bloodPressure": "125/83",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2024-07-03T04:02:46Z",
+     "heartRate": 87,
+     "bloodPressure": "118/72",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-03-05T04:02:46Z",
+     "heartRate": 62,
+     "bloodPressure": "119/73",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "d8bb1b82-8deb-201a-0fe8-308f79ce31a8",
+   "name": "Shankar Patil",
+   "dateOfBirth": "1990-11-07",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "95988 55338",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2019-01-16T13:59:32Z",
+     "heartRate": 91,
+     "bloodPressure": "119/71",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2022-01-19T13:59:32Z",
+     "heartRate": 97,
+     "bloodPressure": "109/69",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-01-22T13:59:32Z",
+     "heartRate": 73,
+     "bloodPressure": "123/70",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "55612fe8-9071-4a97-8e4c-8cc653c8394c",
+   "name": "Shabana Inamdar",
+   "dateOfBirth": "1990-12-01",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "71888 21076",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2019-02-09T05:29:28Z",
+     "heartRate": 84,
+     "bloodPressure": "131/91",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2022-02-12T05:29:28Z",
+     "heartRate": 90,
+     "bloodPressure": "125/88",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-02-15T05:29:28Z",
+     "heartRate": 87,
+     "bloodPressure": "128/88",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "dacd76f7-1058-504d-47e9-c2cebc1ac573",
+   "name": "Geeta Deshpande",
+   "dateOfBirth": "1994-04-15",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "83704 22027",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2019-06-21T12:06:30Z",
+     "heartRate": 82,
+     "bloodPressure": "104/81",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2022-06-24T12:06:30Z",
+     "heartRate": 95,
+     "bloodPressure": "106/83",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-06-27T12:06:30Z",
+     "heartRate": 76,
+     "bloodPressure": "105/83",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "f5d96290-3260-c984-2a87-3b03dfd52a9d",
+   "name": "Nitin Chavan",
+   "dateOfBirth": "1995-12-04",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "79425 20393",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-02-08T16:44:07Z",
+     "heartRate": 93,
+     "bloodPressure": "128/73",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2024-02-12T16:44:07Z",
+     "heartRate": 93,
+     "bloodPressure": "129/79",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-02-03T16:44:07Z",
+     "heartRate": 94,
+     "bloodPressure": "134/81",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "34c7949d-7d70-2d32-dbe4-129496a384ea",
+   "name": "Archana Gawade",
+   "dateOfBirth": "1996-06-23",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "88342 35231",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-08-29T10:53:18Z",
+     "heartRate": 87,
+     "bloodPressure": "141/70",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-05-18T11:26:43Z",
+     "heartRate": 61,
+     "bloodPressure": "129/93",
+     "temperature": 36.5,
+     "respiratoryRate": 15,
+     "oxygenSaturation": 99
+    },
+    {
+     "recordedAt": "2024-09-01T10:53:18Z",
+     "heartRate": 64,
+     "bloodPressure": "144/78",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "1d670d3c-f290-52f4-9409-aaffd1eb59f5",
+   "name": "Vikram Bhosale",
+   "dateOfBirth": "1998-12-30",
+   "gender": "male",
+   "bloodType": "A+",
+   "contactNumber": "72022 28912",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-03-10T04:27:13Z",
+     "heartRate": 82,
+     "bloodPressure": "145/86",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2023-08-30T04:27:13Z",
+     "heartRate": 100,
+     "bloodPressure": "141/83",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2024-03-13T04:27:13Z",
+     "heartRate": 92,
+     "bloodPressure": "137/84",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "e5863ab8-893d-3e6b-3da4-b903413869e2",
+   "name": "Mahesh Lokhande",
+   "dateOfBirth": "1999-06-10",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "91292 36069",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2018-08-09T05:55:00Z",
+     "heartRate": 98,
+     "bloodPressure": "136/82",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2021-08-12T05:55:00Z",
+     "heartRate": 83,
+     "bloodPressure": "142/79",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-08-15T05:55:00Z",
+     "heartRate": 82,
+     "bloodPressure": "140/81",
+     "respiratoryRate": 16
+    }
+   ]
+  },
+  {
+   "syntheaId": "279ca2a4-c2d9-4045-83de-f604ed069fe8",
+   "name": "Zainab Pathan",
+   "dateOfBirth": "1999-07-02",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "95613 01334",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-09-03T13:04:08Z",
+     "heartRate": 91,
+     "bloodPressure": "112/70",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2024-06-28T13:04:08Z",
+     "heartRate": 60,
+     "bloodPressure": "118/71",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2024-09-06T13:04:08Z",
+     "heartRate": 60,
+     "bloodPressure": "118/70",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "254685ad-4f09-a8bf-bca9-85fafdfcf4c1",
+   "name": "Ganesh More",
+   "dateOfBirth": "2000-04-30",
+   "gender": "male",
+   "bloodType": "AB+",
+   "contactNumber": "74972 45627",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-05-02T03:22:48Z",
+     "heartRate": 130,
+     "bloodPressure": "144/83",
+     "temperature": 38.3,
+     "respiratoryRate": 35,
+     "oxygenSaturation": 77
+    },
+    {
+     "recordedAt": "2022-07-03T03:22:48Z",
+     "heartRate": 91,
+     "bloodPressure": "140/77",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-07-06T03:22:48Z",
+     "heartRate": 73,
+     "bloodPressure": "141/79",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "35888667-7e81-9343-2db6-3cfa9fa4e01b",
+   "name": "Rukhsana Sayyed",
+   "dateOfBirth": "2001-03-31",
+   "gender": "female",
+   "bloodType": "B+",
+   "contactNumber": "94581 34345",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2020-05-30T16:41:52Z",
+     "heartRate": 83,
+     "bloodPressure": "130/78",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2023-06-03T16:41:52Z",
+     "heartRate": 92,
+     "bloodPressure": "126/74",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-06-06T16:41:52Z",
+     "heartRate": 96,
+     "bloodPressure": "113/82",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "b3d9fe5d-04e1-dc3e-ceef-0719f236eff6",
+   "name": "Rashid Inamdar",
+   "dateOfBirth": "2003-02-20",
+   "gender": "male",
+   "bloodType": "B-",
+   "contactNumber": "91814 62269",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2021-04-15T12:20:15Z",
+     "heartRate": 70,
+     "bloodPressure": "122/78",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2022-04-21T12:20:15Z",
+     "heartRate": 85,
+     "bloodPressure": "130/82",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-04-24T12:20:15Z",
+     "heartRate": 61,
+     "bloodPressure": "136/78",
+     "respiratoryRate": 12
+    }
+   ]
+  },
+  {
+   "syntheaId": "ae3546fc-4eff-79b7-276e-33c7b1beb735",
+   "name": "Vijay Gawade",
+   "dateOfBirth": "2004-04-08",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "82505 32762",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2022-06-09T02:03:07Z",
+     "heartRate": 76,
+     "bloodPressure": "142/86",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2023-06-15T02:03:07Z",
+     "heartRate": 83,
+     "bloodPressure": "136/87",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-06-18T02:03:07Z",
+     "heartRate": 70,
+     "bloodPressure": "136/90",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "bae49511-dd8c-d6df-e7be-b77c768bedcc",
+   "name": "Priya Jadhav",
+   "dateOfBirth": "2005-09-01",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "93381 74544",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2023-10-26T12:21:49Z",
+     "heartRate": 78,
+     "bloodPressure": "129/71",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2024-10-31T12:21:49Z",
+     "heartRate": 79,
+     "bloodPressure": "126/71",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-08-20T12:21:49Z",
+     "heartRate": 71,
+     "bloodPressure": "128/74",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "b11899dd-7755-73bd-cc39-d6eea54d15a1",
+   "name": "Usha Kamble",
+   "dateOfBirth": "2006-11-27",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "89971 33480",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-01-15T23:30:23Z",
+     "heartRate": 79,
+     "bloodPressure": "103/85",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-01-20T23:30:23Z",
+     "heartRate": 92,
+     "bloodPressure": "104/85",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-01-26T23:30:23Z",
+     "heartRate": 94,
+     "bloodPressure": "104/86",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "1d1330ae-1be0-09c5-040e-dc59176bf0d5",
+   "name": "Swati Satpute",
+   "dateOfBirth": "2007-05-14",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "94070 24987",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-07-01T23:00:18Z",
+     "heartRate": 96,
+     "bloodPressure": "95/72",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-07-07T23:00:18Z",
+     "heartRate": 87,
+     "bloodPressure": "86/77",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-07-13T23:00:18Z",
+     "heartRate": 93,
+     "bloodPressure": "99/72",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "4091b9f5-1779-c891-ea3d-0ef10828bcbd",
+   "name": "Kavita Sawant",
+   "dateOfBirth": "2010-11-11",
+   "gender": "female",
+   "bloodType": "A+",
+   "contactNumber": "90393 27047",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-12-12T19:21:39Z",
+     "heartRate": 89,
+     "bloodPressure": "130/71",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-11-13T19:56:52Z",
+     "heartRate": 89,
+     "bloodPressure": "133/65",
+     "temperature": 37.7,
+     "respiratoryRate": 15,
+     "oxygenSaturation": 100
+    },
+    {
+     "recordedAt": "2025-12-18T19:21:39Z",
+     "heartRate": 75,
+     "bloodPressure": "123/73",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "c4ff5772-cb90-f9bd-9f85-4542e0ebf5fd",
+   "name": "Lata Wagh",
+   "dateOfBirth": "2011-01-27",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "73253 20790",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-02-22T23:01:41Z",
+     "heartRate": 77,
+     "bloodPressure": "126/64",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-02-27T23:01:41Z",
+     "heartRate": 82,
+     "bloodPressure": "124/68",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-03-05T23:01:41Z",
+     "heartRate": 62,
+     "bloodPressure": "132/67",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "96273e26-32fc-3db7-aacb-bb44801d336e",
+   "name": "Arjun Kamble",
+   "dateOfBirth": "2011-03-06",
+   "gender": "male",
+   "bloodType": "B-",
+   "contactNumber": "93360 14991",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-03-31T13:02:24Z",
+     "heartRate": 98,
+     "bloodPressure": "121/71",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-04-06T13:02:24Z",
+     "heartRate": 91,
+     "bloodPressure": "120/67",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-04-12T13:02:24Z",
+     "heartRate": 80,
+     "bloodPressure": "126/72",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "13cca394-008d-dcfa-eac3-fc130583f321",
+   "name": "Salim Shaikh",
+   "dateOfBirth": "2011-04-24",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "75858 06795",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-05-19T16:10:15Z",
+     "heartRate": 70,
+     "bloodPressure": "104/72",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-05-25T16:10:15Z",
+     "heartRate": 79,
+     "bloodPressure": "109/73",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-05-31T16:10:15Z",
+     "heartRate": 79,
+     "bloodPressure": "106/75",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "b6bb2907-5188-8689-8b76-341664e59cb2",
+   "name": "Mahesh Wagh",
+   "dateOfBirth": "2013-05-23",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "70438 03122",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-06T13:49:37Z",
+     "heartRate": 76,
+     "bloodPressure": "116/77",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-06-12T13:49:37Z",
+     "heartRate": 64,
+     "bloodPressure": "110/73",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-06-18T13:49:37Z",
+     "heartRate": 71,
+     "bloodPressure": "107/78",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "4b286419-9530-1f2f-b9f9-638a40f29024",
+   "name": "Rekha Jadhav",
+   "dateOfBirth": "2013-08-03",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "87775 47973",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-08-17T09:45:54Z",
+     "heartRate": 84,
+     "bloodPressure": "129/87",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-08-23T09:45:54Z",
+     "heartRate": 79,
+     "bloodPressure": "125/88",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-08-29T09:45:54Z",
+     "heartRate": 74,
+     "bloodPressure": "127/86",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "a67f6014-54d1-b630-8d51-954d2d26bd42",
+   "name": "Mahesh Mane",
+   "dateOfBirth": "2015-01-17",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "74398 82397",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2023-01-14T16:57:00Z",
+     "heartRate": 77,
+     "bloodPressure": "97/70",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2024-01-20T16:57:00Z",
+     "heartRate": 97,
+     "bloodPressure": "96/67",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2025-01-25T16:57:00Z",
+     "heartRate": 64,
+     "bloodPressure": "90/72",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "bd9dfdd1-aebf-018a-774f-e531d29678e5",
+   "name": "Rohan Sawant",
+   "dateOfBirth": "2015-05-14",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "80703 25132",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-05-16T04:21:54Z",
+     "heartRate": 89,
+     "bloodPressure": "106/78",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2025-05-22T04:21:54Z",
+     "heartRate": 74,
+     "bloodPressure": "105/77",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-05-28T04:21:54Z",
+     "heartRate": 87,
+     "bloodPressure": "106/76",
+     "respiratoryRate": 16
+    }
+   ]
+  },
+  {
+   "syntheaId": "141a1044-5626-4d31-2f1b-eee5da610008",
+   "name": "Arjun Mane",
+   "dateOfBirth": "2016-09-22",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "80640 59240",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-09-19T01:48:59Z",
+     "heartRate": 72,
+     "bloodPressure": "125/79",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-09-25T01:48:59Z",
+     "heartRate": 97,
+     "bloodPressure": "123/82",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-10-01T01:48:59Z",
+     "heartRate": 79,
+     "bloodPressure": "134/86",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "ef74fec9-541e-fab6-90f5-540f1e951194",
+   "name": "Manisha Patil",
+   "dateOfBirth": "2017-06-13",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "94858 73666",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-06-04T22:36:11Z",
+     "heartRate": 80,
+     "bloodPressure": "110/80",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-06-10T22:36:11Z",
+     "heartRate": 79,
+     "bloodPressure": "124/75",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-06-16T22:36:11Z",
+     "heartRate": 65,
+     "bloodPressure": "115/81",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "574b44d2-2cda-01bd-6c1e-c5f80869b83e",
+   "name": "Sagar Joshi",
+   "dateOfBirth": "2020-12-10",
+   "gender": "male",
+   "bloodType": "B+",
+   "contactNumber": "99898 79405",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-05-16T10:47:13Z",
+     "heartRate": 90,
+     "bloodPressure": "140/78",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2024-11-14T10:47:13Z",
+     "heartRate": 97,
+     "bloodPressure": "149/76",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2025-11-20T10:47:13Z",
+     "heartRate": 63,
+     "bloodPressure": "144/75",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "2b9f45d6-b742-8a68-3a22-b9ff8df93521",
+   "name": "Javed Mulla",
+   "dateOfBirth": "2021-04-30",
+   "gender": "male",
+   "bloodType": "AB+",
+   "contactNumber": "79187 26406",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2024-10-04T16:08:05Z",
+     "heartRate": 76,
+     "bloodPressure": "119/68",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-04-04T16:08:05Z",
+     "heartRate": 97,
+     "bloodPressure": "106/72",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-04-10T16:08:05Z",
+     "heartRate": 89,
+     "bloodPressure": "117/69",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "2989e622-947b-9319-2f76-95742872f1ae",
+   "name": "Sagar Sawant",
+   "dateOfBirth": "2023-08-29",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "87282 60075",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2026-02-03T03:47:58Z",
+     "heartRate": 83,
+     "bloodPressure": "141/78",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-07-21T03:47:58Z",
+     "heartRate": 67,
+     "bloodPressure": "136/81",
+     "respiratoryRate": 13
+    },
+    {
+     "recordedAt": "2026-08-11T03:47:58Z",
+     "heartRate": 97,
+     "bloodPressure": "135/84",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "cc63c2f1-1db0-28cb-0324-8be7310ddadd",
+   "name": "Arjun Kale",
+   "dateOfBirth": "2024-07-15",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "86649 01636",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2025-09-22T20:11:18Z",
+     "heartRate": 70,
+     "bloodPressure": "117/71",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2025-12-22T20:11:18Z",
+     "heartRate": 68,
+     "bloodPressure": "114/65",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-06-22T20:11:18Z",
+     "heartRate": 84,
+     "bloodPressure": "105/73",
+     "respiratoryRate": 15
+    }
+   ]
+  },
+  {
+   "syntheaId": "e34fa1e8-0cbc-0d22-89d4-6996de874bd8",
+   "name": "Arjun Sawant",
+   "dateOfBirth": "2026-07-01",
+   "gender": "male",
+   "bloodType": "AB+",
+   "contactNumber": "78791 01880",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2026-07-01T03:22:09Z",
+     "heartRate": 82,
+     "bloodPressure": "136/92",
+     "respiratoryRate": 16
+    },
+    {
+     "recordedAt": "2026-08-05T03:22:09Z",
+     "heartRate": 97,
+     "bloodPressure": "147/95",
+     "respiratoryRate": 15
+    },
+    {
+     "recordedAt": "2026-10-07T03:22:09Z",
+     "heartRate": 84,
+     "bloodPressure": "140/99",
+     "respiratoryRate": 14
+    }
+   ]
+  },
+  {
+   "syntheaId": "034ccd79-62c4-ae8c-fe96-9f67dd6d7207",
+   "name": "Aditya Kadam",
+   "dateOfBirth": "2026-07-04",
+   "gender": "male",
+   "bloodType": "O+",
+   "contactNumber": "99742 22653",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2026-07-04T13:57:57Z",
+     "heartRate": 76,
+     "bloodPressure": "104/76",
+     "respiratoryRate": 14
+    },
+    {
+     "recordedAt": "2026-08-08T13:57:57Z",
+     "heartRate": 85,
+     "bloodPressure": "106/77",
+     "respiratoryRate": 12
+    },
+    {
+     "recordedAt": "2026-10-10T13:57:57Z",
+     "heartRate": 69,
+     "bloodPressure": "104/77",
+     "respiratoryRate": 13
+    }
+   ]
+  },
+  {
+   "syntheaId": "d1974b52-f588-45cf-5c27-9e5b1e47d889",
+   "name": "Neha Tambe",
+   "dateOfBirth": "2026-09-19",
+   "gender": "female",
+   "bloodType": "O+",
+   "contactNumber": "98201 41320",
+   "allergies": [],
+   "medications": [],
+   "vitals": [
+    {
+     "recordedAt": "2026-09-19T08:54:47Z",
+     "heartRate": 86,
+     "bloodPressure": "125/84",
+     "respiratoryRate": 14
+    }
+   ]
+  }
+ ]
+}
