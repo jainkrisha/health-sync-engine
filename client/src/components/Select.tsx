@@ -42,9 +42,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
         {label && (
-          <label htmlFor={selectId} className="flex items-center gap-1 text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor={selectId} className="flex flex-wrap items-baseline gap-x-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
             {label}
-            {required && <span className="text-rose-500 font-bold">*</span>}
+            {required && <span className="text-sm font-normal text-slate-700 dark:text-slate-300">{t('(required)')}</span>}
           </label>
         )}
         <div className="relative">
@@ -53,7 +53,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             className={`form-input cursor-pointer appearance-none pr-10 ${error ? 'form-input-error' : ''} ${className}`}
             aria-invalid={error ? true : undefined}
-            aria-describedby={error && selectId ? `${selectId}-error` : undefined}
+            aria-describedby={error && selectId ? `${selectId}-error` : helperText && selectId ? `${selectId}-help` : undefined}
             {...props}
           >
             {placeholder && (
@@ -67,19 +67,19 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-300">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
         </div>
         {error ? (
           <p className="form-error mt-0" role="alert" id={`${selectId}-error`}>
-            <Icon name="alert" className="h-3.5 w-3.5 flex-shrink-0" />
+            <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span>{t(error)}</span>
           </p>
         ) : helperText ? (
-          <p className="form-help mt-0">{helperText}</p>
+          <p className="form-help mt-0" id={`${selectId}-help`}>{helperText}</p>
         ) : null}
       </div>
     );

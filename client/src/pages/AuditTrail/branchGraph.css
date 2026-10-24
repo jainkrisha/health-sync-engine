@@ -1,23 +1,23 @@
-/* Audit trail branch graph, in the ID-card palette. */
+/* Change history: timeline by device, in the app's slate and blue palette. */
 .bg-wrap {
   --bg-surface: #ffffff;
-  --bg-review: #423d35;
-  --bg-ink: #1b1814;
-  --bg-muted: #7a7263;
-  --bg-line: #e2dbcc;
-  --bg-soft: #f7f4ee;
-  --bg-ember: #a87714;
-  --bg-link: #2f5f94;
+  --bg-review: #334155;
+  --bg-ink: #0f172a;
+  --bg-muted: #475569;
+  --bg-line: #e2e8f0;
+  --bg-soft: #f8fafc;
+  --bg-ember: #b45309;
+  --bg-link: #1f5fa6;
 }
 .dark .bg-wrap {
-  --bg-surface: #1b1814;
-  --bg-review: #e2dbcc;
-  --bg-ink: #efe9dd;
-  --bg-muted: #a39a89;
-  --bg-line: #2a2620;
-  --bg-soft: #221f1a;
-  --bg-ember: #e6b95e;
-  --bg-link: #9db9dc;
+  --bg-surface: #0f172a;
+  --bg-review: #e2e8f0;
+  --bg-ink: #f1f5f9;
+  --bg-muted: #cbd5e1;
+  --bg-line: #1e293b;
+  --bg-soft: #111c30;
+  --bg-ember: #fbbf24;
+  --bg-link: #86acdb;
 }
 
 .bg-legend {
@@ -33,7 +33,7 @@
   align-items: center;
   gap: 8px;
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--bg-ink);
 }
 .bg-legend-dot {
@@ -54,7 +54,7 @@
 .bg-help {
   margin: 0 0 18px;
   max-width: 70ch;
-  font-size: 12.5px;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--bg-muted);
 }
@@ -117,7 +117,7 @@
 
 .bg-msg {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--bg-ink);
@@ -128,7 +128,7 @@
   align-items: center;
   gap: 6px 10px;
   margin-top: 5px;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--bg-muted);
 }
 .bg-hash {
@@ -170,7 +170,7 @@
   margin: 8px 0 0;
   padding: 6px 10px;
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--bg-ink);
   background: var(--bg-soft);
   border: 1px solid var(--bg-line);
@@ -267,7 +267,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11.5px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--lane);
 }
@@ -282,7 +282,7 @@
   font-variant-numeric: tabular-nums;
 }
 .bg-side-sub {
-  font-size: 11.5px;
+  font-size: 15px;
   color: var(--bg-muted);
 }
 .bg-vs {
@@ -295,7 +295,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--bg-surface);
@@ -308,7 +308,7 @@
   align-items: center;
   gap: 4px;
   margin: 12px 0 0;
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--bg-muted);
 }
 .bg-merge-foot b {

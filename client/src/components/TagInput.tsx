@@ -64,8 +64,8 @@ export const TagInput: React.FC<TagInputProps> = ({
             placeholder:text-slate-400
             ${
               error
-                ? 'border-rose-400 bg-rose-50/30 text-slate-900 dark:text-slate-100 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
-                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20'
+                ? 'border-red-400 bg-red-50/30 text-slate-900 dark:text-slate-100 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20'
             }
           `}
         />
@@ -87,16 +87,16 @@ export const TagInput: React.FC<TagInputProps> = ({
           {value.map((tag, idx) => (
             <span
               key={`${tag}-${idx}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200/80 shadow-xs"
             >
-              <svg className="w-3 h-3 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               {tag}
               <button
                 type="button"
                 onClick={() => handleRemoveTag(idx)}
-                className="hover:bg-rose-200/60 rounded-full p-0.5 text-rose-600 transition-colors"
+                className="hover:bg-red-200/60 rounded-full p-0.5 text-red-600 transition-colors"
                 aria-label={t('Remove {tag}', { tag })}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@ export const TagInput: React.FC<TagInputProps> = ({
       )}
 
       {error ? (
-        <p className="text-xs font-medium text-rose-600 flex items-center gap-1" role="alert">
+        <p className="text-xs font-medium text-red-600 flex items-center gap-1" role="alert">
           <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

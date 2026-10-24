@@ -37,13 +37,15 @@ Every decision (automatic or manual) is written to an append-only audit trail.
 - **Encrypted at rest**: patient records and the outbox are AES-256-GCM ciphertext in IndexedDB (Web Crypto, non-extractable per-device key).
 - **Real-time sync**: Socket.io push/pull with acknowledgements, automatic resync on reconnect, live updates from other devices.
 - **Vector clocks** on every field to tell genuine conflicts from stale writes.
-- **Conflict Review dashboard** for clinical reviewers: both values side by side with device and clock, keep A, keep B, or enter a corrected dose.
-- **Audit Trail**: filter by patient, date range, automatic vs manual; read-only.
+- **Dose reviews** for clinical reviewers: both doses side by side with when and where they were entered; keep dose A, use dose B, or enter the correct dose.
+- **Change history** (audit trail): filter by patient, date range, automatic vs reviewer; read-only. A second view draws one patient's edits as a timeline per device.
 - **Two sign-in portals**: **PHC** for the local doctor at a Primary Health Centre (full offline support, data syncs when the network returns) and **Admin** for the central system at the district hospital (every PHC's records, conflict review, audit trail, users and devices). An account only opens in its own portal.
 - **JWT auth with 4 roles** (health worker, clinical reviewer, admin, auditor) enforced on the server and in the UI.
 - **Admin page**: change user roles, see registered devices and who is online.
-- **Dashboard**: synced vs pending chart, auto-resolution rate, system stats.
-- Dark mode, responsive layout, keyboard and screen-reader friendly.
+- **Home**: what to do next (add or find a patient), changes not sent yet, doses waiting for review, a 7-day chart, and at the district hospital a table of every health centre.
+- **Download patients** as an Excel workbook (patients, allergies, medicines, check-ups) or a CSV file, made on the device so it works offline.
+- **Demo data from Synthea**: 99 realistic patients with real-shaped allergies, medicines and dated vitals (see `server/src/data/README.md`).
+- Plain-language, accessible design for staff with any level of computer experience: 17px base text, 48px buttons with words beside every icon, a menu that is always visible, a connection strip that says in words whether work is saved, yellow focus ring, high contrast, light and dark screens, English and Hindi.
 - **Demo mode**: "Simulate offline" switch, and `?device=B` in a second tab to act as a second device.
 
 ## Tech stack

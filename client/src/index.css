@@ -1,5 +1,5 @@
-/* Inter (UI) and Geist Mono (loader, ID cards) load when online; offline it falls back to system-ui (not an error). */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400..800&family=Geist+Mono:wght@200..700&display=swap');
+/* Inter loads when online; offline the app uses the device's own UI font (not an error). */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,13 +11,14 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-feature-settings: 'cv11', 'ss01';
+    font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+    /* 17px base: easier to read on tablets held at arm's length. Every rem size scales with it. */
+    font-size: 106.25%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
-    /* Anchored sections land below the sticky header. */
-    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+    /* Anchored sections land below the sticky top bar. */
+    scroll-padding-top: 6rem;
     color-scheme: light;
   }
   html.dark {
@@ -25,8 +26,9 @@
   }
 
   body {
-    @apply min-h-screen bg-surface text-slate-800 dark:bg-slate-950 dark:text-slate-200;
+    @apply min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
     margin: 0;
+    line-height: 1.55;
   }
 
   h1, h2, h3 {
@@ -36,25 +38,21 @@
     text-wrap: pretty;
   }
 
-  /* Focus ring — accessible but styled */
+  /* A thick yellow ring with a dark edge: visible on every background. */
   :focus-visible {
-    @apply outline-none ring-2 ring-teal-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
+    outline: 3px solid #f5b800;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px #0f172a;
+    border-radius: 0.375rem;
   }
 
   ::selection {
-    @apply bg-teal-200 text-teal-950;
-  }
-
-  /* Quiet scrollbars that match the slate palette. */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgb(148 163 184 / 0.5) transparent;
+    @apply bg-brand-200 text-brand-950;
   }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
-      animation-delay: 0ms !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
@@ -64,166 +62,118 @@
 @layer components {
   /* ── Surfaces ─────────────────────────────────────────────────────────── */
   .card {
-    @apply rounded-card border border-slate-200/70 bg-white p-5 shadow-card sm:p-6
-      dark:border-slate-800 dark:bg-slate-900 dark:shadow-none;
-  }
-  /* Cards that are links or buttons lift slightly under the pointer. */
-  .card-interactive {
-    @apply transition-[box-shadow,transform,border-color] duration-200 ease-out
-      hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-card-hover
-      active:translate-y-0 dark:hover:border-teal-800;
+    @apply rounded-card border border-slate-200 bg-white p-5 shadow-card sm:p-6 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none;
   }
 
-  /* ── Buttons ──────────────────────────────────────────────────────────── */
+  /* ── Buttons: at least 48px tall, text always beside the icon ─────────── */
   .btn {
-    @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold
-      transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
-      active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex min-h-[3rem] select-none items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-base font-semibold leading-tight
+      transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-teal-600 text-white shadow-sm shadow-teal-900/10 hover:bg-teal-700 hover:shadow-teal-glow active:bg-teal-800 focus-visible:ring-teal-500;
+    @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 dark:bg-brand-500 dark:hover:bg-brand-400 dark:hover:text-slate-950;
   }
   .btn-secondary {
-    @apply btn border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-900/5 hover:border-slate-300 hover:bg-slate-50 active:bg-slate-100 focus-visible:ring-teal-500
-      dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700;
+    @apply btn border-2 border-brand-600 bg-white text-brand-700 hover:bg-brand-50 dark:border-brand-300 dark:bg-transparent dark:text-brand-200 dark:hover:bg-brand-950;
+  }
+  .btn-plain {
+    @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800;
   }
   .btn-danger {
-    @apply btn bg-rose-600 text-white shadow-sm hover:bg-rose-700 active:bg-rose-800 focus-visible:ring-rose-400;
+    @apply btn bg-red-700 text-white hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-500;
   }
   .btn-danger-outline {
-    @apply btn border border-rose-200 bg-white text-rose-700 hover:border-rose-300 hover:bg-rose-50 focus-visible:ring-rose-400
-      dark:border-rose-900/60 dark:bg-transparent dark:text-rose-300 dark:hover:bg-rose-950/40;
+    @apply btn border-2 border-red-700 bg-white text-red-700 hover:bg-red-50 dark:border-red-400 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-950;
   }
   .btn-ghost {
-    @apply btn px-3 font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-teal-500
-      dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white;
+    @apply btn px-3 font-semibold text-brand-700 underline-offset-4 hover:bg-brand-50 hover:underline dark:text-brand-300 dark:hover:bg-slate-800;
   }
   .btn-sm {
-    @apply px-3 py-1.5 text-xs;
+    @apply min-h-[2.5rem] px-3.5 py-2 text-sm;
   }
   .btn-icon {
-    @apply btn h-9 w-9 p-0 font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-teal-500
-      dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
+    @apply btn h-12 w-12 p-0 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800;
   }
   .link {
-    @apply font-semibold text-teal-700 underline-offset-4 transition-colors hover:text-teal-800 hover:underline dark:text-teal-300 dark:hover:text-teal-200;
+    @apply font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-900 hover:decoration-2 dark:text-brand-300 dark:hover:text-brand-200;
   }
 
   /* ── Forms ────────────────────────────────────────────────────────────── */
   .form-label {
-    @apply mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300;
+    @apply mb-1.5 block text-base font-semibold text-slate-900 dark:text-slate-100;
   }
   .form-input {
-    @apply block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm shadow-slate-900/[0.03]
-      transition-[border-color,box-shadow,background-color] duration-150 placeholder:text-slate-400
-      hover:border-slate-400 focus:border-teal-600 focus:outline-none focus:ring-4 focus:ring-teal-600/15
-      disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400
-      dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-slate-600 dark:focus:border-teal-500 dark:focus:ring-teal-500/20;
+    @apply block min-h-[3rem] w-full rounded-lg border-2 border-slate-400 bg-white px-3.5 py-2.5 text-base text-slate-900
+      placeholder:text-slate-500 hover:border-slate-500 focus:border-brand-600 focus:outline-none
+      disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500
+      dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-brand-300;
   }
   .form-input-error {
-    @apply border-rose-400 bg-rose-50/40 hover:border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 dark:border-rose-500/70 dark:bg-rose-950/20;
+    @apply border-red-700 dark:border-red-400;
   }
   .form-error {
-    @apply mt-1.5 flex items-center gap-1 text-xs font-medium text-rose-600 dark:text-rose-400;
+    @apply mt-1.5 flex items-start gap-1.5 text-sm font-semibold text-red-700 dark:text-red-300;
   }
   .form-help {
-    @apply mt-1.5 text-xs text-slate-500 dark:text-slate-400;
+    @apply mt-1 text-sm text-slate-600 dark:text-slate-300;
   }
 
-  /* ── Badges ───────────────────────────────────────────────────────────── */
-  /* Status labels are coloured text (with an icon where the markup has one), never a tinted capsule. */
+  /* ── Status text: an icon and coloured words, never a coloured capsule ── */
   .badge {
-    @apply inline-flex items-center gap-1 whitespace-nowrap text-xs font-semibold;
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold;
   }
-  .badge-teal { @apply badge text-teal-700 dark:text-teal-300; }
-  .badge-sage { @apply badge text-sage-700 dark:text-sage-300; }
-  .badge-blue { @apply badge text-medical-600 dark:text-medical-300; }
-  .badge-warning { @apply badge text-amber-700 dark:text-amber-300; }
-  .badge-danger { @apply badge text-rose-700 dark:text-rose-300; }
-  .badge-conflict { @apply badge text-orange-700 dark:text-orange-300; }
-  .badge-slate { @apply badge text-slate-600 dark:text-slate-400; }
-  /* "Resolved by reviewer": a settled outcome, so it reads as success. */
-  .badge-violet { @apply badge text-sage-700 dark:text-sage-300; }
+  .badge-ok { @apply badge text-green-800 dark:text-green-300; }
+  .badge-info { @apply badge text-brand-700 dark:text-brand-300; }
+  .badge-warning { @apply badge text-amber-800 dark:text-amber-300; }
+  .badge-danger { @apply badge text-red-700 dark:text-red-300; }
+  .badge-muted { @apply badge text-slate-600 dark:text-slate-300; }
+
+  /* Notice boxes: a coloured left edge, an icon and a plain sentence. */
+  .notice {
+    @apply flex items-start gap-3 rounded-lg border border-l-[6px] px-4 py-3 text-base;
+  }
+  .notice-info { @apply notice border-brand-300 border-l-brand-600 bg-brand-50 text-brand-950 dark:border-brand-800 dark:border-l-brand-400 dark:bg-brand-950 dark:text-brand-100; }
+  .notice-ok { @apply notice border-green-300 border-l-green-700 bg-green-50 text-green-950 dark:border-green-900 dark:border-l-green-400 dark:bg-green-950 dark:text-green-100; }
+  .notice-warning { @apply notice border-amber-300 border-l-amber-600 bg-amber-50 text-amber-950 dark:border-amber-900 dark:border-l-amber-400 dark:bg-amber-950 dark:text-amber-100; }
+  .notice-danger { @apply notice border-red-300 border-l-red-700 bg-red-50 text-red-950 dark:border-red-900 dark:border-l-red-400 dark:bg-red-950 dark:text-red-100; }
 
   /* ── Type ─────────────────────────────────────────────────────────────── */
   .page-title {
-    @apply text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.75rem] sm:leading-9 dark:text-white;
+    @apply text-[1.75rem] font-bold leading-tight text-slate-900 sm:text-[2rem] dark:text-white;
   }
   .page-subtitle {
-    @apply mt-1.5 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400;
+    @apply mt-2 max-w-3xl text-base leading-relaxed text-slate-700 dark:text-slate-300;
   }
   .section-title {
-    @apply text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400;
+    @apply text-xl font-bold text-slate-900 dark:text-white;
   }
   .eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400;
+    @apply text-sm font-semibold text-slate-600 dark:text-slate-300;
   }
 
   /* ── Tables ───────────────────────────────────────────────────────────── */
   .table-head {
-    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400;
+    @apply bg-slate-50 px-4 py-3 text-left text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200;
   }
   .table-cell {
-    @apply px-4 py-3.5 text-sm text-slate-700 dark:text-slate-300;
+    @apply px-4 py-3.5 align-top text-base text-slate-800 dark:text-slate-200;
   }
 
-  /* ── Segmented tabs (pill group) ─────────────────────────────────────── */
+  /* ── Tabs and option groups ───────────────────────────────────────────── */
   .segmented {
-    @apply inline-flex rounded-xl bg-slate-100 p-1 ring-1 ring-inset ring-slate-200/70 dark:bg-slate-800/70 dark:ring-slate-700/60;
+    @apply inline-flex flex-wrap gap-2;
   }
   .segmented-item {
-    @apply rounded-lg px-3.5 py-1.5 text-sm font-medium text-slate-600 transition-[background-color,color,box-shadow] duration-150
-      hover:text-slate-900 dark:text-slate-400 dark:hover:text-white;
+    @apply inline-flex min-h-[2.75rem] items-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-800
+      hover:border-brand-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-brand-300;
   }
   .segmented-item[aria-selected='true'],
   .segmented-item[aria-pressed='true'] {
-    @apply bg-white text-slate-900 shadow-sm shadow-slate-900/10 dark:bg-slate-900 dark:text-white;
+    @apply border-brand-600 bg-brand-600 text-white dark:border-brand-400 dark:bg-brand-400 dark:text-slate-950;
   }
 
   /* ── Loading ──────────────────────────────────────────────────────────── */
   .skeleton {
-    @apply animate-pulse rounded-md bg-slate-200/80 dark:bg-slate-800;
-  }
-
-  /* ── Motion helpers ───────────────────────────────────────────────────── */
-  .fade-in {
-    @apply animate-fade-in;
-  }
-  /* Children enter one after another (first eight get a delay). */
-  .stagger > * {
-    @apply animate-fade-in;
-  }
-  .stagger > *:nth-child(2) { animation-delay: 40ms; }
-  .stagger > *:nth-child(3) { animation-delay: 80ms; }
-  .stagger > *:nth-child(4) { animation-delay: 120ms; }
-  .stagger > *:nth-child(5) { animation-delay: 160ms; }
-  .stagger > *:nth-child(6) { animation-delay: 200ms; }
-  .stagger > *:nth-child(7) { animation-delay: 240ms; }
-  .stagger > *:nth-child(8) { animation-delay: 280ms; }
-
-  /* ── Tooltip: add data-tip="…" to any focusable element ──────────────── */
-  [data-tip] {
-    position: relative;
-  }
-  [data-tip]::after {
-    content: attr(data-tip);
-    @apply pointer-events-none absolute left-1/2 top-full z-toast mt-2 w-max max-w-[16rem] -translate-x-1/2 translate-y-1 whitespace-normal rounded-md
-      bg-slate-900 px-2.5 py-1.5 text-center text-xs font-medium leading-snug text-white opacity-0 shadow-pop transition duration-150
-      dark:bg-slate-700;
-  }
-  [data-tip]:hover::after,
-  [data-tip]:focus-visible::after {
-    @apply translate-y-0 opacity-100;
-    transition-delay: 250ms;
-  }
-  [data-tip-pos='top']::after {
-    @apply bottom-full top-auto mb-2 mt-0;
-  }
-  [data-tip-pos='left']::after {
-    @apply left-auto right-0 translate-x-0;
-  }
-  @media (hover: none) {
-    [data-tip]::after { display: none; }
+    @apply rounded-md bg-slate-200 dark:bg-slate-800;
   }
 }

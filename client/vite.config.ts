@@ -21,13 +21,6 @@ export default defineConfig({
   preview: { proxy },
   build: {
     chunkSizeWarningLimit: 1200,
-    rollupOptions: {
-      // The PHC library's 3D shelf runs as its own page inside an iframe.
-      input: {
-        main: fileURLToPath(new URL('./index.html', import.meta.url)),
-        bookshelf: fileURLToPath(new URL('./bookshelf.html', import.meta.url)),
-      },
-    },
   },
   plugins: [
     react(),
@@ -45,8 +38,8 @@ export default defineConfig({
         name: 'HealthSync',
         short_name: 'HealthSync',
         description: 'Offline-first patient record system',
-        theme_color: '#1b1814',
-        background_color: '#f7f4ee',
+        theme_color: '#1f5fa6',
+        background_color: '#f1f5f9',
         display: 'standalone',
         start_url: '/',
         icons: [

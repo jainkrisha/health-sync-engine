@@ -1,28 +1,28 @@
 /** Display labels for merge outcomes and rules in the audit trail. */
 export const OUTCOME_STYLE: Record<string, string> = {
-  applied: 'badge-sage',
-  merged: 'badge-blue',
-  kept_existing: 'badge-slate',
-  duplicate: 'badge-slate',
-  conflict: 'badge-conflict',
-  resolved: 'badge-violet',
+  applied: 'badge-ok',
+  merged: 'badge-info',
+  kept_existing: 'badge-muted',
+  duplicate: 'badge-muted',
+  conflict: 'badge-warning',
+  resolved: 'badge-ok',
 };
 
 export const OUTCOME_LABEL: Record<string, string> = {
-  applied: 'Applied',
-  merged: 'Merged',
-  kept_existing: 'Kept existing',
-  duplicate: 'Duplicate',
-  conflict: 'Sent to review',
-  resolved: 'Resolved by reviewer',
+  applied: 'Saved',
+  merged: 'Combined',
+  kept_existing: 'Older change, not used',
+  duplicate: 'Already saved',
+  conflict: 'Sent for dose review',
+  resolved: 'Decided by reviewer',
 };
 
 export const RULE_LABEL: Record<string, string> = {
-  create: 'Create',
-  lww: 'Last-Write-Wins',
-  'or-set': 'OR-Set (add-wins)',
-  'g-set': 'Grow-only set',
-  'critical-review': 'Critical field',
-  'manual-review': 'Manual review',
-  delete: 'Archive',
+  create: 'New record',
+  lww: 'Newest change wins',
+  'or-set': 'Allergies are always kept',
+  'g-set': 'Every check-up is kept',
+  'critical-review': 'Dose needs a doctor',
+  'manual-review': 'Reviewer decision',
+  delete: 'Removed',
 };

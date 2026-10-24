@@ -12,35 +12,28 @@ export function PageHeader({
   subtitle,
   actions,
   back,
-  eyebrow,
 }: {
   title: string;
   subtitle?: ReactNode;
   actions?: ReactNode;
-  /** Optional "back" link shown above the title, e.g. { to: '/patients', label: 'Patients' }. */
+  /** "Back" link shown above the title, e.g. { to: '/patients', label: 'Patients' }. */
   back?: { to: string; label: string };
-  eyebrow?: ReactNode;
 }) {
   useI18n();
   return (
-    <header className="mb-6 border-b border-slate-200/80 pb-5 sm:mb-8 sm:pb-6 dark:border-slate-800">
+    <header className="mb-6 sm:mb-8">
       {back && (
-        <Link
-          to={back.to}
-          aria-label={t('Back to {label}', { label: back.label })}
-          className="group mb-3 inline-flex items-center gap-1 rounded-md text-sm font-medium text-slate-500 transition-colors hover:text-teal-700 dark:text-slate-400 dark:hover:text-teal-300"
-        >
-          <Icon name="chevronRight" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-0.5" />
-          {back.label}
+        <Link to={back.to} className="link mb-4 inline-flex min-h-[2.75rem] items-center gap-1.5 no-underline hover:underline">
+          <Icon name="chevronRight" className="h-5 w-5 rotate-180" />
+          {t('Back to {label}', { label: back.label })}
         </Link>
       )}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0">
-          {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
           <h1 className="page-title">{title}</h1>
           {subtitle && <div className="page-subtitle">{subtitle}</div>}
         </div>
-        {actions && <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
       </div>
     </header>
   );
@@ -51,63 +44,71 @@ export function EmptyState({
   title,
   message,
   action,
-  tone = 'teal',
   compact = false,
 }: {
   icon: IconName;
   title: string;
   message?: string;
   action?: ReactNode;
-  tone?: 'teal' | 'rose' | 'slate';
+  /** Kept for callers; every empty state now uses the same calm style. */
+  tone?: string;
   compact?: boolean;
 }) {
-  const toneClass = {
-    teal: 'bg-teal-50 text-teal-600 ring-teal-100 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-800/50',
-    rose: 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-800/50',
-    slate: 'bg-slate-100 text-slate-500 ring-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:ring-slate-700',
-  }[tone];
   return (
-    <div className={`fade-in flex flex-col items-center justify-center text-center ${compact ? 'py-8' : 'py-14 sm:py-20'}`}>
-      <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ring-8 ${toneClass}`}>
-        <Icon name={icon} className="h-6 w-6" />
-      </div>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
-      {message && <p className="mt-1.5 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">{message}</p>}
-      {action && <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div>}
+    <div className={`flex flex-col items-center justify-center text-center ${compact ? 'py-6' : 'py-12 sm:py-16'}`}>
+      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <Icon name={icon} className="h-7 w-7" />
+      </span>
+      <h2 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h2>
+      {message && <p className="mt-1.5 max-w-md text-base text-slate-700 dark:text-slate-300">{message}</p>}
+      {action && <div className="mt-5 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>
   );
 }
 
-export function Spinner({ className = 'h-4 w-4' }: { className?: string }) {
-  return <span className={`inline-block animate-spin rounded-full border-2 border-current border-t-transparent ${className}`} aria-hidden="true" />;
+export function Spinner({ className = 'h-5 w-5' }: { className?: string }) {
+  return <span className={`inline-block animate-spin rounded-full border-[3px] border-current border-t-transparent ${className}`} aria-hidden="true" />;
+}
+
+/** A visible "Loading…" line, so people know the app is working. */
+export function Loading({ label }: { label?: string }) {
+  useI18n();
+  return (
+    <p className="flex items-center gap-3 py-6 text-base font-semibold text-slate-700 dark:text-slate-200" role="status">
+      <Spinner /> {label ?? t('Loading…')}
+    </p>
+  );
 }
 
 export function SkeletonRows({ rows = 4 }: { rows?: number }) {
+  useI18n();
   return (
-    <div className="space-y-3" aria-busy="true" aria-label={t('Loading')}>
-      {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="card flex items-center gap-4 py-4 sm:py-4" style={{ opacity: 1 - i * 0.12 }}>
-          <div className="skeleton h-10 w-10 rounded-full" />
-          <div className="flex-1 space-y-2">
-            <div className="skeleton h-3.5 w-1/3" />
-            <div className="skeleton h-3 w-1/2" />
+    <div aria-busy="true">
+      <Loading />
+      <div className="space-y-3" aria-hidden="true">
+        {Array.from({ length: rows }, (_, i) => (
+          <div key={i} className="card flex items-center gap-4 py-4 sm:py-4">
+            <div className="skeleton h-10 w-10 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <div className="skeleton h-4 w-1/3" />
+              <div className="skeleton h-3.5 w-1/2" />
+            </div>
           </div>
-          <div className="skeleton hidden h-7 w-16 rounded-lg sm:block" />
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
 
-/** Inline problem banner with an optional retry action. */
+/** A problem, said plainly, with an optional retry. */
 export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: () => void }) {
   useI18n();
   return (
-    <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
-      <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
+    <div role="alert" className="notice-danger">
+      <Icon name="alert" className="mt-0.5 h-5 w-5 flex-shrink-0" />
       <p className="flex-1">{t(message)}</p>
       {onRetry && (
-        <button type="button" onClick={onRetry} className="font-semibold underline-offset-4 hover:underline">
+        <button type="button" onClick={onRetry} className="font-bold underline underline-offset-4">
           {t('Try again')}
         </button>
       )}
@@ -115,43 +116,44 @@ export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: (
   );
 }
 
-/** Card section heading: small label with an optional icon and a right-aligned slot. */
+export function OfflineNotice({ message }: { message: string }) {
+  return (
+    <div className="notice-warning" role="note">
+      <Icon name="wifiOff" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+      <p>{message}</p>
+    </div>
+  );
+}
+
+/** Card heading: an icon and a plain title, with an optional slot on the right. */
 export function SectionHeading({ id, icon, children, aside }: { id?: string; icon?: IconName; children: ReactNode; aside?: ReactNode }) {
   return (
-    <div className="mb-4 flex items-center justify-between gap-3">
-      <h2 id={id} className="section-title flex items-center gap-2">
-        {icon && <Icon name={icon} className="h-4 w-4 text-teal-600 dark:text-teal-400" />}
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <h2 id={id} className="section-title flex items-center gap-2.5">
+        {icon && <Icon name={icon} className="h-6 w-6 flex-shrink-0 text-brand-700 dark:text-brand-300" />}
         {children}
       </h2>
-      {aside}
+      {aside && <div className="text-sm text-slate-600 dark:text-slate-300">{aside}</div>}
     </div>
   );
 }
 
 export function RoleBadge({ role }: { role: Role }) {
-  const style: Record<Role, string> = {
-    admin: 'badge-blue',
-    clinical_reviewer: 'badge-slate',
-    health_worker: 'badge-slate',
-    auditor: 'badge-slate',
-  };
   useI18n();
-  return <span className={style[role]}>{t(ROLE_LABELS[role])}</span>;
+  return <span className="badge-muted">{t(ROLE_LABELS[role])}</span>;
 }
 
-/** Readable vector clock: one chip per device counter. */
+/** Readable vector clock: one entry per device counter. Shown only in technical details. */
 export function ClockView({ clock, highlight }: { clock: VectorClock; highlight?: string }) {
   const entries = Object.entries(clock).filter(([, v]) => v > 0).sort(([a], [b]) => a.localeCompare(b));
-  if (entries.length === 0) return <span className="text-xs text-slate-400">∅</span>;
+  if (entries.length === 0) return <span className="text-sm text-slate-500">∅</span>;
   return (
     <span className="inline-flex flex-wrap gap-1" title={formatClock(clock)}>
       {entries.map(([id, v]) => (
         <span
           key={id}
-          className={`rounded px-1.5 py-0.5 font-mono text-[11px] ${
-            id === highlight
-              ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300'
-              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+          className={`rounded px-1.5 py-0.5 font-mono text-xs ${
+            id === highlight ? 'bg-brand-100 text-brand-900 dark:bg-brand-900 dark:text-brand-100' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
           }`}
         >
           {shortId(id)}:{v}
@@ -213,13 +215,16 @@ export function initials(name: string): string {
   );
 }
 
-export function OfflineNotice({ message }: { message: string }) {
+/** Round letter badge for a person; decorative, the name is always shown beside it. */
+export function Avatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50">
-        <Icon name="wifiOff" className="h-4 w-4" />
-      </span>
-      <p className="text-sm">{message}</p>
-    </div>
+    <span
+      className={`flex flex-shrink-0 items-center justify-center rounded-full bg-brand-100 font-bold text-brand-900 dark:bg-brand-900 dark:text-brand-100 ${
+        size === 'lg' ? 'h-14 w-14 text-lg' : 'h-10 w-10 text-sm'
+      }`}
+      aria-hidden="true"
+    >
+      {initials(name)}
+    </span>
   );
 }

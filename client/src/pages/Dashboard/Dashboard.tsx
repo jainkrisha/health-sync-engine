@@ -1,11 +1,12 @@
 /**
- * Dashboard — what is on this device, what still needs to sync, and how
- * conflicts are being resolved across the whole system.
+ * Home — what to do next, then the numbers that matter: patients, changes not
+ * sent yet, doses waiting for a doctor, and (at the district hospital) how each
+ * health centre is doing.
  */
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { portalForRole, type StatsResponse } from '@shared/types';
+import { portalForRole, type PhcSummary, type StatsResponse } from '@shared/types';
 import { usePatients } from '../../hooks/usePatients';
 import { useSyncEngine } from '../../hooks/useSync';
 import { useApi } from '../../hooks/useApi';
@@ -16,8 +17,7 @@ import { getOutboxSince, type OutboxSummary } from '../../db/mutationLog';
 import { onDataChanged } from '../../lib/events';
 import { StatCard } from '../../components/Card';
 import { Icon } from '../../components/Icon';
-import { EmptyState, PageHeader, SectionHeading, initials, relativeTime } from '../../components/ui';
-import DistrictLanding from './landing/DistrictLanding';
+import { Avatar, EmptyState, Loading, PageHeader, SectionHeading, relativeTime } from '../../components/ui';
 import { useI18n } from '../../i18n/useI18n';
 import { t as translate, tFacility } from '../../i18n/i18n';
 import { tName } from '../../i18n/names';
@@ -38,10 +38,6 @@ function last7Days(): string[] {
   return days;
 }
 
-function localDay(iso: string): string {
-  return dayKey(new Date(iso));
-}
-
 // "Dr. Priya (PHC Wagholi)" -> "Dr. Priya"; "Admin User" -> "Admin".
 function greetingName(name: string | undefined): string {
   const words = (name ?? '').replace(/\(.*?\)/g, '').trim().split(/\s+/).filter(Boolean);
@@ -60,54 +56,168 @@ function useOutboxWeek() {
   return rows;
 }
 
-function DashboardSkeleton() {
+function FindPatient() {
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [q, setQ] = useState('');
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    navigate(q.trim() ? `/patients?q=${encodeURIComponent(q.trim())}` : '/patients');
+  };
   return (
-    <div className="space-y-6" aria-busy="true">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="card flex gap-4">
-            <div className="skeleton h-11 w-11 rounded-full" />
-            <div className="flex-1 space-y-2"><div className="skeleton h-6 w-12" /><div className="skeleton h-3 w-24" /></div>
-          </div>
-        ))}
+    <form onSubmit={submit} role="search" className="card">
+      <label htmlFor="home-search" className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+        <Icon name="search" className="h-6 w-6 text-brand-700 dark:text-brand-300" /> {t('Find a patient')}
+      </label>
+      <p className="form-help mb-3">{t('Type a name, phone number, allergy or medicine.')}</p>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <input id="home-search" type="search" className="form-input" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button type="submit" className="btn-primary flex-shrink-0">
+          <Icon name="search" className="h-5 w-5" /> {t('Search')}
+        </button>
       </div>
-      <div className="card"><div className="skeleton h-64 w-full" /></div>
-    </div>
+    </form>
+  );
+}
+
+function WeekChart() {
+  const outbox = useOutboxWeek();
+  const { theme } = useTheme();
+  const { t, locale } = useI18n();
+  const data = useMemo(() => {
+    const map = new Map(last7Days().map((d) => [d, { day: d, synced: 0, pending: 0, conflicts: 0 }]));
+    for (const r of outbox) {
+      if (r.status === 'pending') {
+        const e = map.get(dayKey(new Date(r.createdAt)));
+        if (e) e.pending++;
+      } else if (r.syncedAt) {
+        const e = map.get(dayKey(new Date(r.syncedAt)));
+        if (!e) continue;
+        if (r.status === 'conflict') e.conflicts++;
+        else if (r.status === 'synced' || r.status === 'resolved') e.synced++;
+      }
+    }
+    return [...map.values()].map((d) => ({ ...d, label: new Date(`${d.day}T00:00:00`).toLocaleDateString(locale, { weekday: 'short' }) }));
+  }, [outbox, locale]);
+  const dark = theme === 'dark';
+  const axis = dark ? '#cbd5e1' : '#334155';
+  const grid = dark ? '#334155' : '#e2e8f0';
+  const total = data.reduce((n, d) => n + d.synced + d.pending + d.conflicts, 0);
+
+  return (
+    <section className="card" aria-labelledby="chart-h">
+      <SectionHeading id="chart-h" icon="activity">
+        {t('Changes from this device in the last 7 days')}
+      </SectionHeading>
+      {total === 0 ? (
+        <p className="text-base text-slate-700 dark:text-slate-300">{t('No changes made on this device in the last 7 days.')}</p>
+      ) : (
+        <div
+          className="h-64"
+          role="img"
+          aria-label={`${t('Bar chart of changes by day.')} ${data
+            .map((d) => t('{day}: {synced} sent, {pending} not sent yet, {conflicts} sent for dose review', { day: d.label, synced: d.synced, pending: d.pending, conflicts: d.conflicts }))
+            .join('; ')}`}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid stroke={grid} vertical={false} />
+              <XAxis dataKey="label" stroke={axis} fontSize={14} tickLine={false} axisLine={false} />
+              <YAxis allowDecimals={false} stroke={axis} fontSize={14} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ background: dark ? '#0f172a' : '#ffffff', border: `1px solid ${grid}`, borderRadius: 8, fontSize: 14 }}
+                cursor={{ fill: dark ? '#1e293b' : '#f1f5f9' }}
+              />
+              <Legend wrapperStyle={{ fontSize: 14 }} />
+              <Bar dataKey="synced" name={t('Sent')} stackId="a" fill={dark ? '#86acdb' : '#1f5fa6'} />
+              <Bar dataKey="conflicts" name={t('Sent for dose review')} stackId="a" fill={dark ? '#fbbf24' : '#b45309'} />
+              <Bar dataKey="pending" name={t('Not sent yet')} stackId="a" fill={dark ? '#94a3b8' : '#64748b'} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function CentresTable() {
+  const { connected } = useSyncEngine();
+  const { t } = useI18n();
+  const phcs = useApi<{ phcs: PhcSummary[] }>(connected ? '/phcs' : null, connected);
+  return (
+    <section className="card p-0 sm:p-0" aria-labelledby="centres-h">
+      <div className="p-5 pb-0 sm:p-6 sm:pb-0">
+        <SectionHeading
+          id="centres-h"
+          icon="clinic"
+          aside={
+            <Link to="/phcs" className="link">
+              {t('See all health centres')}
+            </Link>
+          }
+        >
+          {t('Health centres')}
+        </SectionHeading>
+      </div>
+      {!connected ? (
+        <p className="px-5 pb-5 text-base sm:px-6">{t('Connect to the internet to see the health centres.')}</p>
+      ) : !phcs.data ? (
+        <div className="px-5 sm:px-6">
+          <Loading />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
+            <thead>
+              <tr>
+                {['Health centre', 'Patients', 'Devices online', 'Doses waiting', 'Last update'].map((h) => (
+                  <th key={h} scope="col" className="table-head first:pl-5 sm:first:pl-6">
+                    {t(h)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              {phcs.data.phcs.map((p) => (
+                <tr key={p.name}>
+                  <th scope="row" className="table-cell pl-5 text-left font-bold sm:pl-6">{tFacility(p.name)}</th>
+                  <td className="table-cell tabular-nums">{p.patientCount}</td>
+                  <td className="table-cell tabular-nums">
+                    {p.devices.filter((d) => d.online).length} / {p.devices.length}
+                  </td>
+                  <td className="table-cell">
+                    {p.openConflicts.length ? (
+                      <span className="badge-warning">
+                        <Icon name="alert" className="h-4 w-4" /> {p.openConflicts.length}
+                      </span>
+                    ) : (
+                      <span className="badge-ok">
+                        <Icon name="check" className="h-4 w-4" /> {t('None')}
+                      </span>
+                    )}
+                  </td>
+                  <td className="table-cell whitespace-nowrap">{relativeTime(p.lastSyncAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 
 export default function Dashboard() {
   const { patients, loading } = usePatients();
   const sync = useSyncEngine();
-  const outbox = useOutboxWeek();
   const { user } = useAuth();
   const perms = usePermissions();
-  const { theme } = useTheme();
-  const { t, locale } = useI18n();
+  const { t, tp } = useI18n();
+  const district = Boolean(user && portalForRole(user.role) === 'district');
   const stats = useApi<StatsResponse>(sync.connected ? '/stats' : null, sync.lastSyncedAt);
+  const openReviews = patients.filter((p) => p.hasOpenConflicts).length;
 
-  const chartData = useMemo(() => {
-    const days = last7Days();
-    const map = new Map(days.map((d) => [d, { day: d, synced: 0, pending: 0, conflicts: 0 }]));
-    for (const r of outbox) {
-      if (r.status === 'pending') {
-        const e = map.get(localDay(r.createdAt));
-        if (e) e.pending++;
-      } else if (r.syncedAt) {
-        const e = map.get(localDay(r.syncedAt));
-        if (!e) continue;
-        if (r.status === 'conflict') e.conflicts++;
-        else if (r.status === 'synced' || r.status === 'resolved') e.synced++;
-      }
-    }
-    return [...map.values()].map((d) => ({
-      ...d,
-      label: new Date(`${d.day}T00:00:00`).toLocaleDateString(locale, { weekday: 'short' }),
-    }));
-  }, [outbox, locale]);
-
-  const openConflicts = patients.filter((p) => p.hasOpenConflicts).length;
-  const rate = stats.data
+  const autoRate = stats.data
     ? (() => {
         const { automatic, manual } = stats.data.resolutions;
         const total = automatic + manual + stats.data.conflicts.pending;
@@ -115,163 +225,190 @@ export default function Dashboard() {
       })()
     : null;
 
-  const axisColor = theme === 'dark' ? '#a39a88' : '#7a7263';
-  const gridColor = theme === 'dark' ? '#2a2620' : '#e2dbcc';
-
   return (
-    <div className="space-y-6">
-      {user && portalForRole(user.role) === 'district' && <DistrictLanding stats={stats.data ?? null} />}
+    <div className="space-y-8">
       <PageHeader
         title={t('Hello, {name}', { name: tName(greetingName(user?.name)) })}
-        subtitle={
-          user && portalForRole(user.role) === 'district'
-            ? t("{facility}: every PHC's records, sync activity and conflict resolution at a glance.", { facility: tFacility(user.facility) })
-            : t('{facility}: records on this device, sync activity and conflict resolution at a glance.', { facility: user?.facility ? tFacility(user.facility) : t('PHC') })
-        }
-        actions={
-          perms.canEditPatients && (
-            <Link to="/patients/new" className="btn-primary">
-              <Icon name="plus" className="h-4 w-4" /> {t('Add patient')}
-            </Link>
-          )
-        }
+        subtitle={user ? `${tFacility(user.facility)} · ${t('What would you like to do today?')}` : undefined}
       />
 
-      
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        {perms.canEditPatients ? (
+          <Link to="/patients/new" className="card group flex items-center gap-4 border-2 border-brand-600 hover:bg-brand-50 dark:border-brand-400 dark:hover:bg-brand-950">
+            <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-white dark:bg-brand-400 dark:text-slate-950">
+              <Icon name="plus" className="h-7 w-7" />
+            </span>
+            <span>
+              <span className="block text-lg font-bold text-slate-900 group-hover:underline dark:text-white">{t('Add a new patient')}</span>
+              <span className="block text-base text-slate-700 dark:text-slate-300">{t('Register someone seen today.')}</span>
+            </span>
+          </Link>
+        ) : (
+          perms.canReviewConflicts && (
+            <Link to="/conflicts" className="card group flex items-center gap-4 border-2 border-brand-600 hover:bg-brand-50 dark:border-brand-400 dark:hover:bg-brand-950">
+              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-white dark:bg-brand-400 dark:text-slate-950">
+                <Icon name="pill" className="h-7 w-7" />
+              </span>
+              <span>
+                <span className="block text-lg font-bold text-slate-900 group-hover:underline dark:text-white">{t('Review medicine doses')}</span>
+                <span className="block text-base text-slate-700 dark:text-slate-300">{t('Choose the correct dose where two devices disagree.')}</span>
+              </span>
+            </Link>
+          )
+        )}
+        <FindPatient />
+      </div>
 
-      {loading ? (
-        <DashboardSkeleton />
-      ) : (
-        <>
-          <div className="stagger grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            <StatCard value={patients.length} label={t('Patients on this device')} icon="stethoscope" accent="medical" to="/patients" />
-            <StatCard value={sync.pendingCount} label={t('Changes waiting to sync')} subLabel={t('Last sync {when}', { when: relativeTime(sync.lastSyncedAt) })} icon="hourglass" accent={sync.pendingCount ? 'warning' : 'teal'} />
-            <StatCard
-              value={openConflicts}
-              label={t('Patients with a dose under review')}
-              icon="alert"
-              accent={openConflicts ? 'danger' : 'teal'}
-              to={openConflicts ? (perms.canReviewConflicts ? '/conflicts' : '/patients') : undefined}
-            />
-            <StatCard
-              value={rate === null ? '—' : `${rate}%`}
-              label={t('Concurrent edits auto-resolved')}
-              subLabel={stats.data ? t('{auto} automatic · {manual} by reviewers', { auto: stats.data.resolutions.automatic, manual: stats.data.resolutions.manual }) : t('Connect to load system stats')}
-              icon="merge"
-              accent="teal"
-            />
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-3">
-            <section className="card lg:col-span-2" aria-labelledby="chart-h">
-              <SectionHeading id="chart-h" icon="activity" aside={<span className="text-xs text-slate-400">{t('Changes by day')}</span>}>
-                {t('This device, last 7 days')}
-              </SectionHeading>
-              <div className="h-64" role="img" aria-label={`${t('Bar chart of changes synced and pending over the last 7 days.')} ${chartData.map((d) => t('{day}: {synced} synced, {pending} pending, {conflicts} sent to review', { day: d.label, synced: d.synced, pending: d.pending, conflicts: d.conflicts })).join('; ')}`}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid stroke={gridColor} vertical={false} />
-                    <XAxis dataKey="label" stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis allowDecimals={false} stroke={axisColor} fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: theme === 'dark' ? '#1b1814' : '#fdfbf7', border: `1px solid ${gridColor}`, borderRadius: 8, fontSize: 12 }}
-                      cursor={{ fill: theme === 'dark' ? '#2a2620' : '#efe9dd' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="synced" name={t('Synced')} stackId="a" fill={theme === 'dark' ? '#9db9dc' : '#2f5f94'} radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="conflicts" name={t('Sent to review')} stackId="a" fill={theme === 'dark' ? '#e6b95e' : '#c8901f'} />
-                    <Bar dataKey="pending" name={t('Pending')} stackId="a" fill={theme === 'dark' ? '#a39a88' : '#7a7263'} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </section>
-
-            <section className="card" aria-labelledby="system-h">
-              <SectionHeading id="system-h" icon="hospital">{t('System')}</SectionHeading>
-              {stats.data ? (
-                <dl className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <dt className="text-sm text-slate-600 dark:text-slate-300">{t('Patients on server')}</dt>
-                    <dd className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{stats.data.patients}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-sm text-slate-600 dark:text-slate-300">{t('Conflicts awaiting review')}</dt>
-                    <dd className="text-lg font-bold tabular-nums text-orange-600 dark:text-orange-400">{stats.data.conflicts.pending}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-sm text-slate-600 dark:text-slate-300">{t('Conflicts resolved')}</dt>
-                    <dd className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{stats.data.conflicts.resolved}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-sm text-slate-600 dark:text-slate-300">{t('Registered devices')}</dt>
-                    <dd className="text-lg font-bold tabular-nums text-slate-900 dark:text-white">{stats.data.devices}</dd>
-                  </div>
-                  {rate !== null && (
-                    <div>
-                      <div className="mb-1 flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                        <span>{t('Auto-resolved')}</span><span>{t('Manual / pending')}</span>
-                      </div>
-                      <div className="flex h-2.5 overflow-hidden rounded-full bg-orange-200 dark:bg-orange-900/50" role="img" aria-label={t('{rate}% of concurrent edits resolved automatically', { rate })}>
-                        <div className="bg-sage-600 transition-[width] duration-700 ease-out" style={{ width: `${rate}%` }} />
-                      </div>
-                    </div>
-                  )}
-                  {perms.canReviewConflicts && stats.data.conflicts.pending > 0 && (
-                    <Link to="/conflicts" className="btn-primary w-full">{t('Review conflicts')}</Link>
-                  )}
-                </dl>
-              ) : (
-                sync.connected ? (
-                  <div className="space-y-4" aria-busy="true" aria-label={t('Loading')}>
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="flex items-center justify-between"><div className="skeleton h-3.5 w-36" /><div className="skeleton h-5 w-8" /></div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState compact tone="slate" icon="wifiOff" title={t("You're offline")} message={t('System-wide stats appear when the server is reachable.')} />
-                )
-              )}
-            </section>
-          </div>
-
-          <section className="card" aria-labelledby="recent-h">
-            <SectionHeading
-              id="recent-h"
-              icon="clock"
-              aside={
-                <Link to="/patients" className="link inline-flex items-center gap-1 text-sm">
-                  {t('All patients')} <Icon name="arrowRight" className="h-3.5 w-3.5" />
-                </Link>
-              }
-            >
-              {t('Recently updated')}
-            </SectionHeading>
-            {patients.length === 0 ? (
-              <EmptyState
-                icon="patients"
-                title={t('No patients yet')}
-                message={t('Add a patient, or sync to download records from the server.')}
-                action={perms.canEditPatients && <Link to="/patients/new" className="btn-primary">{t('Add your first patient')}</Link>}
-              />
-            ) : (
-              <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-                {patients.slice(0, 6).map((p) => (
-                  <li key={p.id}>
-                    <Link to={`/patients/${p.id}`} className="group -mx-3 flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">{initials(tName(p.name))}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-slate-800 group-hover:text-teal-700 dark:text-slate-100 dark:group-hover:text-teal-300">{tName(p.name)}</span>
-                        <span className="block text-xs text-slate-400">{t('Updated {when}', { when: relativeTime(p.updatedAt) })}</span>
-                      </span>
-                      {p.hasOpenConflicts && <span className="badge-conflict">{t('Review')}</span>}
-                      <Icon name="chevronRight" className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-600 dark:text-slate-600" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+      {sync.pendingCount > 0 && (
+        <div className="notice-warning">
+          <Icon name="clock" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p>
+            {tp(
+              sync.pendingCount,
+              '{count} change is saved only on this device. It will be sent to the server when there is internet.',
+              '{count} changes are saved only on this device. They will be sent to the server when there is internet.',
             )}
-          </section>
-        </>
+          </p>
+        </div>
+      )}
+      {openReviews > 0 && (
+        <div className="notice-info">
+          <Icon name="pill" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p className="flex-1">
+            {tp(
+              openReviews,
+              '{count} patient has a medicine dose waiting for a doctor to check it. Until then the earlier dose stays on the record.',
+              '{count} patients have a medicine dose waiting for a doctor to check it. Until then the earlier dose stays on the record.',
+            )}
+          </p>
+          {perms.canReviewConflicts && (
+            <Link to="/conflicts" className="link whitespace-nowrap">
+              {t('Review now')}
+            </Link>
+          )}
+        </div>
+      )}
+
+      <section aria-labelledby="numbers-h">
+        <h2 id="numbers-h" className="section-title mb-4">
+          {t('At a glance')}
+        </h2>
+        {loading ? (
+          <Loading />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              icon="patients"
+              label={district ? t('Patients on this computer') : t('Patients on this device')}
+              value={patients.length}
+              to="/patients"
+              action={t('See patients')}
+            />
+            <StatCard
+              icon="clock"
+              label={t('Changes not sent yet')}
+              value={sync.pendingCount}
+              tone={sync.pendingCount ? 'warning' : 'ok'}
+              subLabel={sync.pendingCount ? t('They send when there is internet.') : t('Everything has been sent.')}
+            />
+            <StatCard
+              icon="pill"
+              label={t('Doses waiting for review')}
+              value={openReviews}
+              tone={openReviews ? 'warning' : 'ok'}
+              subLabel={openReviews ? t('A doctor at the district hospital checks these.') : t('Nothing waiting.')}
+              to={openReviews && perms.canReviewConflicts ? '/conflicts' : undefined}
+              action={t('Review now')}
+            />
+            <StatCard
+              icon="merge"
+              label={t('Edits merged automatically')}
+              value={autoRate === null ? '—' : `${autoRate}%`}
+              subLabel={
+                stats.data
+                  ? t('{auto} by the system, {manual} by a reviewer', { auto: stats.data.resolutions.automatic, manual: stats.data.resolutions.manual })
+                  : t('Connect to the internet to see this.')
+              }
+            />
+          </div>
+        )}
+      </section>
+
+      {district && <CentresTable />}
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section className="card" aria-labelledby="recent-h">
+          <SectionHeading
+            id="recent-h"
+            icon="clock"
+            aside={
+              <Link to="/patients" className="link">
+                {t('See all patients')}
+              </Link>
+            }
+          >
+            {t('Recently updated patients')}
+          </SectionHeading>
+          {loading ? (
+            <Loading />
+          ) : patients.length === 0 ? (
+            <EmptyState
+              compact
+              icon="patients"
+              title={t('No patients yet')}
+              message={t('Add a patient, or connect to the internet to get records from the server.')}
+              action={
+                perms.canEditPatients && (
+                  <Link to="/patients/new" className="btn-primary">
+                    <Icon name="plus" className="h-5 w-5" /> {t('Add a new patient')}
+                  </Link>
+                )
+              }
+            />
+          ) : (
+            <ul className="-mx-2 divide-y divide-slate-200 dark:divide-slate-800">
+              {patients.slice(0, 6).map((p) => (
+                <li key={p.id}>
+                  <Link to={`/patients/${p.id}`} className="group flex min-h-[3.5rem] items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                    <Avatar name={tName(p.name)} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-base font-bold text-slate-900 group-hover:underline dark:text-white">{tName(p.name)}</span>
+                      <span className="block text-sm text-slate-700 dark:text-slate-300">{t('Updated {when}', { when: relativeTime(p.updatedAt) })}</span>
+                    </span>
+                    {p.hasOpenConflicts && (
+                      <span className="badge-warning">
+                        <Icon name="alert" className="h-4 w-4" /> {t('Dose review')}
+                      </span>
+                    )}
+                    <Icon name="chevronRight" className="h-5 w-5 flex-shrink-0 text-slate-500" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <WeekChart />
+      </div>
+
+      {stats.data && (
+        <section className="card" aria-labelledby="system-h">
+          <SectionHeading id="system-h" icon="hospital">
+            {t('Whole district (from the server)')}
+          </SectionHeading>
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['Patients on the server', stats.data.patients],
+              ['Doses waiting for review', stats.data.conflicts.pending],
+              ['Doses reviewed', stats.data.conflicts.resolved],
+              ['Registered devices', stats.data.devices],
+            ].map(([label, value]) => (
+              <div key={label as string}>
+                <dt className="text-base text-slate-700 dark:text-slate-300">{t(label as string)}</dt>
+                <dd className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       )}
     </div>
   );

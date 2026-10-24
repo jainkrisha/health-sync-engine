@@ -1,47 +1,83 @@
 /**
- * The sign-in screen shows two ID passes: PHC (local doctor, works offline) and
- * Admin (central system at the district hospital). Each account only opens on
- * its own pass, and each pass flips over to create an account.
+ * Sign-in asks "Where do you work?": a PHC (local doctor, works offline) or the
+ * district hospital (central system). Each account only opens in its own
+ * place, and the same card switches to "Create an account".
  */
 import { expect, test } from '@playwright/test';
 
 const run = Date.now().toString(36);
 
-test('PHC and Admin passes at sign-in', async ({ page }) => {
+test('PHC and district hospital sign-in', async ({ page }) => {
   await page.goto('/');
-  // The illustrated intro is scroll-driven; skip it to reach the passes.
-  await page.getByRole('button', { name: 'Skip intro' }).click();
-  const phc = page.getByRole('region', { name: 'PHC sign-in pass' });
-  const admin = page.getByRole('region', { name: 'Admin sign-in pass' });
+  const phc = page.getByRole('radio', { name: /Primary Health Centre/ });
+  const district = page.getByRole('radio', { name: /District hospital/ });
 
-  // Register a PHC doctor on the back of the PHC pass.
-  await phc.getByRole('button', { name: 'Create account' }).click();
-  await phc.getByLabel('Full name').fill('Dr. Portal Test');
-  await phc.locator('#pass-phc-r-username').fill(`e2e_phc_${run}`);
-  await phc.locator('#pass-phc-r-password').fill('password123');
-  await phc.getByLabel('PHC name').fill('PHC Hadapsar');
-  await phc.getByRole('button', { name: 'Create PHC account' }).click();
+  // Register a PHC doctor.
+  await phc.check();
+  await page.getByRole('button', { name: 'Create an account' }).click();
+  await page.getByLabel('Full name').fill('Dr. Portal Test');
+  await page.getByLabel('PHC name').fill('PHC Hadapsar');
+  await page.getByLabel('Choose a username').fill(`e2e_phc_${run}`);
+  await page.getByLabel('Choose a password').fill('password123');
+  await page.getByRole('button', { name: 'Create PHC account' }).click();
   await expect(page).toHaveURL(/dashboard/);
   await expect(page.getByText('PHC Hadapsar').filter({ visible: true }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);
-  await page.getByRole('button', { name: /Sign out|Log out/ }).first().click();
+  await expect(page.getByRole('link', { name: /^Dose reviews/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sign out' }).first().click();
 
-  // The same PHC account is refused on the Admin pass.
-  await admin.locator('#pass-district-user').fill(`e2e_phc_${run}`);
-  await admin.locator('#pass-district-pass').fill('password123');
-  await admin.getByRole('button', { name: 'Sign in to district system' }).click();
-  await expect(admin.getByRole('alert')).toContainText('This is a PHC account');
+  // The same PHC account is refused at the district hospital.
+  await district.check();
+  await page.getByLabel('Username').fill(`e2e_phc_${run}`);
+  await page.getByLabel('Password', { exact: true }).fill('password123');
+  await page.getByRole('button', { name: 'Sign in to district system' }).click();
+  await expect(page.getByRole('alert')).toContainText('This is a PHC account');
 
-  // A district administrator registers on the back of the Admin pass.
-  await admin.getByRole('button', { name: 'Create account' }).click();
-  await expect(admin.getByLabel('PHC name')).toHaveCount(0);
-  await admin.locator('#pass-district-r-name').fill('District Admin');
-  await admin.locator('#pass-district-r-username').fill(`e2e_dist_${run}`);
-  await admin.locator('#pass-district-r-password').fill('password123');
-  await admin.getByRole('button', { name: 'Create district account' }).click();
+  // A district administrator registers: no PHC name, a job instead.
+  await page.getByRole('button', { name: 'Create an account' }).click();
+  await expect(page.getByLabel('PHC name')).toHaveCount(0);
+  await page.getByLabel('Full name').fill('District Admin');
+  await page.getByRole('radio', { name: /Administrator/ }).check();
+  await page.getByLabel('Choose a username').fill(`e2e_dist_${run}`);
+  await page.getByLabel('Choose a password').fill('password123');
+  await page.getByRole('button', { name: 'Create district account' }).click();
   await expect(page).toHaveURL(/dashboard/);
   await expect(page.getByText('District Hospital').filter({ visible: true }).first()).toBeVisible();
-  await page.mouse.move(2, 420); // the card wheel opens at the left edge
-  await expect(page.getByRole('link', { name: 'Conflict Review', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Audit Trail', exact: true })).toBeVisible();
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  await expect(nav.getByRole('link', { name: 'Dose reviews' })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Change history' })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Health centres' })).toBeVisible();
+});
+
+test('patient list downloads as Excel and CSV', async ({ page, request }) => {
+  const user = { username: `e2e_exp_${run}`, name: 'Export Worker', role: 'health_worker', portal: 'phc', facility: 'PHC Export Test', password: 'password123' };
+  expect((await request.post('/api/auth/register', { data: user })).status()).toBe(201);
+  await page.goto('/');
+  await page.getByLabel('Username').fill(user.username);
+  await page.getByLabel('Password', { exact: true }).fill(user.password);
+  await page.getByRole('button', { name: 'Sign in to PHC' }).click();
+  await expect(page).toHaveURL(/dashboard/);
+
+  // One patient of our own, so the file has a known row.
+  const name = `Export Patient ${run}`;
+  await page.getByRole('link', { name: 'Add patient' }).first().click();
+  await page.getByLabel('Full name').fill(name);
+  await page.getByLabel('Date of birth').fill('1990-02-03');
+  await page.getByRole('button', { name: 'Save patient' }).click();
+  await expect(page.getByRole('heading', { name })).toBeVisible();
+
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Patients', exact: true }).click();
+  await page.getByLabel('Search patients').fill(name);
+  await page.getByRole('button', { name: 'Download', exact: true }).click();
+  await page.getByRole('radio', { name: /Only the 1 patient shown/ }).check();
+
+  const [xlsx] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Excel file/ }).click()]);
+  expect(xlsx.suggestedFilename()).toMatch(/^patient-export-patient-.*\.xlsx$/);
+  const bytes = await (await xlsx.createReadStream()).toArray();
+  expect(Buffer.concat(bytes).subarray(0, 2).toString()).toBe('PK');
+
+  await page.getByRole('button', { name: 'Download', exact: true }).click();
+  const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /CSV file/ }).click()]);
+  const text = Buffer.concat(await (await csv.createReadStream()).toArray()).toString('utf8');
+  expect(text).toContain('Name,Date of birth,Age (years)');
+  expect(text).toContain(`${name},1990-02-03`);
 });

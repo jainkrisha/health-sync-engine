@@ -1,42 +1,38 @@
 /**
- * Sign-in: two ID passes hang from lanyards over a liquid-metal background —
- * one for PHC doctors, one for the district hospital's central system. Each pass
- * is its own form: type your ID and password straight onto the card, or flip it
- * over to create an account.
+ * Sign-in. First "Where do you work?" (a health centre, or the district
+ * hospital), then the username and password for that place. The same card
+ * switches to "Create an account". Each account opens only in its own place;
+ * the server says so in plain words if someone picks the wrong one.
  */
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PORTAL_ROLES, ROLE_LABELS, type Portal, type Role } from '@shared/types';
-import { Icon } from '../../components/Icon';
+import { Icon, type IconName } from '../../components/Icon';
 import { Spinner } from '../../components/ui';
 import { deviceLabel, profileKey } from '../../lib/deviceProfile';
-import { LiquidMetal } from './LiquidMetal';
-import { ParticleTitle } from './ParticleTitle';
-import { PhcIntro, shouldPlayIntro } from './PhcIntro';
 import { useI18n } from '../../i18n/useI18n';
 import { t as translate } from '../../i18n/i18n';
 import { LanguageSwitch } from '../../i18n/LanguageSwitch';
-import './login.css';
 
 const loginSchema = z.object({
-  username: z.string().trim().min(1, 'Enter your ID'),
+  username: z.string().trim().min(1, 'Enter your username'),
   password: z.string().min(1, 'Enter your password'),
 });
 
 const registerSchema = z.object({
   facility: z.string().trim().max(80).optional(),
-  name: z.string().trim().min(1, 'Your name is required').max(80),
+  name: z.string().trim().min(1, 'Enter your full name').max(80),
   username: z
     .string()
     .trim()
-    .min(3, 'At least 3 characters')
+    .min(3, 'Use at least 3 letters or numbers')
     .max(40)
-    .regex(/^[a-zA-Z0-9_.-]+$/, 'Letters, numbers, dots, dashes or underscores'),
-  password: z.string().min(6, 'At least 6 characters'),
+    .regex(/^[a-zA-Z0-9_.-]+$/, 'Use only English letters, numbers, dots, dashes or underscores'),
+  password: z.string().min(6, 'Use at least 6 characters'),
   role: z.string(),
 });
 
@@ -44,43 +40,30 @@ type LoginValues = z.infer<typeof loginSchema>;
 type RegisterValues = z.infer<typeof registerSchema>;
 
 const ROLE_HELP: Partial<Record<Role, string>> = {
-  admin: 'Every PHC, users and devices',
-  clinical_reviewer: 'Resolves dose conflicts',
-  auditor: 'Read-only audit access',
+  admin: 'Sees every health centre, staff and devices',
+  clinical_reviewer: 'Checks medicine doses that two devices changed',
+  auditor: 'Can read the change history; cannot edit',
 };
 
-const PASS = {
+const PLACES: Record<Portal, { title: string; help: string; icon: IconName; signIn: string; create: string }> = {
   phc: {
-    title: 'PHC',
-    org: 'Primary Health Centre',
-    chip: 'HEALTH WORKER',
-    meta: [
-      ['MODE', 'OFFLINE-FIRST'],
-      ['STORE', 'AES-256'],
-    ],
-    serial: '4127-0806-PHC',
+    title: 'Primary Health Centre (PHC)',
+    help: 'For doctors, nurses and health workers. Works without internet.',
+    icon: 'clinic',
     signIn: 'Sign in to PHC',
     create: 'Create PHC account',
-    footer: 'Works with no network. Syncs when back online.',
-    strapText: 'HEALTHSYNC · PHC · HEALTHSYNC · PHC · HEALTHSYNC',
   },
   district: {
-    title: 'ADMIN',
-    org: 'District Hospital · Central',
-    chip: 'DISTRICT SYSTEM',
-    meta: [
-      ['SCOPE', 'ALL PHCS'],
-      ['VIEW', 'LIVE'],
-    ],
-    serial: '0921-4410-DST',
+    title: 'District hospital',
+    help: 'For administrators, dose reviewers and auditors.',
+    icon: 'hospital',
     signIn: 'Sign in to district system',
     create: 'Create district account',
-    footer: 'Conflict review, audit trail, users and devices.',
-    strapText: 'HEALTHSYNC · DISTRICT · HEALTHSYNC · DISTRICT',
   },
-} as const;
+};
 
 const PORTAL_KEY = profileKey('portal');
+
 function readPortal(): Portal {
   try {
     return localStorage.getItem(PORTAL_KEY) === 'district' ? 'district' : 'phc';
@@ -88,6 +71,7 @@ function readPortal(): Portal {
     return 'phc';
   }
 }
+
 function rememberPortal(p: Portal) {
   try {
     localStorage.setItem(PORTAL_KEY, p);
@@ -96,56 +80,164 @@ function rememberPortal(p: Portal) {
   }
 }
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({ id, message }: { id: string; message?: string }) {
   useI18n();
   if (!message) return null;
   return (
-    <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-[#b4232b]" role="alert">
-      <Icon name="alert" className="h-3 w-3" /> {translate(message)}
+    <p className="form-error" id={id}>
+      <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" /> {translate(message)}
     </p>
   );
 }
 
-function Stripes() {
+function Field({
+  id,
+  label,
+  help,
+  error,
+  children,
+}: {
+  id: string;
+  label: string;
+  help?: string;
+  error?: string;
+  children: ReactNode;
+}) {
   return (
-    <span className="flex h-3.5 items-stretch gap-[2px]" aria-hidden="true">
-      {['#e0663a', '#f0a63a', '#e9c46a', '#5f8f7a', '#4f6378', '#2d3a48'].map((c) => (
-        <span key={c} className="w-[3px] rounded-[1px]" style={{ background: c }} />
-      ))}
-    </span>
+    <div>
+      <label htmlFor={id} className="form-label">
+        {label}
+      </label>
+      {help && (
+        <p className="form-help -mt-1 mb-1.5" id={`${id}-help`}>
+          {help}
+        </p>
+      )}
+      {children}
+      <FieldError id={`${id}-error`} message={error} />
+    </div>
   );
 }
 
-function IdPass({ portal, delay, from }: { portal: Portal; delay: number; from: 'left' | 'right' }) {
-  const info = PASS[portal];
+function PlaceChoice({ portal, onChange }: { portal: Portal; onChange: (p: Portal) => void }) {
   const { t } = useI18n();
-  const [side, setSide] = useState<'front' | 'back'>('front');
+  return (
+    <fieldset>
+      <legend className="form-label">{t('Where do you work?')}</legend>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {(['phc', 'district'] as const).map((p) => {
+          const place = PLACES[p];
+          const checked = portal === p;
+          return (
+            <label
+              key={p}
+              className={`flex cursor-pointer items-start gap-3 rounded-lg border-2 p-4 ${
+                checked
+                  ? 'border-brand-600 bg-brand-50 dark:border-brand-300 dark:bg-brand-950'
+                  : 'border-slate-300 bg-white hover:border-brand-600 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-brand-300'
+              }`}
+            >
+              <input type="radio" name="place" value={p} checked={checked} onChange={() => onChange(p)} className="mt-1 h-5 w-5 flex-shrink-0 accent-brand-600" />
+              <span className="min-w-0">
+                <span className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                  <Icon name={place.icon} className="h-5 w-5 flex-shrink-0" /> {t(place.title)}
+                </span>
+                <span className="mt-1 block text-sm text-slate-700 dark:text-slate-300">{t(place.help)}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function SignInForm({ portal, onCreate }: { portal: Portal; onCreate: () => void }) {
+  const { t } = useI18n();
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const { login, register } = useAuth();
-  const navigate = useNavigate();
+  const form = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  const errors = form.formState.errors;
 
-  const loginForm = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
-  const registerForm = useForm<RegisterValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { role: PORTAL_ROLES[portal][0], facility: '' },
-  });
-
-  const onLogin = async (v: LoginValues) => {
+  const onSubmit = async (v: LoginValues) => {
     setServerError(null);
     try {
       await login(v.username, v.password, portal);
       rememberPortal(portal);
       navigate('/dashboard');
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : t('Sign-in failed'));
+      setServerError(err instanceof Error ? err.message : 'Sign-in failed');
     }
   };
 
-  const onRegister = async (v: RegisterValues) => {
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-5" aria-label={t(PLACES[portal].signIn)}>
+      <Field id="login-username" label={t('Username')} error={errors.username?.message}>
+        <input
+          id="login-username"
+          className={`form-input ${errors.username ? 'form-input-error' : ''}`}
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          aria-invalid={errors.username ? true : undefined}
+          aria-describedby={errors.username ? 'login-username-error' : undefined}
+          {...form.register('username')}
+        />
+      </Field>
+      <Field id="login-password" label={t('Password')} error={errors.password?.message}>
+        <div className="flex gap-2">
+          <input
+            id="login-password"
+            type={showPassword ? 'text' : 'password'}
+            className={`form-input ${errors.password ? 'form-input-error' : ''}`}
+            autoComplete="current-password"
+            aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? 'login-password-error' : undefined}
+            {...form.register('password')}
+          />
+          <button type="button" className="btn-plain flex-shrink-0" onClick={() => setShowPassword((s) => !s)} aria-pressed={showPassword}>
+            <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-5 w-5" />
+            {showPassword ? t('Hide') : t('Show')}
+          </button>
+        </div>
+      </Field>
+      {serverError && (
+        <div role="alert" className="notice-danger">
+          <Icon name="alert" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p>{t(serverError)}</p>
+        </div>
+      )}
+      <button type="submit" className="btn-primary w-full" disabled={form.formState.isSubmitting}>
+        {form.formState.isSubmitting ? <Spinner /> : <Icon name="arrowRight" className="h-5 w-5" />}
+        {t(PLACES[portal].signIn)}
+      </button>
+      <p className="text-center text-base text-slate-700 dark:text-slate-300">
+        {t('First time here?')}{' '}
+        <button type="button" className="link" onClick={onCreate}>
+          {t('Create an account')}
+        </button>
+      </p>
+    </form>
+  );
+}
+
+function RegisterForm({ portal, onBack }: { portal: Portal; onBack: () => void }) {
+  const { t } = useI18n();
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { role: PORTAL_ROLES[portal][0], facility: '' },
+  });
+  const errors = form.formState.errors;
+
+  const onSubmit = async (v: RegisterValues) => {
     setServerError(null);
     if (portal === 'phc' && !v.facility?.trim()) {
-      registerForm.setError('facility', { message: 'Enter the name of your PHC' });
+      form.setError('facility', { message: 'Enter the name of your PHC' });
       return;
     }
     try {
@@ -153,298 +245,154 @@ function IdPass({ portal, delay, from }: { portal: Portal; delay: number; from: 
       rememberPortal(portal);
       navigate('/dashboard');
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : t('Registration failed'));
+      setServerError(err instanceof Error ? err.message : 'Registration failed');
     }
   };
 
-  const flip = (to: 'front' | 'back') => {
-    setSide(to);
-    setServerError(null);
-  };
-
-  // Faces are stacked absolutely for the flip; the card takes the height of the side showing.
-  const frontRef = useRef<HTMLDivElement>(null);
-  const backRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | undefined>(undefined);
-  useLayoutEffect(() => {
-    const el = side === 'front' ? frontRef.current : backRef.current;
-    if (!el) return;
-    const measure = () => setHeight(el.offsetHeight);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [side]);
-
-  const lErr = loginForm.formState.errors;
-  const rErr = registerForm.formState.errors;
-  const id = `pass-${portal}`;
-
-  const header = (
-    <div className="flex items-center justify-between gap-2 bg-[var(--navy)] px-3 py-2 text-[var(--cream)]">
-      <span className="flex items-center gap-2">
-        <img src="/favicon.svg" alt="" className="h-4 w-4 rounded-[4px]" />
-        <span className="pass-mono text-[10px] font-semibold tracking-[2px]">HEALTHSYNC</span>
-      </span>
-      <Stripes />
-    </div>
-  );
-
-  const errorBox = serverError && (
-    <div role="alert" className="mt-3 flex items-start gap-2 rounded-md border border-[#e9b4a4] bg-[#f6ddd3] px-2.5 py-2 text-[12px] font-medium leading-snug text-[#8a2a1a]">
-      <Icon name="alert" className="mt-px h-3.5 w-3.5 flex-shrink-0" />
-      <span>{t(serverError)}</span>
-    </div>
+  const input = (name: 'name' | 'username' | 'password' | 'facility', props: InputHTMLAttributes<HTMLInputElement> = {}) => (
+    <input
+      id={`reg-${name}`}
+      className={`form-input ${errors[name] ? 'form-input-error' : ''}`}
+      aria-invalid={errors[name] ? true : undefined}
+      aria-describedby={errors[name] ? `reg-${name}-error` : undefined}
+      {...props}
+      {...form.register(name)}
+    />
   );
 
   return (
-    <section className={`pass-col pass-${portal}`} aria-label={portal === 'district' ? t('Admin sign-in pass') : t('PHC sign-in pass')}>
-      <div className={`pass-hanger ${from === 'right' ? 'from-right' : ''}`} style={{ ['--delay' as string]: `${delay}s` }}>
-        <div className="pass-sway" style={{ ['--delay' as string]: `${delay}s` }}>
-          <div className="pass-strap">
-            <span className="pass-strap-text">{t(info.strapText)}</span>
+    <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-5" aria-label={t(PLACES[portal].create)}>
+      <Field id="reg-name" label={t('Full name')} error={errors.name?.message}>
+        {input('name', { autoComplete: 'name' })}
+      </Field>
+      {portal === 'phc' ? (
+        <Field id="reg-facility" label={t('PHC name')} help={t('For example: PHC Hadapsar')} error={errors.facility?.message}>
+          {input('facility')}
+        </Field>
+      ) : (
+        <fieldset>
+          <legend className="form-label">{t('What is your job?')}</legend>
+          <div className="grid gap-2">
+            {PORTAL_ROLES.district.map((r) => (
+              <label
+                key={r}
+                className="flex cursor-pointer items-start gap-3 rounded-lg border-2 border-slate-300 p-3 hover:border-brand-600 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 dark:border-slate-600 dark:has-[:checked]:border-brand-300 dark:has-[:checked]:bg-brand-950"
+              >
+                <input type="radio" value={r} className="mt-1 h-5 w-5 flex-shrink-0 accent-brand-600" {...form.register('role')} />
+                <span>
+                  <span className="block font-bold text-slate-900 dark:text-white">{t(ROLE_LABELS[r])}</span>
+                  <span className="block text-sm text-slate-700 dark:text-slate-300">{t(ROLE_HELP[r] ?? '')}</span>
+                </span>
+              </label>
+            ))}
           </div>
-          <div className="pass-clip" />
-          <div className="pass-sleeve">
-            <span className="pass-rivet" style={{ left: 9, top: 9 }} />
-            <span className="pass-rivet" style={{ right: 9, top: 9 }} />
-            <span className="pass-rivet" style={{ left: 9, bottom: 9 }} />
-            <span className="pass-rivet" style={{ right: 9, bottom: 9 }} />
-
-            <div className="pass-flip">
-              <div className={`pass-inner ${side === 'back' ? 'is-flipped' : ''}`} style={{ height }}>
-                {/* ── Front: sign in ─────────────────────────────────────── */}
-                <div className="pass-face front" ref={frontRef} aria-hidden={side !== 'front'}>
-                  <div className="pass-card">
-                    {header}
-                    <form onSubmit={loginForm.handleSubmit(onLogin)} noValidate className="px-4 pb-3 pt-3" aria-label={t(info.signIn)}>
-                      <p className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-[2.4px] text-[var(--orange-2)]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--orange)]" aria-hidden="true" />
-                        {t('LOGIN AS')}
-                      </p>
-                      <p className="mt-0.5 text-[42px] font-extrabold leading-[0.95] tracking-[-1.5px] text-[var(--ink)]" style={{ fontFamily: 'Geist, Inter, sans-serif' }}>
-                        {t(info.title)}
-                      </p>
-                      <div className="mt-2.5 flex items-end gap-3">
-                        <span className="pass-chip">{t(info.chip)}</span>
-                        {info.meta.map(([k, v]) => (
-                          <span key={k}>
-                            <span className="pass-label">{t(k)}</span>
-                            <span className="pass-mono block text-[10.5px] font-bold tracking-[1px] text-[var(--ink)]">{t(v)}</span>
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="mt-4">
-                        <label htmlFor={`${id}-user`} className="pass-label">
-                          {t('Username')}
-                        </label>
-                        <input
-                          id={`${id}-user`}
-                          className="pass-field"
-                          autoComplete="username"
-                          autoCapitalize="none"
-                          spellCheck={false}
-                          placeholder="your-id"
-                          aria-invalid={lErr.username ? true : undefined}
-                          disabled={side !== 'front'}
-                          {...loginForm.register('username')}
-                        />
-                        <FieldError message={lErr.username?.message} />
-                      </div>
-
-                      <div className="mt-3">
-                        <label htmlFor={`${id}-pass`} className="pass-label mb-1">
-                          {t('Password')}
-                        </label>
-                        <div className="pass-lcd" data-invalid={lErr.password ? 'true' : undefined}>
-                          <input
-                            id={`${id}-pass`}
-                            type={showPassword ? 'text' : 'password'}
-                            autoComplete="current-password"
-                            placeholder="••••••••"
-                            aria-invalid={lErr.password ? true : undefined}
-                            disabled={side !== 'front'}
-                            {...loginForm.register('password')}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword((s) => !s)}
-                            className="flex h-8 w-8 items-center justify-center rounded text-[rgba(29,39,51,0.5)] transition-colors hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e0663a]"
-                            aria-label={showPassword ? t('Hide characters') : t('Show characters')}
-                            aria-pressed={showPassword}
-                            tabIndex={side === 'front' ? 0 : -1}
-                          >
-                            <Icon name={showPassword ? 'eyeOff' : 'eye'} className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <FieldError message={lErr.password?.message} />
-                      </div>
-
-                      {errorBox}
-
-                      <button type="submit" className="pass-btn mt-4" disabled={loginForm.formState.isSubmitting || side !== 'front'}>
-                        {loginForm.formState.isSubmitting && <Spinner className="h-4 w-4" />}
-                        {t(info.signIn)}
-                      </button>
-
-                      <div className="mt-3 flex items-center justify-between gap-2">
-                        <button type="button" className="pass-link" onClick={() => flip('back')} tabIndex={side === 'front' ? 0 : -1}>
-                          {t('Create account')}
-                        </button>
-                        <span className="pass-mono text-[9.5px] text-[rgba(29,39,51,0.55)]">
-                          {t('DEMO PW')} <b className="text-[var(--ink)]">password123</b>
-                        </span>
-                      </div>
-                    </form>
-
-                    <div className="flex items-end justify-between gap-3 border-t border-dashed border-[rgba(29,39,51,0.2)] px-4 pb-3 pt-2.5">
-                      <div className="w-[46%]">
-                        <div className="pass-barcode" aria-hidden="true" />
-                        <p className="pass-mono mt-1 text-[8px] tracking-[1px] text-[rgba(29,39,51,0.6)]">{info.serial}</p>
-                      </div>
-                      <p className="pass-mono max-w-[48%] text-right text-[8px] font-semibold leading-[1.45] tracking-[0.6px] text-[rgba(29,39,51,0.6)]">
-                        {t('DEMO IDS')}: {portal === 'phc' ? 'WORKER1 · WORKER2' : 'ADMIN · REVIEWER · AUDITOR'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Back: create account ───────────────────────────────── */}
-                <div className="pass-face back" ref={backRef} aria-hidden={side !== 'back'}>
-                  <div className="pass-card">
-                    {header}
-                    <form onSubmit={registerForm.handleSubmit(onRegister)} noValidate className="space-y-3 px-4 pb-4 pt-3" aria-label={t(info.create)}>
-                      <div>
-                        <p className="pass-mono text-[8.5px] font-semibold tracking-[1.6px] text-[rgba(29,39,51,0.55)]">{t('NEW PASS')} · {t(info.org).toUpperCase()}</p>
-                        <p className="mt-1 text-[26px] font-extrabold leading-none tracking-[-0.8px] text-[var(--ink)]">{t('Create account')}</p>
-                      </div>
-                      {(
-                        [
-                          ['name', 'Full name', 'text', 'name', 'Dr. Asha Rao'],
-                          ['username', 'Username', 'text', 'username', 'asha.rao'],
-                          ['password', 'Password', 'password', 'new-password', '6+ characters'],
-                        ] as const
-                      ).map(([field, label, type, ac, ph]) => (
-                        <div key={field}>
-                          <label htmlFor={`${id}-r-${field}`} className="pass-label">
-                            {t(label)}
-                          </label>
-                          <input
-                            id={`${id}-r-${field}`}
-                            type={type}
-                            className="pass-field"
-                            autoComplete={ac}
-                            placeholder={t(ph)}
-                            aria-invalid={rErr[field] ? true : undefined}
-                            disabled={side !== 'back'}
-                            {...registerForm.register(field)}
-                          />
-                          <FieldError message={rErr[field]?.message} />
-                        </div>
-                      ))}
-                      {portal === 'phc' ? (
-                        <div>
-                          <label htmlFor={`${id}-r-facility`} className="pass-label">
-                            {t('PHC name')}
-                          </label>
-                          <input
-                            id={`${id}-r-facility`}
-                            className="pass-field"
-                            placeholder="PHC Hadapsar"
-                            aria-invalid={rErr.facility ? true : undefined}
-                            disabled={side !== 'back'}
-                            {...registerForm.register('facility')}
-                          />
-                          <FieldError message={rErr.facility?.message} />
-                        </div>
-                      ) : (
-                        <fieldset>
-                          <legend className="pass-label mb-1.5">{t('Role')}</legend>
-                          <div className="grid gap-1.5">
-                            {PORTAL_ROLES.district.map((r) => (
-                              <label
-                                key={r}
-                                className="flex cursor-pointer items-center gap-2 rounded-md border border-[rgba(29,39,51,0.18)] px-2.5 py-1.5 text-[12px] transition-colors hover:border-[rgba(29,39,51,0.35)] has-[:checked]:border-[#e0663a] has-[:checked]:bg-[rgba(224,102,58,0.08)]"
-                              >
-                                <input type="radio" value={r} className="accent-[#e0663a]" disabled={side !== 'back'} {...registerForm.register('role')} />
-                                <span className="font-semibold text-[var(--ink)]">{t(ROLE_LABELS[r])}</span>
-                                <span className="ml-auto text-[10.5px] text-[rgba(29,39,51,0.55)]">{t(ROLE_HELP[r] ?? '')}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </fieldset>
-                      )}
-                      {errorBox}
-                      <button type="submit" className="pass-btn" disabled={registerForm.formState.isSubmitting || side !== 'back'}>
-                        {registerForm.formState.isSubmitting && <Spinner className="h-4 w-4" />}
-                        {t(info.create)}
-                      </button>
-                      <button type="button" className="pass-link block" onClick={() => flip('front')} tabIndex={side === 'back' ? 0 : -1}>
-                        ← {t('Back to sign in')}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        </fieldset>
+      )}
+      <Field id="reg-username" label={t('Choose a username')} help={t('You will type this every time you sign in.')} error={errors.username?.message}>
+        {input('username', { autoComplete: 'username', autoCapitalize: 'none', spellCheck: false })}
+      </Field>
+      <Field id="reg-password" label={t('Choose a password')} help={t('At least 6 characters.')} error={errors.password?.message}>
+        {input('password', { type: 'password', autoComplete: 'new-password' })}
+      </Field>
+      {serverError && (
+        <div role="alert" className="notice-danger">
+          <Icon name="alert" className="mt-0.5 h-5 w-5 flex-shrink-0" />
+          <p>{t(serverError)}</p>
         </div>
-      </div>
-    </section>
+      )}
+      <button type="submit" className="btn-primary w-full" disabled={form.formState.isSubmitting}>
+        {form.formState.isSubmitting ? <Spinner /> : <Icon name="check" className="h-5 w-5" />}
+        {t(PLACES[portal].create)}
+      </button>
+      <p className="text-center">
+        <button type="button" className="link" onClick={onBack}>
+          {t('I already have an account: sign in')}
+        </button>
+      </p>
+    </form>
   );
 }
 
 export function Login() {
   const [portal, setPortal] = useState<Portal>(readPortal);
-  const [introDone, setIntroDone] = useState(() => !shouldPlayIntro());
-  const [wide, setWide] = useState(() => window.matchMedia('(min-width: 768px)').matches);
+  const [mode, setMode] = useState<'signin' | 'register'>('signin');
   const { t } = useI18n();
 
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    const on = () => setWide(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
+  const points: [IconName, string][] = [
+    ['wifiOff', 'Keeps working when the internet is off.'],
+    ['sync', 'Sends records to the district hospital when you are back online.'],
+    ['lock', 'Patient records are locked (encrypted) on this device.'],
+  ];
 
   return (
-    <div className="login-page relative min-h-screen overflow-x-hidden">
-      <LiquidMetal />
-      <LanguageSwitch className="pass-switch fixed right-3 top-3 z-50 sm:right-5 sm:top-5" />
-      {!introDone && <PhcIntro onDone={() => setIntroDone(true)} />}
-
-      <div className="relative z-10 flex min-h-screen flex-col">
-        {/* Title and tagline float above the straps, which run up to the top edge. */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-center px-4 pt-6 sm:pt-8">
-          <ParticleTitle className="pointer-events-auto h-[72px] w-full max-w-[720px] sm:h-[110px]" />
-          <p className="mt-1 text-center text-[11px] font-medium uppercase tracking-[3px] text-[rgba(236,231,218,0.55)] sm:mt-2">
-            {t('Offline-first patient records · choose your pass')}
-          </p>
+    <div className="flex min-h-screen flex-col bg-slate-100 dark:bg-slate-950">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="" className="h-10 w-10" />
+            <span className="text-xl font-bold text-slate-900 dark:text-white">HealthSync</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Icon name="globe" className="h-5 w-5 text-slate-700 dark:text-slate-300" />
+            <span className="sr-only">{t('Language')}</span>
+            <LanguageSwitch className="flex gap-2" buttonClassName="segmented-item min-h-[2.5rem] px-3 py-1.5" />
+          </div>
         </div>
+      </header>
 
-        {!introDone ? null : wide ? (
-          <div className="pass-pair relative mx-auto grid w-full max-w-[1040px] grid-cols-2 gap-x-28 px-6 pb-16" style={{ ['--strap-len' as string]: '172px' }}>
-            <IdPass portal="phc" delay={0.15} from="left" />
-            <IdPass portal="district" delay={0.45} from="right" />
-          </div>
-        ) : (
-          <div className="relative mx-auto flex w-full flex-col items-center px-4 pb-10" style={{ ['--strap-len' as string]: '196px' }}>
-            <div className="pass-switch absolute top-[140px] z-20" role="group" aria-label={t('Choose a pass')}>
-              {(['phc', 'district'] as const).map((p) => (
-                <button key={p} type="button" aria-pressed={portal === p} onClick={() => setPortal(p)}>
-                  {p === 'phc' ? t('PHC') : t('Admin')}
-                </button>
-              ))}
-            </div>
-            <IdPass key={portal} portal={portal} delay={0.1} from={portal === 'phc' ? 'left' : 'right'} />
-          </div>
-        )}
+      <main className="mx-auto grid w-full max-w-6xl flex-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_minmax(0,34rem)] lg:items-start lg:py-14">
+        <section className="lg:pt-6" aria-labelledby="about-h">
+          <h2 id="about-h" className="text-[1.75rem] font-bold leading-tight text-slate-900 sm:text-[2.25rem] dark:text-white">
+            {t('Patient records for health centres')}
+          </h2>
+          <p className="mt-3 max-w-xl text-lg text-slate-700 dark:text-slate-300">
+            {t('Record patients, allergies, medicines and check-ups. Everything is saved on this device first.')}
+          </p>
+          <ul className="mt-6 space-y-4">
+            {points.map(([icon, text]) => (
+              <li key={text} className="flex items-start gap-3 text-base text-slate-800 dark:text-slate-200">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-800 dark:bg-brand-950 dark:text-brand-200">
+                  <Icon name={icon} className="h-5 w-5" />
+                </span>
+                <span className="pt-2">{t(text)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-        <p className="relative mt-auto pb-5 text-center text-[11px] text-[rgba(236,231,218,0.45)]">
-          {t(deviceLabel)} · {t('The first sign-in needs a connection; after that the PHC works offline.')}
-        </p>
-      </div>
+        <section className="card space-y-6 sm:p-8" aria-labelledby="signin-h">
+          <h1 id="signin-h" className="page-title">
+            {mode === 'signin' ? t('Sign in') : t('Create an account')}
+          </h1>
+          <PlaceChoice portal={portal} onChange={setPortal} />
+          {mode === 'signin' ? (
+            <SignInForm key={`in-${portal}`} portal={portal} onCreate={() => setMode('register')} />
+          ) : (
+            <RegisterForm key={`reg-${portal}`} portal={portal} onBack={() => setMode('signin')} />
+          )}
+          <details className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-base dark:border-slate-700 dark:bg-slate-800/60">
+            <summary className="cursor-pointer font-semibold text-slate-900 dark:text-white">{t('Demo accounts for the project')}</summary>
+            <dl className="mt-3 space-y-1 text-slate-800 dark:text-slate-200">
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="font-semibold">{t('PHC')}:</dt>
+                <dd className="font-mono">worker1 … worker5</dd>
+              </div>
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="font-semibold">{t('District hospital')}:</dt>
+                <dd className="font-mono">admin, reviewer, auditor</dd>
+              </div>
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="font-semibold">{t('Password')}:</dt>
+                <dd className="font-mono">password123</dd>
+              </div>
+            </dl>
+          </details>
+        </section>
+      </main>
+
+      <footer className="px-4 pb-6 text-center text-sm text-slate-700 dark:text-slate-300">
+        {t(deviceLabel)} · {t('The first sign-in needs internet. After that, the PHC works offline.')}
+      </footer>
     </div>
   );
 }

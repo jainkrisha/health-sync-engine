@@ -20,19 +20,17 @@ test('records can be created and read with no network, then sync', async ({ brow
   });
   test.skip(!hasSw, 'Service worker only runs in the production build (npm run build && npm run preview)');
 
-  // The illustrated intro is scroll-driven; skip it to reach the passes.
-  await page.getByRole('button', { name: 'Skip intro' }).click();
-
-  const pass = page.getByRole('region', { name: 'PHC sign-in pass' });
-  await pass.locator('#pass-phc-user').fill(user.username);
-  await pass.locator('#pass-phc-pass').fill(user.password);
-  await pass.getByRole('button', { name: 'Sign in to PHC' }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
+  await page.getByRole('radio', { name: /Primary Health Centre/ }).check();
+  await page.getByLabel('Username').fill(user.username);
+  await page.getByLabel('Password', { exact: true }).fill(user.password);
+  await page.getByRole('button', { name: 'Sign in to PHC' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Online' }).first()).toBeVisible();
 
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole('heading', { name: /Hello/ })).toBeVisible();
-  await expect(page.getByRole('status').filter({ hasText: 'Offline' })).toBeVisible();
+  // The strip says the work stays on this device ("Offline" or "Cannot reach the server").
+  await expect(page.getByRole('status').filter({ hasText: /Offline|Cannot reach the server/ })).toBeVisible();
 
   const name = `Offline Patient ${run}`;
   await page.getByRole('link', { name: 'Add patient' }).first().click();
@@ -40,14 +38,14 @@ test('records can be created and read with no network, then sync', async ({ brow
   await page.getByLabel('Date of birth').fill('1975-01-01');
   await page.getByRole('button', { name: 'Save patient' }).click();
   await expect(page.getByRole('heading', { name })).toBeVisible();
-  await expect(page.getByText('Changes not synced yet')).toBeVisible();
+  await expect(page.getByText('Changes not sent yet')).toBeVisible();
 
   await page.reload();
   await expect(page.getByRole('heading', { name })).toBeVisible();
 
   await context.setOffline(false);
-  await expect(page.getByText('Synced', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('Changes not synced yet')).toHaveCount(0);
+  await expect(page.getByText('Saved on the server', { exact: true })).toBeVisible();
+  await expect(page.getByText('Changes not sent yet')).toHaveCount(0);
 
   const token = await page.evaluate(() => JSON.parse(localStorage.getItem('healthsync.auth') ?? '{}').token as string);
   const res = await request.get('/api/patients', { headers: { Authorization: `Bearer ${token}` } });

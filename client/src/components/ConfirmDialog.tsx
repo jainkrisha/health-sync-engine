@@ -14,9 +14,9 @@ export interface ConfirmDialogProps {
 }
 
 const VARIANTS: Record<NonNullable<ConfirmDialogProps['variant']>, { button: string; icon: IconName; iconTone: string }> = {
-  danger: { button: 'btn-danger', icon: 'trash', iconTone: 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-900/30 dark:text-rose-300 dark:ring-rose-900/50' },
-  warning: { button: 'btn bg-amber-600 text-white hover:bg-amber-700 focus-visible:ring-amber-500', icon: 'alert', iconTone: 'bg-amber-50 text-amber-600 ring-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-900/50' },
-  info: { button: 'btn-primary', icon: 'info', iconTone: 'bg-teal-50 text-teal-600 ring-teal-100 dark:bg-teal-900/30 dark:text-teal-300 dark:ring-teal-900/50' },
+  danger: { button: 'btn-danger', icon: 'trash', iconTone: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200' },
+  warning: { button: 'btn-primary', icon: 'alert', iconTone: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200' },
+  info: { button: 'btn-primary', icon: 'info', iconTone: 'bg-brand-100 text-brand-900 dark:bg-brand-950 dark:text-brand-200' },
 };
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -75,30 +75,30 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <div className="fixed inset-0 z-overlay flex items-end justify-center p-4 sm:items-center" role="presentation">
-      <div className="absolute inset-0 animate-overlay-in bg-slate-900/50 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
+      <div className="absolute inset-0 bg-slate-950/60" onClick={onCancel} aria-hidden="true" />
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
-        className="relative w-full max-w-md animate-scale-in overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-pop dark:border-slate-700 dark:bg-slate-900"
+        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-slate-300 bg-white shadow-pop dark:border-slate-700 dark:bg-slate-900"
       >
         <div className="flex gap-4 p-6">
-          <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ring-4 ${v.iconTone}`}>
-            <Icon name={v.icon} className="h-5 w-5" />
+          <span className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${v.iconTone}`}>
+            <Icon name={v.icon} className="h-6 w-6" />
           </span>
           <div className="min-w-0">
-            <h3 id="confirm-dialog-title" className="text-base font-semibold text-slate-900 dark:text-white">
+            <h3 id="confirm-dialog-title" className="text-xl font-bold text-slate-900 dark:text-white">
               {title}
             </h3>
-            <p id="confirm-dialog-message" className="mt-1.5 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p id="confirm-dialog-message" className="mt-2 text-base text-slate-700 dark:text-slate-300">
               {message}
             </p>
           </div>
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/80 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-800/40">
-          <button ref={cancelRef} type="button" onClick={onCancel} className="btn-secondary">
+        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-800/60">
+          <button ref={cancelRef} type="button" onClick={onCancel} className="btn-plain">
             {cancelText ?? t('Cancel')}
           </button>
           <button type="button" onClick={onConfirm} className={v.button}>

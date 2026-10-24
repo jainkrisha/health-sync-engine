@@ -29,7 +29,7 @@ import { tValue } from '../../i18n/clinical';
 import './branchGraph.css';
 import { tName } from '../../i18n/names';
 
-const LANE_COLORS = ['#b86f52', '#4f7cb0', '#3a8f7a', '#8a8273', '#7d7c45', '#5f8a94'];
+const LANE_COLORS = ['#1f5fa6', '#b45309', '#047857', '#7c3aed', '#be123c', '#0e7490'];
 const REVIEW_COLOR = 'var(--bg-review)';
 const LANE_W = 22;
 const PAD = 14;
@@ -341,7 +341,7 @@ function CommitRow({
           {relativeTime(commit.timestamp)}
         </time>
         {node.parents.length > 1 && (
-          <span className="badge-slate">{t('Merge of {hashes}', { hashes: node.parents.map(hashOf).join(' + ') })}</span>
+          <span className="badge-muted">{t('Merge of {hashes}', { hashes: node.parents.map(hashOf).join(' + ') })}</span>
         )}
         <span
           className="bg-clock"
@@ -353,7 +353,7 @@ function CommitRow({
       {shown.length > 0 && (
         <div className="bg-decisions">
           {shown.map((d) => (
-            <span key={d.id} className={OUTCOME_STYLE[d.outcome] ?? 'badge-slate'} title={translateReport(d.report)}>
+            <span key={d.id} className={OUTCOME_STYLE[d.outcome] ?? 'badge-muted'} title={translateReport(d.report)}>
               {t(OUTCOME_LABEL[d.outcome] ?? d.outcome)} · {t(RULE_LABEL[d.rule] ?? d.rule)}
             </span>
           ))}
@@ -417,7 +417,7 @@ function MergeRow({
         <p className="bg-msg">
           {pending ? t('Merge conflict') : t('Merged')} · {t('{name} dose', { name: tName(conflict.label) })}
         </p>
-        <span className={pending ? 'badge-conflict' : 'badge-sage'}>
+        <span className={pending ? 'badge-warning' : 'badge-ok'}>
           {pending ? t('Waiting for review') : t('Resolved by {name}', { name: tName(conflict.resolvedByName) ?? t('reviewer') })}
         </span>
       </div>
@@ -460,7 +460,7 @@ function MergeRow({
         </p>
       ) : (
         <p className="bg-merge-foot">
-          <Icon name="checkCircle" className="inline h-3.5 w-3.5 text-sage-600" />{' '}
+          <Icon name="checkCircle" className="inline h-3.5 w-3.5 text-green-600" />{' '}
           {t(CHOICE_TEXT[conflict.resolution ?? ''] ?? 'Resolved')}:{' '}
           <b>
             {dose(conflict.resolvedValue)}

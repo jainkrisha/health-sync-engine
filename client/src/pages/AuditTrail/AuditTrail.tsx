@@ -1,6 +1,8 @@
 /**
- * Audit Trail — every merge decision, automatic or manual. Read-only by design:
- * the server exposes no route to edit or delete entries and blocks it at the model.
+ * Change history (audit trail) — every merge decision, automatic or manual.
+ * Read-only by design: the server exposes no route to edit or delete entries
+ * and blocks it at the model. "All changes" is a plain list with filters;
+ * "Timeline by device" draws one patient's edits per tablet.
  */
 import { useMemo, useState } from 'react';
 import type { AuditEntry, HistoryPatient, PatientHistory } from '@shared/types';
@@ -31,7 +33,7 @@ export default function AuditTrail() {
   const [to, setTo] = useState('');
   const [type, setType] = useState<TypeFilter>('all');
   const [concurrentOnly, setConcurrentOnly] = useState(false);
-  const [view, setView] = useState<View>('graph');
+  const [view, setView] = useState<View>('list');
   const { t, tp } = useI18n();
 
   // The graph is drawn per patient, from the server's own list (a device copy can
@@ -91,46 +93,31 @@ export default function AuditTrail() {
   return (
     <div>
       <PageHeader
-        title={t('Audit trail')}
+        title={t('Change history')}
         subtitle={
-          <span className="flex items-start gap-1.5">
-            <Icon name="lock" className="mt-1 h-3.5 w-3.5 flex-shrink-0" />{' '}
-            {t('Append-only record of how every change was merged. Entries cannot be edited or deleted.')}
+          <span className="flex items-start gap-2">
+            <Icon name="lock" className="mt-1 h-5 w-5 flex-shrink-0" />
+            {t('Every change to every record, and how it was saved when devices disagreed. Nobody can edit or delete these entries.')}
           </span>
         }
       />
 
       <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div
-          className="inline-flex rounded-full border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900"
-          role="tablist"
-          aria-label={t('Audit view')}
-        >
+        <div className="segmented" role="tablist" aria-label={t('How to show the history')}>
           {(
             [
-              ['graph', 'Branch graph', 'git'],
-              ['list', 'All entries', 'list'],
+              ['list', 'All changes', 'list'],
+              ['graph', 'Timeline by device', 'git'],
             ] as const
           ).map(([v, label, icon]) => (
-            <button
-              key={v}
-              type="button"
-              role="tab"
-              aria-selected={view === v}
-              onClick={() => setView(v)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                view === v
-                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-              }`}
-            >
-              <Icon name={icon} className="h-4 w-4" /> {t(label)}
+            <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)} className="segmented-item">
+              <Icon name={icon} className="h-5 w-5" /> {t(label)}
             </button>
           ))}
         </div>
         {view === 'graph' && (
-          <div className="flex min-w-[220px] flex-1 items-center gap-2 sm:flex-none">
-            <label htmlFor="graph-patient" className="text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[22rem]">
+            <label htmlFor="graph-patient" className="form-label mb-0">
               {t('Patient')}
             </label>
             <select
@@ -185,7 +172,7 @@ export default function AuditTrail() {
         <>
           <button
             type="button"
-            className="btn-secondary mb-3 w-full justify-between md:hidden"
+            className="btn-plain mb-3 w-full justify-between md:hidden"
             aria-expanded={filtersOpen}
             aria-controls="audit-filters"
             onClick={() => setFiltersOpen((o) => !o)}
@@ -193,9 +180,7 @@ export default function AuditTrail() {
             <span className="inline-flex items-center gap-2">
               <Icon name="list" className="h-4 w-4" /> {t('Filters')}
               {activeFilters > 0 && (
-                <span className="rounded-full bg-teal-600 px-1.5 text-[11px] font-bold tabular-nums text-white">
-                  {activeFilters}
-                </span>
+                <span className="tabular-nums">({activeFilters})</span>
               )}
             </span>
             <Icon
@@ -253,7 +238,7 @@ export default function AuditTrail() {
             </div>
             <div>
               <label htmlFor="audit-type" className="form-label">
-                {t('Resolution')}
+                {t('Decided by')}
               </label>
               <select
                 id="audit-type"
@@ -262,26 +247,26 @@ export default function AuditTrail() {
                 onChange={(e) => setType(e.target.value as TypeFilter)}
               >
                 <option value="all">{t('All')}</option>
-                <option value="automatic">{t('Automatic (CRDT rules)')}</option>
-                <option value="manual">{t('Manual review')}</option>
+                <option value="automatic">{t('Saved automatically by the system')}</option>
+                <option value="manual">{t('Decided by a reviewer')}</option>
               </select>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 md:col-span-2 lg:col-span-5">
-              <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <label className="inline-flex min-h-[2.75rem] items-center gap-2.5 text-base text-slate-900 dark:text-slate-100">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-teal-600"
+                  className="h-5 w-5 accent-brand-600"
                   checked={concurrentOnly}
                   onChange={(e) => setConcurrentOnly(e.target.checked)}
                 />
-                {t('Only concurrent edits (real merges)')}
+                {t('Only show changes made at the same time on two devices')}
               </label>
-              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex flex-wrap items-center gap-3 text-base text-slate-700 dark:text-slate-300">
                 <span className="tabular-nums">
                   {t('{entries} entries · {auto} automatic · {manual} manual', { entries: entries.length, auto: counts.automatic, manual: counts.manual })}
                 </span>
-                <button className="btn-ghost btn-sm" onClick={clear} disabled={activeFilters === 0}>
-                  <Icon name="x" className="h-3.5 w-3.5" /> {t('Clear filters')}
+                <button className="btn-plain btn-sm" onClick={clear} disabled={activeFilters === 0}>
+                  <Icon name="x" className="h-5 w-5" /> {t('Clear filters')}
                 </button>
               </div>
             </div>
@@ -302,7 +287,7 @@ export default function AuditTrail() {
                 message={t('Try widening the filters.')}
                 action={
                   activeFilters > 0 && (
-                    <button type="button" className="btn-secondary" onClick={clear}>
+                    <button type="button" className="btn-plain" onClick={clear}>
                       {t('Clear filters')}
                     </button>
                   )

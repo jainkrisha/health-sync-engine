@@ -31,14 +31,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
         {label && (
-          <label htmlFor={inputId} className="flex items-center gap-1 text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label htmlFor={inputId} className="flex flex-wrap items-baseline gap-x-1.5 text-base font-semibold text-slate-900 dark:text-slate-100">
             {label}
-            {required && <span className="text-rose-500 font-bold">*</span>}
+            {required && <span className="text-sm font-normal text-slate-700 dark:text-slate-300">{t('(required)')}</span>}
           </label>
         )}
         <div className="relative flex items-center">
           {icon && (
-            <div className="absolute left-3 text-slate-400 pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3 text-slate-500 pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -47,17 +47,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             className={`form-input ${icon ? 'pl-10' : ''} ${error ? 'form-input-error' : ''} ${className}`}
             aria-invalid={error ? true : undefined}
-            aria-describedby={error && inputId ? `${inputId}-error` : undefined}
+            aria-describedby={error && inputId ? `${inputId}-error` : helperText && inputId ? `${inputId}-help` : undefined}
             {...props}
           />
         </div>
         {error ? (
           <p className="form-error mt-0" role="alert" id={`${inputId}-error`}>
-            <Icon name="alert" className="h-3.5 w-3.5 flex-shrink-0" />
+            <Icon name="alert" className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span>{t(error)}</span>
           </p>
         ) : helperText ? (
-          <p className="form-help mt-0">{helperText}</p>
+          <p className="form-help mt-0" id={`${inputId}-help`}>{helperText}</p>
         ) : null}
       </div>
     );

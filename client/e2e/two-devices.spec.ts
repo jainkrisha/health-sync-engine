@@ -5,14 +5,9 @@
  */
 import { expect, test, type Browser, type Page } from '@playwright/test';
 
-/** Desktop navigation is the card wheel: open it at the left edge, then pick a card. */
-async function openMenuItem(page: Page, name: string | RegExp) {
-  await page.mouse.move(2, 420);
-  const link = page
-    .getByRole('navigation', { name: 'Main navigation' })
-    .getByRole('link', { name, exact: typeof name === 'string' });
-  await link.focus();
-  await page.keyboard.press('Enter');
+/** Desktop navigation is the menu on the left, always open. */
+async function openMenuItem(page: Page, name: string) {
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: new RegExp(`^${name}`) }).click();
 }
 
 const run = Date.now().toString(36);
@@ -29,22 +24,14 @@ async function device(browser: Browser, user: { username: string; role: string }
   const context = await browser.newContext();
   const page = await context.newPage();
   await page.goto('/');
-  // The illustrated intro is scroll-driven; skip it to reach the passes.
-  await page.getByRole('button', { name: 'Skip intro' }).click();
-  // Health workers sign in on the PHC pass; everyone else on the district (Admin) pass.
-  const portal = user.role === 'health_worker' ? 'phc' : 'district';
-  const pass = page.getByRole('region', {
-    name: portal === 'phc' ? 'PHC sign-in pass' : 'Admin sign-in pass',
-  });
-  await pass.locator(`#pass-${portal}-user`).fill(user.username);
-  await pass.locator(`#pass-${portal}-pass`).fill(password);
-  await pass
-    .getByRole('button', {
-      name: portal === 'phc' ? 'Sign in to PHC' : 'Sign in to district system',
-    })
-    .click();
+  // Health workers sign in at a PHC; everyone else at the district hospital.
+  const phc = user.role === 'health_worker';
+  await page.getByRole('radio', { name: phc ? /Primary Health Centre/ : /District hospital/ }).check();
+  await page.getByLabel('Username').fill(user.username);
+  await page.getByLabel('Password', { exact: true }).fill(password);
+  await page.getByRole('button', { name: phc ? 'Sign in to PHC' : 'Sign in to district system' }).click();
   await expect(page).toHaveURL(/dashboard/);
-  await expect(page.getByRole('status').filter({ hasText: 'Synced' }).first()).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Online' }).first()).toBeVisible();
   return page;
 }
 
@@ -54,7 +41,7 @@ async function setOffline(page: Page, offline: boolean) {
   await expect(
     page
       .getByRole('status')
-      .filter({ hasText: offline ? 'Offline' : 'Synced' })
+      .filter({ hasText: offline ? 'Offline' : 'Online' })
       .first(),
   ).toBeVisible();
 }
@@ -82,17 +69,17 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   await a.getByRole('link', { name: 'Add patient' }).first().click();
   await a.getByLabel('Full name').fill(patientName);
   await a.getByLabel('Date of birth').fill('1980-05-20');
-  await a.getByLabel('Blood type').selectOption('B+');
+  await a.getByLabel('Blood group').selectOption('B+');
   await a.getByRole('button', { name: 'Add allergy' }).click();
   await a.locator('#allergies-0-allergen').fill('Penicillin');
   await a.locator('#allergies-0-severity').selectOption('severe');
-  await a.getByRole('button', { name: 'Add medication' }).click();
+  await a.getByRole('button', { name: 'Add medicine' }).click();
   await a.locator('#medications-0-name').fill('Metformin');
   await a.locator('#medications-0-dosage').fill('500 mg');
   await a.locator('#medications-0-frequency').fill('Twice daily');
   await a.getByRole('button', { name: 'Save patient' }).click();
   await expect(a.getByRole('heading', { name: patientName })).toBeVisible();
-  await expect(a.getByText('Synced', { exact: true }).first()).toBeVisible();
+  await expect(a.getByText('Saved on the server', { exact: true })).toBeVisible();
 
   // Device B receives it.
   const b = await device(browser, users.b);
@@ -103,20 +90,20 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   await setOffline(a, true);
   await setOffline(b, true);
 
-  await a.getByRole('link', { name: 'Edit' }).click();
+  await a.getByRole('link', { name: 'Edit record' }).click();
   await a.locator('#medications-0-dosage').fill('850 mg');
-  await a.getByRole('button', { name: 'Add allergy' }).click();
+  await a.getByRole('button', { name: 'Add another allergy' }).click();
   await a.locator('#allergies-1-allergen').fill('Latex');
   await a.getByRole('button', { name: 'Save changes' }).click();
-  await expect(a.getByText('Changes not synced yet')).toBeVisible();
+  await expect(a.getByText('Changes not sent yet')).toBeVisible();
 
-  await b.getByRole('link', { name: 'Edit' }).click();
+  await b.getByRole('link', { name: 'Edit record' }).click();
   await b.locator('#medications-0-dosage').fill('1000 mg');
-  await b.getByRole('button', { name: 'Add allergy' }).click();
+  await b.getByRole('button', { name: 'Add another allergy' }).click();
   await b.locator('#allergies-1-allergen').fill('Peanuts');
-  await b.getByLabel('Heart rate (bpm)').fill('88');
+  await b.getByLabel('Pulse (beats per minute)').fill('88');
   await b.getByRole('button', { name: 'Save changes' }).click();
-  await expect(b.getByText('Changes not synced yet')).toBeVisible();
+  await expect(b.getByText('Changes not sent yet')).toBeVisible();
 
   // Reconnect: A first, then B.
   await setOffline(a, false);
@@ -128,26 +115,26 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
       await expect(page.getByText(allergen, { exact: true })).toBeVisible();
     }
     // ...and the conflicting dose is held for review, keeping A's value meanwhile.
-    await expect(page.getByText('Medication under review')).toBeVisible();
+    await expect(page.getByText('Medicine dose waiting for review')).toBeVisible();
     await expect(page.getByText('850 mg · Twice daily')).toBeVisible();
   }
 
   // A clinical reviewer resolves it with a corrected dose.
   const reviewer = await device(browser, users.reviewer);
-  await openMenuItem(reviewer, 'Conflict Review');
+  await openMenuItem(reviewer, 'Dose reviews');
   const card = reviewer.locator('article').filter({ hasText: patientName });
   await expect(card.getByText('850 mg · Twice daily').first()).toBeVisible();
   await expect(card.getByText('1000 mg · Twice daily').first()).toBeVisible();
-  await card.getByRole('button', { name: 'Enter a corrected dose' }).click();
-  await card.getByLabel('Corrected dosage').fill('750 mg');
-  await card.getByLabel(/Reviewer note/).fill('Confirmed with the doctor');
-  await card.getByRole('button', { name: 'Save corrected dose' }).click();
+  await card.getByRole('button', { name: 'Neither: enter the correct dose' }).click();
+  await card.getByLabel('Correct dose').fill('750 mg');
+  await card.getByLabel(/Note for the record/).fill('Confirmed with the doctor');
+  await card.getByRole('button', { name: 'Save the correct dose' }).click();
   await expect(reviewer.getByText(`resolved`, { exact: false }).first()).toBeVisible();
 
   // Every device converges on the reviewed value.
   for (const page of [a, b]) {
     await expect(page.getByText('750 mg · Twice daily')).toBeVisible();
-    await expect(page.getByText('Medication under review')).toHaveCount(0);
+    await expect(page.getByText('Medicine dose waiting for review')).toHaveCount(0);
   }
 
   // Data at rest on the device is ciphertext, not readable JSON.
@@ -173,8 +160,9 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
 
   // The auditor sees the manual decision in the read-only trail.
   const auditor = await device(browser, users.auditor);
-  await openMenuItem(auditor, 'Audit Trail');
-  // Branch graph: both tablets' doses side by side in the merge, with the reviewer's result.
+  await openMenuItem(auditor, 'Change history');
+  // Timeline by device: both tablets' doses side by side in the merge, with the reviewer's result.
+  await auditor.getByRole('tab', { name: 'Timeline by device' }).click();
   const graphPick = auditor.locator('#graph-patient');
   await expect(graphPick.locator('option', { hasText: patientName })).toHaveCount(1);
   const option = (await graphPick.locator('option').allTextContents()).find((o) =>
@@ -187,8 +175,8 @@ test('concurrent offline edits merge, dose conflict goes to review', async ({ br
   await expect(merge.getByText(/Resolved by/)).toBeVisible();
   await expect(auditor.locator('.bg-clash')).toHaveCount(2);
   // The flat list still filters by resolution type.
-  await auditor.getByRole('tab', { name: 'All entries' }).click();
-  await auditor.getByLabel('Resolution').selectOption('manual');
+  await auditor.getByRole('tab', { name: 'All changes' }).click();
+  await auditor.getByLabel('Decided by').selectOption('manual');
   await expect(auditor.getByText(/Confirmed with the doctor/).first()).toBeVisible();
-  await expect(auditor.getByRole('link', { name: /^Conflict Review/ })).toHaveCount(0);
+  await expect(auditor.getByRole('link', { name: /^Dose reviews/ })).toHaveCount(0);
 });
