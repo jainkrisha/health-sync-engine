@@ -14,6 +14,7 @@ import { PORTAL_ROLES, ROLE_LABELS, type Portal, type Role } from '@shared/types
 import { Spinner } from '../../components/ui';
 import { Mark } from '../../components/Mark';
 import { deviceLabel, profileKey } from '../../lib/deviceProfile';
+import { takeExpiredNotice } from '../../lib/authStore';
 import { useI18n } from '../../i18n/useI18n';
 import { t as translate } from '../../i18n/i18n';
 import { LanguageSwitch } from '../../i18n/LanguageSwitch';
@@ -305,6 +306,7 @@ export function Login() {
   const [portal, setPortal] = useState<Portal>(readPortal);
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
   const { t } = useI18n();
+  const [expired] = useState(takeExpiredNotice);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -322,6 +324,12 @@ export function Login() {
         <div>
           <h1 className="heading-xl">{mode === 'signin' ? t('Sign in') : t('Create an account')}</h1>
           <p className="lead mt-4">{t('Patient records for health centres. Everything is saved on this device first.')}</p>
+          {expired && (
+            <div className="inset" role="status">
+              <p className="font-bold">{t('Please sign in again. Your sign-in has expired.')}</p>
+              <p className="mt-1">{t('Any changes not sent yet are still on this device and will be sent after you sign in.')}</p>
+            </div>
+          )}
           <div className="mt-8">
             <PlaceChoice portal={portal} onChange={setPortal} />
             {mode === 'signin' ? (

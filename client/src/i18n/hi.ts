@@ -1183,4 +1183,6 @@ export const hi: Record<string, string> = {
   'Download patient list': 'मरीज़ों की सूची डाउनलोड करें',
   'Keep dose A: {dose}': 'खुराक A रखें: {dose}',
   'Use dose B: {dose}': 'खुराक B लें: {dose}',
+  'Please sign in again. Your sign-in has expired.': 'कृपया फिर से साइन इन करें। आपका साइन-इन समाप्त हो गया है।',
+  'Any changes not sent yet are still on this device and will be sent after you sign in.': 'जो बदलाव अभी नहीं भेजे गए, वे इसी डिवाइस पर हैं और साइन इन के बाद भेजे जाएँगे।',
 };

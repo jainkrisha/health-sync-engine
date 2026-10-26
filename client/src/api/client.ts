@@ -2,7 +2,7 @@
  * client.ts — small fetch wrapper for the HealthSync REST API.
  * Attaches the JWT, parses JSON and turns error responses into ApiError.
  */
-import { getSession, setSession } from '../lib/authStore';
+import { expireSession, getSession } from '../lib/authStore';
 
 export const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? '';
 
@@ -39,7 +39,7 @@ export async function api<T>(path: string, options: { method?: string; body?: un
   if (res.status === 204) return undefined as T;
   const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string[] };
   if (!res.ok) {
-    if (res.status === 401 && session && path !== '/auth/login') setSession(null);
+    if (res.status === 401 && session && path !== '/auth/login') expireSession();
     throw new ApiError(res.status, data.error ?? `Request failed (${res.status})`, data.details);
   }
   return data as T;

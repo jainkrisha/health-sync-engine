@@ -21,7 +21,7 @@ import {
   type PushResponse,
 } from '@shared/types';
 import { API_BASE } from '../api/client';
-import { getSession, onSessionChange } from '../lib/authStore';
+import { expireSession, getSession, onSessionChange } from '../lib/authStore';
 import { deviceLabel, getClientId, profileKey } from '../lib/deviceProfile';
 import { getMeta, setMeta } from '../db/db';
 import {
@@ -203,6 +203,12 @@ class SyncEngine {
       this.set({ connected: false, status: navigator.onLine ? 'connecting' : 'offline' });
     });
     socket.on('connect_error', (err: Error) => {
+      // The server is reachable but refuses this sign-in: ask the user to sign in again
+      // instead of showing "cannot reach the server" forever.
+      if (/invalid or expired token|authentication required/i.test(err.message)) {
+        expireSession();
+        return;
+      }
       this.set({
         connected: false,
         status: 'error',

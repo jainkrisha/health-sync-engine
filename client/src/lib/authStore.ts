@@ -65,3 +65,30 @@ export function onSessionChange(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
+
+const EXPIRED_KEY = profileKey('signInExpired');
+
+/**
+ * The server no longer accepts this device's sign-in (it expired, or the
+ * server's secret changed): sign out, and let the sign-in page say why.
+ * Changes waiting to sync stay on the device and are sent after signing in.
+ */
+export function expireSession(): void {
+  try {
+    sessionStorage.setItem(EXPIRED_KEY, '1');
+  } catch {
+    // ignore
+  }
+  setSession(null);
+}
+
+/** True once after expireSession(), for the sign-in page's notice. */
+export function takeExpiredNotice(): boolean {
+  try {
+    const was = sessionStorage.getItem(EXPIRED_KEY) === '1';
+    sessionStorage.removeItem(EXPIRED_KEY);
+    return was;
+  } catch {
+    return false;
+  }
+}

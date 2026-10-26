@@ -81,3 +81,24 @@ test('patient list downloads as Excel and CSV', async ({ page, request }) => {
   expect(text).toContain('Name,Date of birth,Age (years)');
   expect(text).toContain(`${name},1990-02-03`);
 });
+
+test('a sign-in the server no longer accepts goes back to sign-in, not "cannot reach the server"', async ({ page, request }) => {
+  const user = { username: `e2e_exp2_${run}`, name: 'Expired Worker', role: 'health_worker', portal: 'phc', facility: 'PHC Expiry Test', password: 'password123' };
+  expect((await request.post('/api/auth/register', { data: user })).status()).toBe(201);
+  await page.goto('/');
+  await page.getByLabel('Username').fill(user.username);
+  await page.getByLabel('Password', { exact: true }).fill(user.password);
+  await page.getByRole('button', { name: 'Sign in to PHC' }).click();
+  await expect(page).toHaveURL(/dashboard/);
+
+  // As if the server's secret changed: the saved token no longer verifies.
+  await page.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem('healthsync.auth')!);
+    s.token = `${s.token.split('.').slice(0, 2).join('.')}.bad-signature`;
+    localStorage.setItem('healthsync.auth', JSON.stringify(s));
+  });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByText('Please sign in again. Your sign-in has expired.')).toBeVisible();
+  await expect(page.getByText('Cannot reach the server')).toHaveCount(0);
+});
